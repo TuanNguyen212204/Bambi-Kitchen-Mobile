@@ -1,6 +1,3 @@
-<<<<<<< HEAD
-# Bambi-Kitchen-Mobile
-=======
 # GroupProject - MMA301
 
 Dự án React Native Expo cho môn MMA301 - FPT University HCM
