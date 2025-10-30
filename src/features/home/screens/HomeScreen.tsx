@@ -17,19 +17,6 @@ const Header = styled.View`
   padding: 44px 20px 16px 20px;
 `;
 
-const HeaderTop = styled.View`
-  flex-direction: row;
-  align-items: center;
-  justify-content: space-between;
-  margin-bottom: 12px;
-`;
-
-const WelcomeText = styled.Text`
-  font-size: 18px;
-  font-weight: 700;
-  color: #ffffff;
-`;
-
 const SearchContainer = styled.View`
   background-color: #ffffff;
   border-radius: 8px;
@@ -142,7 +129,7 @@ const DishCard = styled.TouchableOpacity`
 
 const DishImage = styled.Image`
   width: 100%;
-  height: 100px;
+  height: 120px;
   resize-mode: cover;
 `;
 
@@ -250,9 +237,6 @@ const HomeScreen = () => {
   return (
     <Screen showsVerticalScrollIndicator={false}>
       <Header>
-        <HeaderTop>
-          <WelcomeText>Xin chào{user?.name ? `, ${user.name}` : ''} 👋</WelcomeText>
-        </HeaderTop>
         <SearchContainer>
           <Image 
             source={require('../../../../assets/logo.png')} 
