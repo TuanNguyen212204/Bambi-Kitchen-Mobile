@@ -33,26 +33,10 @@ apiClient.interceptors.request.use(
 // Response interceptor
 apiClient.interceptors.response.use(
   (response: AxiosResponse) => {
-    console.log('Response:', response.status, response.config.url);
     return response;
   },
   (error) => {
-    if (error.response) {
-      // Server responded with error
-      console.error('Response Error:', error.response.status, error.response.data);
-      
-      // Handle specific status codes
-      if (error.response.status === 401) {
-        // Unauthorized - redirect to login
-        console.warn('Unauthorized access - redirect to login');
-      }
-    } else if (error.request) {
-      // Request was made but no response
-      console.error('Network Error:', error.message);
-    } else {
-      console.error('Error:', error.message);
-    }
-    
+    // Trả lỗi gọn để tránh spam log
     return Promise.reject(error);
   }
 );
