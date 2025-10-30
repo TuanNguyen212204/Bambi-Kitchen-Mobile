@@ -1,12 +1,13 @@
 import React, { useState } from 'react';
 import { Alert, KeyboardAvoidingView, Platform, TouchableOpacity } from 'react-native';
+import { SafeAreaView, useSafeAreaInsets } from 'react-native-safe-area-context';
 import { Ionicons } from '@expo/vector-icons';
 import styled from 'styled-components/native';
 import Button from '@components/common/Button';
 import { COLORS, SIZES } from '@constants';
 import { authService } from '@services/api/authService';
 
-const Container = styled.SafeAreaView`
+const Container = styled.View`
   flex: 1;
   background-color: #ffffff;
 `;
@@ -50,6 +51,7 @@ const BackButton = styled(TouchableOpacity)`
 const ForgotPasswordScreen: React.FC<any> = ({ navigation }) => {
   const [email, setEmail] = useState('');
   const [loading, setLoading] = useState(false);
+  const insets = useSafeAreaInsets();
 
   const onSend = async () => {
     if (!email) {
@@ -69,9 +71,9 @@ const ForgotPasswordScreen: React.FC<any> = ({ navigation }) => {
   };
 
   return (
-    <Container>
+    <SafeAreaView style={{ flex: 1 }}>
       <KeyboardAvoidingView behavior={Platform.OS === 'ios' ? 'padding' : undefined} style={{ flex: 1 }}>
-        <BackButton onPress={() => navigation.goBack()}>
+        <BackButton onPress={() => navigation.goBack()} style={{ top: Math.max(insets.top, 16) }}>
           <Ionicons name="chevron-back" size={28} color="#111" />
         </BackButton>
         <Inner>
@@ -89,7 +91,7 @@ const ForgotPasswordScreen: React.FC<any> = ({ navigation }) => {
           <Button title="Gửi yêu cầu" onPress={onSend} loading={loading} fullWidth />
         </Inner>
       </KeyboardAvoidingView>
-    </Container>
+    </SafeAreaView>
   );
 };
 

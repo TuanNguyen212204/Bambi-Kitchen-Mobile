@@ -1,12 +1,13 @@
 import React, { useState } from 'react';
 import { Alert, KeyboardAvoidingView, Platform } from 'react-native';
+import { SafeAreaView, useSafeAreaInsets } from 'react-native-safe-area-context';
 import styled from 'styled-components/native';
 import Button from '@components/common/Button';
 import { COLORS, SIZES } from '@constants';
 import { useAppDispatch, useAppSelector } from '@store/store';
 import { loginThunk } from '@store/thunks/authThunks';
 
-const Container = styled.SafeAreaView`
+const Container = styled.View`
   flex: 1;
   background-color: #ffffff;
   justify-content: center;
@@ -56,6 +57,7 @@ const LoginScreen: React.FC<any> = ({ navigation }) => {
   const [password, setPassword] = useState('');
   const dispatch = useAppDispatch();
   const loading = useAppSelector((s) => s.auth.loading);
+  const insets = useSafeAreaInsets();
 
   const onLogin = async () => {
     if (!username || !password) {
@@ -71,9 +73,9 @@ const LoginScreen: React.FC<any> = ({ navigation }) => {
   };
 
   return (
-    <Container>
+    <SafeAreaView style={{ flex: 1 }}>
       <KeyboardAvoidingView behavior={Platform.OS === 'ios' ? 'padding' : undefined} style={{ flex: 1 }}>
-        <Inner>
+        <Inner style={{ paddingTop: Math.max(insets.top, 16) }}>
           <Title>Chào mừng trở lại 👋</Title>
           <Subtitle>Đăng nhập để tiếp tục với Bambi Kitchen</Subtitle>
 
@@ -101,7 +103,7 @@ const LoginScreen: React.FC<any> = ({ navigation }) => {
           </Row>
         </Inner>
       </KeyboardAvoidingView>
-    </Container>
+    </SafeAreaView>
   );
 };
 
