@@ -1,4 +1,5 @@
 import axios, { AxiosInstance, AxiosRequestConfig, AxiosResponse } from 'axios';
+import { storage } from '@utils/storage';
 
 // Cấu hình base URL từ .env (với fallback)
 let BASE_URL = 'https://bambi.kdz.asia';
@@ -23,14 +24,11 @@ const apiClient: AxiosInstance = axios.create({
 
 // Request interceptor
 apiClient.interceptors.request.use(
-  (config) => {
-    // Thêm token vào headers nếu có
-    // const token = await AsyncStorage.getItem('authToken');
-    // if (token) {
-    //   config.headers.Authorization = `Bearer ${token}`;
-    // }
-    
-    console.log('Request:', config.method?.toUpperCase(), config.url);
+  async (config) => {
+    const token = await storage.getItem<string>('authToken');
+    if (token) {
+      (config.headers as any).Authorization = `Bearer ${token}`;
+    }
     return config;
   },
   (error) => {

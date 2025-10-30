@@ -1,4 +1,4 @@
-// import AsyncStorage from '@react-native-async-storage/async-storage';
+import AsyncStorage from '@react-native-async-storage/async-storage';
 
 /**
  * Utility functions cho local storage
@@ -12,8 +12,7 @@ export const storage = {
   setItem: async (key: string, value: any): Promise<void> => {
     try {
       const jsonValue = JSON.stringify(value);
-      // await AsyncStorage.setItem(key, jsonValue);
-      console.log('Storage: setItem', key);
+      await AsyncStorage.setItem(key, jsonValue);
     } catch (error) {
       console.error('Error saving to storage:', error);
     }
@@ -24,10 +23,8 @@ export const storage = {
    */
   getItem: async <T>(key: string): Promise<T | null> => {
     try {
-      // const jsonValue = await AsyncStorage.getItem(key);
-      // return jsonValue != null ? JSON.parse(jsonValue) : null;
-      console.log('Storage: getItem', key);
-      return null;
+      const jsonValue = await AsyncStorage.getItem(key);
+      return jsonValue != null ? JSON.parse(jsonValue) : null;
     } catch (error) {
       console.error('Error reading from storage:', error);
       return null;
@@ -39,8 +36,7 @@ export const storage = {
    */
   removeItem: async (key: string): Promise<void> => {
     try {
-      // await AsyncStorage.removeItem(key);
-      console.log('Storage: removeItem', key);
+      await AsyncStorage.removeItem(key);
     } catch (error) {
       console.error('Error removing from storage:', error);
     }
@@ -51,8 +47,7 @@ export const storage = {
    */
   clear: async (): Promise<void> => {
     try {
-      // await AsyncStorage.clear();
-      console.log('Storage: clear all');
+      await AsyncStorage.clear();
     } catch (error) {
       console.error('Error clearing storage:', error);
     }
