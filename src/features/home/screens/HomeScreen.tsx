@@ -1,66 +1,186 @@
-import React, { useEffect, useMemo, useState } from 'react';
-import { View, Text, StyleSheet, FlatList, Image, TextInput, TouchableOpacity } from 'react-native';
+import React, { useEffect, useMemo, useState, useRef } from 'react';
+import { View, Text, ScrollView, Image, TextInput, TouchableOpacity, Dimensions } from 'react-native';
 import styled from 'styled-components/native';
 import { dishService, type DishDto } from '@services/api/dishService';
 import { useAppSelector } from '@store/store';
+import { COLORS } from '@constants';
 
-const Screen = styled.View`
+const { width: SCREEN_WIDTH } = Dimensions.get('window');
+
+const Screen = styled.ScrollView`
   flex: 1;
-  background-color: #ffffff;
+  background-color: #f5f5f5;
 `;
 
 const Header = styled.View`
-  padding: 20px 20px 8px 20px;
+  background-color: #ef4444;
+  padding: 44px 20px 16px 20px;
 `;
 
-const Title = styled.Text`
-  font-size: 24px;
-  font-weight: 800;
+const HeaderTop = styled.View`
+  flex-direction: row;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 12px;
 `;
 
-const Sub = styled.Text`
-  color: #7a7a7a;
-  margin-top: 4px;
+const WelcomeText = styled.Text`
+  font-size: 18px;
+  font-weight: 700;
+  color: #ffffff;
 `;
 
-const SearchBar = styled.View`
-  margin: 12px 20px 8px 20px;
-  border-width: 1px;
-  border-color: #e5e7eb;
-  border-radius: 12px;
-  padding: 10px 12px;
+const SearchContainer = styled.View`
+  background-color: #ffffff;
+  border-radius: 8px;
+  padding: 8px 12px;
   flex-direction: row;
   align-items: center;
 `;
 
-const ChipRow = styled.ScrollView.attrs({ horizontal: true, showsHorizontalScrollIndicator: false })`
-  padding: 0 16px 8px 16px;
+const SearchInput = styled.TextInput`
+  flex: 1;
+  font-size: 14px;
+  margin-left: 8px;
 `;
 
-const Chip = styled.TouchableOpacity<{ active?: boolean }>`
-  padding: 6px 12px;
-  border-radius: 12px;
-  background-color: ${(p) => (p.active ? '#ef4444' : '#f3f4f6')};
-  margin-right: 8px;
+const BannerContainer = styled.View`
+  height: 160px;
+  margin-bottom: 8px;
 `;
 
-const ChipText = styled.Text<{ active?: boolean }>`
-  color: ${(p) => (p.active ? '#fff' : '#111')};
-  font-weight: 600;
-  font-size: 13px;
+const BannerImage = styled.Image`
+  width: ${SCREEN_WIDTH}px;
+  height: 160px;
+  resize-mode: cover;
 `;
 
-const Card = styled.TouchableOpacity`
-  background-color: #fff;
-  border-radius: 16px;
-  padding: 12px;
-  border-width: 1px;
-  border-color: #f1f5f9;
+const BannerPagination = styled.View`
+  flex-direction: row;
+  justify-content: center;
+  margin-top: -20px;
+  position: relative;
+  z-index: 1;
 `;
 
-const Price = styled.Text`
+const PaginationDot = styled.View<{ active?: boolean }>`
+  width: ${(p) => (p.active ? 24 : 8)}px;
+  height: 8px;
+  border-radius: 4px;
+  background-color: ${(p) => (p.active ? '#ffffff' : 'rgba(255,255,255,0.5)')};
+  margin-horizontal: 4px;
+`;
+
+const Section = styled.View`
+  background-color: #ffffff;
+  margin-top: 8px;
+  padding-vertical: 16px;
+`;
+
+const SectionHeader = styled.View`
+  flex-direction: row;
+  justify-content: space-between;
+  align-items: center;
+  padding-horizontal: 20px;
+  margin-bottom: 12px;
+`;
+
+const SectionTitle = styled.Text`
+  font-size: 18px;
+  font-weight: 700;
+  color: #111;
+`;
+
+const SectionMore = styled.Text`
+  font-size: 14px;
   color: #ef4444;
-  font-weight: 800;
+  font-weight: 600;
+`;
+
+const CategoryRow = styled.ScrollView.attrs({ 
+  horizontal: true, 
+  showsHorizontalScrollIndicator: false 
+})`
+  padding-horizontal: 12px;
+`;
+
+const CategoryChip = styled.TouchableOpacity<{ active?: boolean }>`
+  background-color: ${(p) => (p.active ? '#ef4444' : '#f3f4f6')};
+  padding-vertical: 6px;
+  padding-horizontal: 12px;
+  border-radius: 20px;
+  margin-right: 8px;
+  min-width: 80px;
+  align-items: center;
+`;
+
+const CategoryText = styled.Text<{ active?: boolean }>`
+  color: ${(p) => (p.active ? '#ffffff' : '#111')};
+  font-weight: 600;
+  font-size: 12px;
+`;
+
+const DishRow = styled.ScrollView.attrs({ 
+  horizontal: true, 
+  showsHorizontalScrollIndicator: false 
+})`
+  padding-horizontal: 16px;
+`;
+
+const DishCard = styled.TouchableOpacity`
+  width: 140px;
+  margin-right: 12px;
+  background-color: #ffffff;
+  border-radius: 12px;
+  overflow: hidden;
+  shadow-color: #000;
+  shadow-offset: 0px 2px;
+  shadow-opacity: 0.1;
+  shadow-radius: 4px;
+  elevation: 3;
+`;
+
+const DishImage = styled.Image`
+  width: 100%;
+  height: 100px;
+  resize-mode: cover;
+`;
+
+const DishInfo = styled.View`
+  padding: 8px;
+`;
+
+const DishName = styled.Text`
+  font-size: 13px;
+  font-weight: 600;
+  color: #111;
+  margin-bottom: 4px;
+`;
+
+const DishPrice = styled.Text`
+  font-size: 14px;
+  font-weight: 700;
+  color: #ef4444;
+`;
+
+const DishesGrid = styled.View`
+  flex-direction: row;
+  flex-wrap: wrap;
+  padding-horizontal: 12px;
+  padding-top: 8px;
+`;
+
+const DishGridCard = styled.TouchableOpacity`
+  width: ${(SCREEN_WIDTH - 36) / 2}px;
+  margin: 6px;
+  background-color: #ffffff;
+  border-radius: 12px;
+  overflow: hidden;
+  shadow-color: #000;
+  shadow-offset: 0px 2px;
+  shadow-opacity: 0.1;
+  shadow-radius: 4px;
+  elevation: 3;
 `;
 
 const HomeScreen = () => {
@@ -70,6 +190,14 @@ const HomeScreen = () => {
   const [loading, setLoading] = useState(false);
   const [query, setQuery] = useState('');
   const [categoryId, setCategoryId] = useState<number | undefined>(undefined);
+  const [currentBannerIndex, setCurrentBannerIndex] = useState(0);
+  const bannerScrollRef = useRef<any>(null);
+
+  const banners = [
+    require('../../../../assets/HomePage/WelcomePagePic.png'),
+    require('../../../../assets/HomePage/OurExpectsChefPic.png'),
+    require('../../../../assets/HomePage/dish-2 1.png'),
+  ];
 
   useEffect(() => {
     const fetchData = async () => {
@@ -90,6 +218,22 @@ const HomeScreen = () => {
     fetchData();
   }, []);
 
+  // Auto-scroll banner
+  useEffect(() => {
+    const interval = setInterval(() => {
+      setCurrentBannerIndex((prev) => {
+        const next = (prev + 1) % banners.length;
+        bannerScrollRef.current?.scrollTo({
+          x: next * SCREEN_WIDTH,
+          animated: true,
+        });
+        return next;
+      });
+    }, 3000);
+
+    return () => clearInterval(interval);
+  }, [banners.length]);
+
   const visible = useMemo(() => dishes.filter((d) => (d as any).public !== false && ((d as any).active ?? true)), [dishes]);
   const filtered = useMemo(() => {
     const q = query.trim().toLowerCase();
@@ -100,137 +244,115 @@ const HomeScreen = () => {
     });
   }, [visible, query, categoryId]);
 
+  const featured = filtered.slice(0, 5);
+  const rest = filtered.slice(5);
+
   return (
-    <Screen>
+    <Screen showsVerticalScrollIndicator={false}>
       <Header>
-        <Title>Xin chào{user?.name ? `, ${user.name}` : ''} 👋</Title>
-        <Sub>Đặt món yêu thích của bạn</Sub>
+        <HeaderTop>
+          <WelcomeText>Xin chào{user?.name ? `, ${user.name}` : ''} 👋</WelcomeText>
+        </HeaderTop>
+        <SearchContainer>
+          <Image 
+            source={require('../../../../assets/logo.png')} 
+            style={{ width: 20, height: 20 }} 
+          />
+          <SearchInput
+            placeholder="Tìm kiếm món ăn..."
+            value={query}
+            onChangeText={setQuery}
+            placeholderTextColor="#999"
+          />
+        </SearchContainer>
       </Header>
 
-      <SearchBar>
-        <TextInput
-          placeholder="Tìm kiếm món ăn..."
-          style={{ flex: 1 }}
-          value={query}
-          onChangeText={setQuery}
-        />
-      </SearchBar>
+      <BannerContainer>
+        <ScrollView
+          ref={bannerScrollRef}
+          horizontal
+          pagingEnabled
+          showsHorizontalScrollIndicator={false}
+          onMomentumScrollEnd={(e) => {
+            const index = Math.round(e.nativeEvent.contentOffset.x / SCREEN_WIDTH);
+            setCurrentBannerIndex(index);
+          }}
+        >
+          {banners.map((banner, index) => (
+            <BannerImage key={index} source={banner} />
+          ))}
+        </ScrollView>
+        <BannerPagination>
+          {banners.map((_, index) => (
+            <PaginationDot key={index} active={index === currentBannerIndex} />
+          ))}
+        </BannerPagination>
+      </BannerContainer>
 
-      <ChipRow>
-        <Chip active={!categoryId} onPress={() => setCategoryId(undefined)}>
-          <ChipText active={!categoryId}>Tất cả</ChipText>
-        </Chip>
-        {categories.map((c) => (
-          <Chip key={c.id} active={categoryId===c.id} onPress={() => setCategoryId(c.id)}>
-            <ChipText active={categoryId===c.id}>{c.name}</ChipText>
-          </Chip>
-        ))}
-      </ChipRow>
+      <Section>
+        <SectionHeader>
+          <SectionTitle>Danh mục</SectionTitle>
+        </SectionHeader>
+        <CategoryRow>
+          <CategoryChip active={!categoryId} onPress={() => setCategoryId(undefined)}>
+            <CategoryText active={!categoryId}>Tất cả</CategoryText>
+          </CategoryChip>
+          {categories.map((c) => (
+            <CategoryChip key={c.id} active={categoryId === c.id} onPress={() => setCategoryId(c.id)}>
+              <CategoryText active={categoryId === c.id}>{c.name}</CategoryText>
+            </CategoryChip>
+          ))}
+        </CategoryRow>
+      </Section>
 
-      <FlatList
-        data={filtered}
-        keyExtractor={(item) => String(item.id)}
-        numColumns={2}
-        columnWrapperStyle={{ gap: 12, paddingHorizontal: 20 }}
-        contentContainerStyle={{ paddingBottom: 24, gap: 12 }}
-        renderItem={({ item }) => (
-          <Card style={{ flex: 1 }}>
-            <Image
-              source={{ uri: item.imageUrl || 'https://via.placeholder.com/300x200.png?text=Dish' }}
-              style={{ width: '100%', height: 110, borderRadius: 12, marginBottom: 8 }}
-              resizeMode="cover"
-            />
-            <Text style={{ fontWeight: '700' }} numberOfLines={1}>{item.name}</Text>
-            {!!item.description && (
-              <Text style={{ color: '#6b7280' }} numberOfLines={1}>{item.description}</Text>
-            )}
-            {!!item.price && <Price>{item.price?.toLocaleString('vi-VN')} ₫</Price>}
-          </Card>
-        )}
-        ListEmptyComponent={!loading ? (
-          <View style={{ padding: 24 }}>
-            <Text>Không có món nào.</Text>
-          </View>
-        ) : null}
-      />
+      {featured.length > 0 && (
+        <Section>
+          <SectionHeader>
+            <SectionTitle>Món ăn nổi bật</SectionTitle>
+            <TouchableOpacity onPress={() => setCategoryId(undefined)}>
+              <SectionMore>Xem tất cả &gt;</SectionMore>
+            </TouchableOpacity>
+          </SectionHeader>
+          <DishRow>
+            {featured.map((item) => (
+              <DishCard key={item.id}>
+                <DishImage
+                  source={{ uri: item.imageUrl || 'https://via.placeholder.com/300x200.png?text=Dish' }}
+                />
+                <DishInfo>
+                  <DishName numberOfLines={1}>{item.name}</DishName>
+                  {!!item.price && <DishPrice>{item.price?.toLocaleString('vi-VN')} ₫</DishPrice>}
+                </DishInfo>
+              </DishCard>
+            ))}
+          </DishRow>
+        </Section>
+      )}
+
+      {rest.length > 0 && (
+        <Section>
+          <SectionHeader>
+            <SectionTitle>Tất cả món ăn</SectionTitle>
+          </SectionHeader>
+          <DishesGrid>
+            {rest.map((item) => (
+              <DishGridCard key={item.id}>
+                <DishImage
+                  source={{ uri: item.imageUrl || 'https://via.placeholder.com/300x200.png?text=Dish' }}
+                />
+                <DishInfo>
+                  <DishName numberOfLines={2} style={{ fontSize: 14 }}>
+                    {item.name}
+                  </DishName>
+                  {!!item.price && <DishPrice>{item.price?.toLocaleString('vi-VN')} ₫</DishPrice>}
+                </DishInfo>
+              </DishGridCard>
+            ))}
+          </DishesGrid>
+        </Section>
+      )}
     </Screen>
   );
 };
 
-const styles = StyleSheet.create({
-  container: {
-    flex: 1,
-    backgroundColor: '#f5f5f5',
-  },
-  content: {
-    padding: 20,
-  },
-  title: {
-    fontSize: 28,
-    fontWeight: 'bold',
-    color: '#333',
-    marginBottom: 8,
-  },
-  subtitle: {
-    fontSize: 16,
-    color: '#666',
-    marginBottom: 24,
-  },
-  card: {
-    backgroundColor: '#fff',
-    borderRadius: 12,
-    padding: 20,
-    marginBottom: 16,
-    shadowColor: '#000',
-    shadowOffset: { width: 0, height: 2 },
-    shadowOpacity: 0.1,
-    shadowRadius: 4,
-    elevation: 3,
-  },
-  cardTitle: {
-    fontSize: 18,
-    fontWeight: '600',
-    color: '#333',
-    marginBottom: 12,
-  },
-  counterText: {
-    fontSize: 24,
-    fontWeight: 'bold',
-    color: '#007AFF',
-    textAlign: 'center',
-    marginVertical: 16,
-  },
-  button: {
-    backgroundColor: '#007AFF',
-    paddingVertical: 12,
-    paddingHorizontal: 24,
-    borderRadius: 8,
-    alignItems: 'center',
-  },
-  buttonText: {
-    color: '#fff',
-    fontSize: 16,
-    fontWeight: '600',
-  },
-  infoBox: {
-    backgroundColor: '#E8F4FD',
-    borderRadius: 12,
-    padding: 16,
-    borderLeftWidth: 4,
-    borderLeftColor: '#007AFF',
-  },
-  infoTitle: {
-    fontSize: 16,
-    fontWeight: '600',
-    color: '#333',
-    marginBottom: 8,
-  },
-  infoText: {
-    fontSize: 14,
-    color: '#666',
-    lineHeight: 20,
-  },
-});
-
 export default HomeScreen;
-
