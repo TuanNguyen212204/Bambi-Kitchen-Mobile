@@ -3,6 +3,7 @@ import { Alert } from 'react-native';
 import styled from 'styled-components/native';
 import Button from '@components/common/Button';
 import { COLORS, SIZES } from '@constants';
+import { authService } from '@services/api/authService';
 
 const Container = styled.View`
   flex: 1;
@@ -43,11 +44,15 @@ const ForgotPasswordScreen: React.FC<any> = ({ navigation }) => {
       return;
     }
     setLoading(true);
-    setTimeout(() => {
-      setLoading(false);
-      Alert.alert('Thông báo', 'Đã gửi email khôi phục (UI)');
+    try {
+      await authService.forgotPassword(email);
+      Alert.alert('Thành công', 'Đã gửi email khôi phục mật khẩu.');
       navigation.goBack();
-    }, 600);
+    } catch (e: any) {
+      Alert.alert('Lỗi', e?.message || 'Không thể gửi yêu cầu');
+    } finally {
+      setLoading(false);
+    }
   };
 
   return (
