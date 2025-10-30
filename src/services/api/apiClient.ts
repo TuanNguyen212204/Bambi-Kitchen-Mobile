@@ -1,17 +1,10 @@
 import axios, { AxiosInstance, AxiosRequestConfig, AxiosResponse } from 'axios';
 import { storage } from '@utils/storage';
+import { API_BASE_URL, API_TIMEOUT } from '@env';
 
 // Cấu hình base URL từ .env (với fallback)
-let BASE_URL = 'https://bambi.kdz.asia';
-let TIMEOUT = 30000;
-
-try {
-  const { API_BASE_URL, API_TIMEOUT } = require('@env');
-  BASE_URL = API_BASE_URL || 'https://bambi.kdz.asia';
-  TIMEOUT = parseInt(API_TIMEOUT || '30000', 10);
-} catch (error) {
-  console.warn('No .env file found, using default API config');
-}
+const BASE_URL = API_BASE_URL || 'https://bambi.kdz.asia';
+const TIMEOUT = parseInt((API_TIMEOUT as any) || '30000', 10);
 
 // Tạo axios instance
 const apiClient: AxiosInstance = axios.create({
