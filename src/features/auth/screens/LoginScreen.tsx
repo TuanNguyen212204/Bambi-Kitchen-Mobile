@@ -60,8 +60,6 @@ const Subtitle = styled.Text`
 
 const Input = styled.TextInput`
   width: 100%;
-  border-width: 1px;
-  border-color: ${COLORS.border};
   border-radius: 24px;
   padding: 14px 16px;
   margin-bottom: 12px;
@@ -137,6 +135,7 @@ const LoginScreen: React.FC<any> = ({ navigation }) => {
               onChangeText={setUsername}
               autoCapitalize="none"
               keyboardType="phone-pad"
+              style={{ borderWidth: 1, borderColor: COLORS.border }}
             />
             <Input
               placeholder="Mật khẩu"
@@ -144,6 +143,7 @@ const LoginScreen: React.FC<any> = ({ navigation }) => {
               value={password}
               onChangeText={setPassword}
               returnKeyType="done"
+              style={{ borderWidth: 1, borderColor: COLORS.border }}
             />
             <Button title="Đăng nhập" onPress={onLogin} loading={loading} fullWidth style={{ borderRadius: 24 }} />
             <Row>
