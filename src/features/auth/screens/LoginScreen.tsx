@@ -1,11 +1,12 @@
 import React, { useState } from 'react';
-import { Alert, KeyboardAvoidingView, Platform, Dimensions, StatusBar, ImageBackground, View } from 'react-native';
+import { Alert, KeyboardAvoidingView, Platform, Dimensions, StatusBar, ImageBackground, View, Text } from 'react-native';
 import { SafeAreaView, useSafeAreaInsets } from 'react-native-safe-area-context';
 import styled from 'styled-components/native';
 import Button from '@components/common/Button';
 import { COLORS } from '@constants';
 import { useAppDispatch, useAppSelector } from '@store/store';
 import { loginThunk } from '@store/thunks/authThunks';
+import { MaterialCommunityIcons } from '@expo/vector-icons';
 
 const Container = styled(View)`
   flex: 1;
@@ -72,6 +73,18 @@ const LinkText = styled.Text`
   font-weight: 600;
 `;
 
+const GoogleBtn = styled.TouchableOpacity`
+  flex-direction: row;
+  align-items: center;
+  justify-content: center;
+  width: 100%;
+  padding: 14px 0;
+  border-radius: 27px;
+  border: 1px solid #e5e7eb;
+  margin-top: 28px;
+  background: #fff;
+`;
+
 const LoginScreen: React.FC<any> = ({ navigation }) => {
   const [username, setUsername] = useState('');
   const [password, setPassword] = useState('');
@@ -91,18 +104,23 @@ const LoginScreen: React.FC<any> = ({ navigation }) => {
     }
   };
 
+  // -- Google login handler placeholder
+  const onGoogle = () => {
+    Alert.alert('Chức năng đăng nhập Google sẽ có sau!');
+  };
+
   return (
-    <SafeAreaView style={{ flex: 1 }} edges={['left','right','top']}>
+    <SafeAreaView style={{ flex: 1 }} edges={['left','right','bottom']}>
       <StatusBar translucent backgroundColor="transparent" barStyle="light-content" />
       <KeyboardAvoidingView behavior={Platform.OS === 'ios' ? 'padding' : undefined} style={{ flex: 1 }}>
         <Center>
           <Banner
             source={require('../../../../assets/LoginPage/loginPage1.png')}
             resizeMode="cover"
-            style={{ height: Dimensions.get('window').height * 0.6 }}
+            style={{ height: Dimensions.get('window').height * 0.58 }}
           />
-          <Sheet style={{ bottom: -insets.bottom }}>
-            <Title>Chào mừng trở lại 👋</Title>
+          <Sheet style={{ bottom: insets.bottom + 8 }}>
+            <Title>Chào mừng bạn đến với Bambi Kitchen</Title>
             <Subtitle>Đăng nhập để tiếp tục với Bambi Kitchen</Subtitle>
             <Input
               placeholder="Email hoặc tên đăng nhập"
@@ -124,6 +142,10 @@ const LoginScreen: React.FC<any> = ({ navigation }) => {
               <LinkText onPress={() => navigation.navigate('ForgotPassword')}>Quên mật khẩu?</LinkText>
               <LinkText onPress={() => navigation.navigate('Register')}>Tạo tài khoản</LinkText>
             </Row>
+            <GoogleBtn onPress={onGoogle}>
+              <MaterialCommunityIcons name="google" size={24} color="#EA4335" style={{ marginRight: 8 }} />
+              <Text style={{ color: '#111', fontWeight: '600', fontSize: 16 }}>Đăng nhập với Google</Text>
+            </GoogleBtn>
           </Sheet>
         </Center>
       </KeyboardAvoidingView>
