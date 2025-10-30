@@ -38,8 +38,8 @@ const ChipRow = styled.ScrollView.attrs({ horizontal: true, showsHorizontalScrol
 `;
 
 const Chip = styled.TouchableOpacity<{ active?: boolean }>`
-  padding: 8px 14px;
-  border-radius: 16px;
+  padding: 6px 12px;
+  border-radius: 12px;
   background-color: ${(p) => (p.active ? '#ef4444' : '#f3f4f6')};
   margin-right: 8px;
 `;
@@ -47,6 +47,7 @@ const Chip = styled.TouchableOpacity<{ active?: boolean }>`
 const ChipText = styled.Text<{ active?: boolean }>`
   color: ${(p) => (p.active ? '#fff' : '#111')};
   font-weight: 600;
+  font-size: 13px;
 `;
 
 const Card = styled.TouchableOpacity`

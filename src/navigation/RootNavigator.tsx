@@ -1,5 +1,6 @@
-import React, { useEffect, useMemo } from 'react';
+import React, { useEffect, useMemo, useRef } from 'react';
 import { createNativeStackNavigator } from '@react-navigation/native-stack';
+import { useNavigation } from '@react-navigation/native';
 import MainTabNavigator from './MainTabNavigator';
 import { RootStackParamList } from '@types/navigation';
 import { LoginScreen, RegisterScreen, ForgotPasswordScreen, OTPScreen, ResetPasswordScreen } from '@features/auth/screens';
@@ -12,10 +13,26 @@ const Stack = createNativeStackNavigator<RootStackParamList>();
 const RootNavigator = () => {
   const dispatch = useAppDispatch();
   const { token, user } = useAppSelector((s) => s.auth);
+  const navigation = useNavigation<any>();
 
   useEffect(() => {
     dispatch(loadSessionThunk());
   }, [dispatch]);
+
+  // Navigate after login based on user role
+  useEffect(() => {
+    if (!token || !user) return;
+    
+    const timer = setTimeout(() => {
+      if (user.role === 'ADMIN') {
+        navigation.navigate('Dashboard');
+      } else {
+        navigation.navigate('MainTabs');
+      }
+    }, 100);
+    
+    return () => clearTimeout(timer);
+  }, [token, user, navigation]);
 
   const initial = useMemo(() => {
     if (!token) return 'Login' as keyof RootStackParamList;
