@@ -25,29 +25,28 @@ const ProfileScreen = () => {
         </View>
 
         <View style={styles.section}>
-          <Text style={styles.sectionTitle}>Thông tin nhóm</Text>
+          <Text style={styles.sectionTitle}>Tài khoản</Text>
           <View style={styles.card}>
-            <InfoRow label="Tên nhóm" value="Group [Số nhóm]" />
-            <InfoRow label="Môn học" value="MMA301" />
-            <InfoRow label="Trường" value="FPT University HCM" />
-            <InfoRow label="Thành viên" value="3 người" />
+            <InfoRow label="Họ tên" value={user?.name || '—'} />
+            <InfoRow label="Email" value={user?.mail || '—'} />
+            <InfoRow label="Vai trò" value={String(user?.role || 'USER')} />
           </View>
         </View>
 
         <View style={styles.section}>
-          <Text style={styles.sectionTitle}>Vai trò trong nhóm</Text>
+          <Text style={styles.sectionTitle}>Thiết lập</Text>
           <View style={styles.card}>
-            <Text style={styles.roleText}>
-              • Thành viên 1: UI/UX Developer{'\n'}
-              • Thành viên 2: API Integration{'\n'}
-              • Thành viên 3: State Management & Testing
-            </Text>
+            <TouchableOpacity style={styles.actionBtn}>
+              <Text style={styles.actionText}>Chỉnh sửa thông tin</Text>
+            </TouchableOpacity>
+            <TouchableOpacity style={styles.actionBtn}>
+              <Text style={styles.actionText}>Đổi mật khẩu</Text>
+            </TouchableOpacity>
+            <TouchableOpacity style={[styles.actionBtn, { backgroundColor: '#E53935' }]} onPress={onLogout}>
+              <Text style={[styles.actionText, { color: '#fff' }]}>Đăng xuất</Text>
+            </TouchableOpacity>
           </View>
         </View>
-
-        <TouchableOpacity style={styles.logoutBtn} onPress={onLogout}>
-          <Text style={styles.logoutText}>Đăng xuất</Text>
-        </TouchableOpacity>
       </View>
     </ScrollView>
   );
@@ -142,16 +141,16 @@ const styles = StyleSheet.create({
     color: '#666',
     lineHeight: 24,
   },
-  logoutBtn: {
-    marginTop: 16,
-    backgroundColor: '#E53935',
+  actionBtn: {
+    backgroundColor: '#f3f4f6',
     paddingVertical: 12,
     borderRadius: 10,
     alignItems: 'center',
+    marginBottom: 10,
   },
-  logoutText: {
-    color: '#fff',
+  actionText: {
     fontWeight: '600',
+    color: '#111827',
   },
 });
 
