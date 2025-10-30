@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
 import { Alert, KeyboardAvoidingView, Platform } from 'react-native';
-import { SafeAreaView } from 'react-native-safe-area-context';
+import { SafeAreaView, useSafeAreaInsets } from 'react-native-safe-area-context';
 import { Image, ImageBackground, Dimensions, StatusBar, View, Text } from 'react-native';
 import styled from 'styled-components/native';
 import Button from '@components/common/Button';
@@ -40,11 +40,7 @@ const Banner = styled(ImageBackground)`
   right: 0;
 ` as any;
 
-const Logo = styled(Image)`
-  width: 64px;
-  height: 64px;
-  margin: 12px auto 8px auto;
-`;
+// Logo removed per new design
 
 const Title = styled.Text`
   font-size: 26px;
@@ -85,7 +81,7 @@ const LoginScreen: React.FC<any> = ({ navigation }) => {
   const [password, setPassword] = useState('');
   const dispatch = useAppDispatch();
   const loading = useAppSelector((s) => s.auth.loading);
-  
+  const insets = useSafeAreaInsets();
 
   const onLogin = async () => {
     if (!username || !password) {
@@ -101,17 +97,16 @@ const LoginScreen: React.FC<any> = ({ navigation }) => {
   };
 
   return (
-    <SafeAreaView style={{ flex: 1 }}>
+    <SafeAreaView style={{ flex: 1 }} edges={['left','right','top']}>
       <StatusBar translucent backgroundColor="transparent" barStyle="light-content" />
       <KeyboardAvoidingView behavior={Platform.OS === 'ios' ? 'padding' : undefined} style={{ flex: 1 }}>
         <Center>
           <Banner
             source={require('../../../../assets/LoginPage/loginPage1.png')}
             resizeMode="cover"
-            style={{ height: Dimensions.get('window').height * 0.5 }}
+            style={{ height: Dimensions.get('window').height * 0.58 }}
           />
-          <Logo source={require('../../../../assets/logo.png')} resizeMode="contain" />
-          <Sheet>
+          <Sheet style={{ bottom: -insets.bottom }}>
             <Title>Chào mừng trở lại 👋</Title>
             <Subtitle>Đăng nhập để tiếp tục với Bambi Kitchen</Subtitle>
 
