@@ -1,17 +1,15 @@
 import React, { useState } from 'react';
-import { Alert, KeyboardAvoidingView, Platform } from 'react-native';
+import { Alert, KeyboardAvoidingView, Platform, Dimensions, StatusBar, ImageBackground, View } from 'react-native';
 import { SafeAreaView, useSafeAreaInsets } from 'react-native-safe-area-context';
-import { Image, ImageBackground, Dimensions, StatusBar, View, Text } from 'react-native';
 import styled from 'styled-components/native';
 import Button from '@components/common/Button';
-import { COLORS, SIZES } from '@constants';
+import { COLORS } from '@constants';
 import { useAppDispatch, useAppSelector } from '@store/store';
 import { loginThunk } from '@store/thunks/authThunks';
 
 const Container = styled(View)`
   flex: 1;
   background-color: #ffffff;
-  justify-content: center;
 `;
 
 const Center = styled(View)`
@@ -39,8 +37,6 @@ const Banner = styled(ImageBackground)`
   left: 0;
   right: 0;
 ` as any;
-
-// Logo removed per new design
 
 const Title = styled.Text`
   font-size: 26px;
@@ -90,7 +86,6 @@ const LoginScreen: React.FC<any> = ({ navigation }) => {
     }
     try {
       await dispatch(loginThunk({ username, password } as any)).unwrap();
-      // RootNavigator sẽ điều hướng theo role
     } catch (e: any) {
       Alert.alert('Đăng nhập thất bại', e?.message || 'Vui lòng kiểm tra thông tin');
     }
@@ -104,46 +99,31 @@ const LoginScreen: React.FC<any> = ({ navigation }) => {
           <Banner
             source={require('../../../../assets/LoginPage/loginPage1.png')}
             resizeMode="cover"
-            style={{ height: Dimensions.get('window').height * 0.58 }}
+            style={{ height: Dimensions.get('window').height * 0.6 }}
           />
           <Sheet style={{ bottom: -insets.bottom }}>
             <Title>Chào mừng trở lại 👋</Title>
             <Subtitle>Đăng nhập để tiếp tục với Bambi Kitchen</Subtitle>
-
-      <Input
-        placeholder="Email hoặc tên đăng nhập"
-        autoCapitalize="none"
-        value={username}
-        onChangeText={setUsername}
-        keyboardType="email-address"
-        returnKeyType="next"
-      />
-      <Input
-        placeholder="Mật khẩu"
-        secureTextEntry
-        value={password}
-        onChangeText={setPassword}
-        returnKeyType="done"
-      />
-
+            <Input
+              placeholder="Email hoặc tên đăng nhập"
+              autoCapitalize="none"
+              value={username}
+              onChangeText={setUsername}
+              keyboardType="email-address"
+              returnKeyType="next"
+            />
+            <Input
+              placeholder="Mật khẩu"
+              secureTextEntry
+              value={password}
+              onChangeText={setPassword}
+              returnKeyType="done"
+            />
             <Button title="Đăng nhập" onPress={onLogin} loading={loading} fullWidth style={{ borderRadius: 24 }} />
-
             <Row>
               <LinkText onPress={() => navigation.navigate('ForgotPassword')}>Quên mật khẩu?</LinkText>
               <LinkText onPress={() => navigation.navigate('Register')}>Tạo tài khoản</LinkText>
             </Row>
-
-            <View style={{ alignItems: 'center', marginTop: 16 }}>
-              <Text style={{ color: '#9CA3AF' }}>Hoặc tiếp tục với</Text>
-            </View>
-            <View style={{ flexDirection: 'row', gap: 12, marginTop: 12 }}>
-              <View style={{ flex: 1, borderWidth: 1, borderColor: '#E5E7EB', borderRadius: 16, paddingVertical: 12, alignItems: 'center' }}>
-                <Text>Apple</Text>
-              </View>
-              <View style={{ flex: 1, borderWidth: 1, borderColor: '#E5E7EB', borderRadius: 16, paddingVertical: 12, alignItems: 'center' }}>
-                <Text>Google</Text>
-              </View>
-            </View>
           </Sheet>
         </Center>
       </KeyboardAvoidingView>
@@ -152,5 +132,3 @@ const LoginScreen: React.FC<any> = ({ navigation }) => {
 };
 
 export default LoginScreen;
-
-
