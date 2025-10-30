@@ -1,7 +1,7 @@
 import React, { useState } from 'react';
 import { Alert, KeyboardAvoidingView, Platform } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
-import { Image, ImageBackground, Dimensions, StatusBar, View } from 'react-native';
+import { Image, ImageBackground, Dimensions, StatusBar, View, Text } from 'react-native';
 import styled from 'styled-components/native';
 import Button from '@components/common/Button';
 import { COLORS, SIZES } from '@constants';
@@ -38,7 +38,6 @@ const Banner = styled(ImageBackground)`
   top: 0px;
   left: 0;
   right: 0;
-  height: ${Dimensions.get('window').height * 0.5}px;
 ` as any;
 
 const Logo = styled(Image)`
@@ -106,7 +105,11 @@ const LoginScreen: React.FC<any> = ({ navigation }) => {
       <StatusBar translucent backgroundColor="transparent" barStyle="light-content" />
       <KeyboardAvoidingView behavior={Platform.OS === 'ios' ? 'padding' : undefined} style={{ flex: 1 }}>
         <Center>
-          <Banner source={require('../../../../assets/LoginPage/loginPage1.png')} resizeMode="cover" />
+          <Banner
+            source={require('../../../../assets/LoginPage/loginPage1.png')}
+            resizeMode="cover"
+            style={{ height: Dimensions.get('window').height * 0.5 }}
+          />
           <Logo source={require('../../../../assets/logo.png')} resizeMode="contain" />
           <Sheet>
             <Title>Chào mừng trở lại 👋</Title>
