@@ -14,21 +14,24 @@ const Screen = styled.ScrollView`
 
 const Header = styled.View`
   background-color: #ef4444;
-  padding: 44px 16px 12px 16px;
+  padding: 48px 16px 8px 16px;
 `;
 
 const SearchContainer = styled.View`
   background-color: #ffffff;
   border-radius: 8px;
-  padding: 6px 12px;
+  padding-vertical: 6px;
+  padding-horizontal: 12px;
   flex-direction: row;
   align-items: center;
+  height: 40px;
 `;
 
 const SearchInput = styled.TextInput`
   flex: 1;
   font-size: 14px;
   margin-left: 8px;
+  height: 28px;
 `;
 
 const BannerContainer = styled.View`
