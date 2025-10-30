@@ -3,11 +3,9 @@ import { Dimensions } from 'react-native';
 const { width, height } = Dimensions.get('window');
 
 export const SIZES = {
-  // Screen dimensions
   width,
   height,
 
-  // Font sizes
   fontXS: 10,
   fontSM: 12,
   fontMD: 14,
@@ -17,7 +15,6 @@ export const SIZES = {
   font3XL: 24,
   font4XL: 32,
 
-  // Spacing
   xs: 4,
   sm: 8,
   md: 12,
@@ -26,7 +23,6 @@ export const SIZES = {
   xxl: 24,
   xxxl: 32,
 
-  // Border radius
   radiusXS: 4,
   radiusSM: 8,
   radiusMD: 12,
@@ -34,7 +30,6 @@ export const SIZES = {
   radiusXL: 20,
   radiusFull: 9999,
 
-  // Icon sizes
   iconXS: 16,
   iconSM: 20,
   iconMD: 24,

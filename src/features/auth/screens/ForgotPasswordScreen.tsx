@@ -88,7 +88,6 @@ const ForgotPasswordScreen: React.FC<any> = ({ navigation }) => {
     }
     setLoading(true);
     try {
-      // Gửi OTP để xác thực
       await authService.sendOTP(email);
       Alert.alert('Thành công', 'Đã gửi mã OTP đến email của bạn');
       navigation.navigate('OTP', { email });
@@ -135,5 +134,3 @@ const ForgotPasswordScreen: React.FC<any> = ({ navigation }) => {
 };
 
 export default ForgotPasswordScreen;
-
-

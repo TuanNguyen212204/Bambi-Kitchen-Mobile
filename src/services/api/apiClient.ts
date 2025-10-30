@@ -2,11 +2,9 @@ import axios, { AxiosInstance, AxiosRequestConfig, AxiosResponse } from 'axios';
 import { storage } from '@utils/storage';
 import { API_BASE_URL, API_TIMEOUT } from '@env';
 
-// Cấu hình base URL từ .env (với fallback)
 const BASE_URL = API_BASE_URL || 'https://bambi.kdz.asia';
 const TIMEOUT = parseInt((API_TIMEOUT as any) || '30000', 10);
 
-// Tạo axios instance
 const apiClient: AxiosInstance = axios.create({
   baseURL: BASE_URL,
   timeout: TIMEOUT,
@@ -15,7 +13,6 @@ const apiClient: AxiosInstance = axios.create({
   },
 });
 
-// Request interceptor
 apiClient.interceptors.request.use(
   async (config) => {
     const token = await storage.getItem<string>('authToken');
@@ -30,13 +27,11 @@ apiClient.interceptors.request.use(
   }
 );
 
-// Response interceptor
 apiClient.interceptors.response.use(
   (response: AxiosResponse) => {
     return response;
   },
   (error) => {
-    // Trả lỗi gọn để tránh spam log
     return Promise.reject(error);
   }
 );

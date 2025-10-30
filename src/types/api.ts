@@ -1,4 +1,3 @@
-// API Response Types
 export interface ApiResponse<T> {
   success: boolean;
   data: T;
@@ -11,7 +10,6 @@ export interface ApiError {
   status?: number;
 }
 
-// User Types
 export interface User {
   id: string;
   name: string;
@@ -19,7 +17,6 @@ export interface User {
   avatar?: string;
 }
 
-// Thêm các types khác cho API của bạn
 export interface Product {
   id: string;
   name: string;

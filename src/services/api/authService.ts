@@ -15,7 +15,6 @@ export interface RegisterRequest {
 export const authService = {
   login: async (payload: LoginRequest): Promise<string> => {
     const res = await apiClient.post<string>('/api/user/login', payload);
-    // API trả về token string
     return res.data as unknown as string;
   },
 

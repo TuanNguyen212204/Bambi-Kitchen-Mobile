@@ -212,7 +212,6 @@ const HomeScreen = () => {
     fetchData();
   }, []);
 
-  // Auto-scroll banner
   useEffect(() => {
     const interval = setInterval(() => {
       setCurrentBannerIndex((prev) => {

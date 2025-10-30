@@ -109,7 +109,6 @@ const LoginScreen: React.FC<any> = ({ navigation }) => {
     }
   };
 
-  // -- Google login handler placeholder
   const onGoogle = () => {
     Alert.alert('Chức năng đăng nhập Google sẽ có sau!');
   };
