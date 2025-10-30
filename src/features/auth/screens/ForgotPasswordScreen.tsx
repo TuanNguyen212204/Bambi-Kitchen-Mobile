@@ -1,14 +1,20 @@
 import React, { useState } from 'react';
-import { Alert } from 'react-native';
+import { Alert, KeyboardAvoidingView, Platform, TouchableOpacity } from 'react-native';
+import { Ionicons } from '@expo/vector-icons';
 import styled from 'styled-components/native';
 import Button from '@components/common/Button';
 import { COLORS, SIZES } from '@constants';
 import { authService } from '@services/api/authService';
 
-const Container = styled.View`
+const Container = styled.SafeAreaView`
   flex: 1;
   background-color: #ffffff;
+`;
+
+const Inner = styled.View`
+  flex: 1;
   padding: 24px;
+  justify-content: center;
 `;
 
 const Title = styled.Text`
@@ -34,6 +40,13 @@ const Input = styled.TextInput`
   font-size: 16px;
 `;
 
+const BackButton = styled(TouchableOpacity)`
+  position: absolute;
+  top: 16px;
+  left: 16px;
+  z-index: 10;
+`;
+
 const ForgotPasswordScreen: React.FC<any> = ({ navigation }) => {
   const [email, setEmail] = useState('');
   const [loading, setLoading] = useState(false);
@@ -57,18 +70,25 @@ const ForgotPasswordScreen: React.FC<any> = ({ navigation }) => {
 
   return (
     <Container>
-      <Title>Quên mật khẩu</Title>
-      <Subtitle>Nhập email để nhận hướng dẫn đặt lại mật khẩu</Subtitle>
+      <KeyboardAvoidingView behavior={Platform.OS === 'ios' ? 'padding' : undefined} style={{ flex: 1 }}>
+        <BackButton onPress={() => navigation.goBack()}>
+          <Ionicons name="chevron-back" size={28} color="#111" />
+        </BackButton>
+        <Inner>
+          <Title>Quên mật khẩu</Title>
+          <Subtitle>Nhập email để nhận hướng dẫn đặt lại mật khẩu</Subtitle>
 
-      <Input
-        placeholder="Email"
-        value={email}
-        onChangeText={setEmail}
-        autoCapitalize="none"
-        keyboardType="email-address"
-      />
+          <Input
+            placeholder="Email"
+            value={email}
+            onChangeText={setEmail}
+            autoCapitalize="none"
+            keyboardType="email-address"
+          />
 
-      <Button title="Gửi yêu cầu" onPress={onSend} loading={loading} fullWidth />
+          <Button title="Gửi yêu cầu" onPress={onSend} loading={loading} fullWidth />
+        </Inner>
+      </KeyboardAvoidingView>
     </Container>
   );
 };

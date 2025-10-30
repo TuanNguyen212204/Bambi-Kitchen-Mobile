@@ -1,14 +1,18 @@
 import React, { useState } from 'react';
-import { Alert } from 'react-native';
+import { Alert, KeyboardAvoidingView, Platform } from 'react-native';
 import styled from 'styled-components/native';
 import Button from '@components/common/Button';
 import { COLORS, SIZES } from '@constants';
 import { useAppDispatch, useAppSelector } from '@store/store';
 import { loginThunk } from '@store/thunks/authThunks';
 
-const Container = styled.View`
+const Container = styled.SafeAreaView`
   flex: 1;
   background-color: #ffffff;
+  justify-content: center;
+`;
+
+const Inner = styled.View`
   padding: 24px;
   justify-content: center;
 `;
@@ -68,8 +72,10 @@ const LoginScreen: React.FC<any> = ({ navigation }) => {
 
   return (
     <Container>
-      <Title>Chào mừng trở lại 👋</Title>
-      <Subtitle>Đăng nhập để tiếp tục với Bambi Kitchen</Subtitle>
+      <KeyboardAvoidingView behavior={Platform.OS === 'ios' ? 'padding' : undefined} style={{ flex: 1 }}>
+        <Inner>
+          <Title>Chào mừng trở lại 👋</Title>
+          <Subtitle>Đăng nhập để tiếp tục với Bambi Kitchen</Subtitle>
 
       <Input
         placeholder="Email hoặc tên đăng nhập"
@@ -87,12 +93,14 @@ const LoginScreen: React.FC<any> = ({ navigation }) => {
         returnKeyType="done"
       />
 
-      <Button title="Đăng nhập" onPress={onLogin} loading={loading} fullWidth />
+          <Button title="Đăng nhập" onPress={onLogin} loading={loading} fullWidth />
 
-      <Row>
-        <LinkText onPress={() => navigation.navigate('ForgotPassword')}>Quên mật khẩu?</LinkText>
-        <LinkText onPress={() => navigation.navigate('Register')}>Tạo tài khoản</LinkText>
-      </Row>
+          <Row>
+            <LinkText onPress={() => navigation.navigate('ForgotPassword')}>Quên mật khẩu?</LinkText>
+            <LinkText onPress={() => navigation.navigate('Register')}>Tạo tài khoản</LinkText>
+          </Row>
+        </Inner>
+      </KeyboardAvoidingView>
     </Container>
   );
 };

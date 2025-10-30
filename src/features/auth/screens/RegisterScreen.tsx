@@ -1,14 +1,20 @@
 import React, { useState } from 'react';
-import { Alert } from 'react-native';
+import { Alert, KeyboardAvoidingView, Platform, TouchableOpacity } from 'react-native';
 import styled from 'styled-components/native';
 import Button from '@components/common/Button';
 import { COLORS, SIZES } from '@constants';
 import { authService } from '@services/api/authService';
+import { Ionicons } from '@expo/vector-icons';
 
-const Container = styled.View`
+const Container = styled.SafeAreaView`
   flex: 1;
   background-color: #ffffff;
+`;
+
+const Inner = styled.View`
+  flex: 1;
   padding: 24px;
+  justify-content: center;
 `;
 
 const Title = styled.Text`
@@ -32,6 +38,13 @@ const Input = styled.TextInput`
   padding: 12px 14px;
   margin-bottom: 12px;
   font-size: 16px;
+`;
+
+const BackButton = styled(TouchableOpacity)`
+  position: absolute;
+  top: 16px;
+  left: 16px;
+  z-index: 10;
 `;
 
 const RegisterScreen: React.FC<any> = ({ navigation }) => {
@@ -59,32 +72,39 @@ const RegisterScreen: React.FC<any> = ({ navigation }) => {
 
   return (
     <Container>
-      <Title>Tạo tài khoản</Title>
-      <Subtitle>Đăng ký để trải nghiệm Bambi Kitchen</Subtitle>
+      <KeyboardAvoidingView behavior={Platform.OS === 'ios' ? 'padding' : undefined} style={{ flex: 1 }}>
+        <BackButton onPress={() => navigation.goBack()}>
+          <Ionicons name="chevron-back" size={28} color="#111" />
+        </BackButton>
+        <Inner>
+          <Title>Tạo tài khoản</Title>
+          <Subtitle>Đăng ký để trải nghiệm Bambi Kitchen</Subtitle>
 
-      <Input placeholder="Họ và tên" value={name} onChangeText={setName} />
-      <Input
-        placeholder="Email"
-        value={email}
-        onChangeText={setEmail}
-        autoCapitalize="none"
-        keyboardType="email-address"
-      />
-      <Input
-        placeholder="Mật khẩu"
-        value={password}
-        onChangeText={setPassword}
-        secureTextEntry
-      />
+          <Input placeholder="Họ và tên" value={name} onChangeText={setName} />
+          <Input
+            placeholder="Email"
+            value={email}
+            onChangeText={setEmail}
+            autoCapitalize="none"
+            keyboardType="email-address"
+          />
+          <Input
+            placeholder="Mật khẩu"
+            value={password}
+            onChangeText={setPassword}
+            secureTextEntry
+          />
 
-      <Button title="Đăng ký" onPress={onRegister} loading={loading} fullWidth />
-      <Button
-        title="Đã có tài khoản? Đăng nhập"
-        variant="outline"
-        onPress={() => navigation.navigate('Login')}
-        style={{ marginTop: 8 }}
-        fullWidth
-      />
+          <Button title="Đăng ký" onPress={onRegister} loading={loading} fullWidth />
+          <Button
+            title="Đã có tài khoản? Đăng nhập"
+            variant="outline"
+            onPress={() => navigation.navigate('Login')}
+            style={{ marginTop: 8 }}
+            fullWidth
+          />
+        </Inner>
+      </KeyboardAvoidingView>
     </Container>
   );
 };
