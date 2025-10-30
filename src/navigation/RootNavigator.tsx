@@ -19,19 +19,15 @@ const RootNavigator = () => {
     dispatch(loadSessionThunk());
   }, [dispatch]);
 
-  // Navigate after login based on user role
+  // Navigate after login based on user role (remove timeout for smoother transition)
   useEffect(() => {
     if (!token || !user) return;
     
-    const timer = setTimeout(() => {
-      if (user.role === 'ADMIN') {
-        navigation.navigate('Dashboard');
-      } else {
-        navigation.navigate('MainTabs');
-      }
-    }, 100);
-    
-    return () => clearTimeout(timer);
+    if (user.role === 'ADMIN') {
+      navigation.navigate('Dashboard');
+    } else {
+      navigation.navigate('MainTabs');
+    }
   }, [token, user, navigation]);
 
   const initial = useMemo(() => {

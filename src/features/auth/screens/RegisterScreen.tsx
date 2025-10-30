@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { Alert, KeyboardAvoidingView, Platform, TouchableOpacity, View, ScrollView, StatusBar, Dimensions, ImageBackground } from 'react-native';
+import { Alert, KeyboardAvoidingView, Platform, TouchableOpacity, View, ScrollView, StatusBar, Dimensions, ImageBackground, Text } from 'react-native';
 import { SafeAreaView, useSafeAreaInsets } from 'react-native-safe-area-context';
 import styled from 'styled-components/native';
 import Button from '@components/common/Button';
@@ -133,13 +133,9 @@ const RegisterScreen: React.FC<any> = ({ navigation }) => {
             <Input placeholder="Mật khẩu" value={password} onChangeText={setPassword} secureTextEntry />
             <Input placeholder="Xác nhận mật khẩu" value={confirmPassword} onChangeText={setConfirmPassword} secureTextEntry />
             <Button title="Đăng ký" onPress={onRegister} loading={loading} fullWidth style={{ borderRadius: 24, marginTop: 12 }} />
-            <Button
-              title="Đã có tài khoản? Đăng nhập"
-              variant="outline"
-              onPress={() => navigation.navigate('Login')}
-              style={{ marginTop: 8 }}
-              fullWidth
-            />
+            <TouchableOpacity onPress={() => navigation.navigate('Login')} style={{ marginTop: 12, alignItems: 'center' }}>
+              <Text style={{ color: COLORS.primary, fontWeight: '600' }}>Đã có tài khoản? Đăng nhập</Text>
+            </TouchableOpacity>
           </Sheet>
         </View>
       </KeyboardAvoidingView>
