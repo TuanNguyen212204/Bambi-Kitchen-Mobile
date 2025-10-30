@@ -1,7 +1,17 @@
 import React from 'react';
-import { View, Text, StyleSheet, ScrollView, Image } from 'react-native';
+import { View, Text, StyleSheet, ScrollView, Image, TouchableOpacity } from 'react-native';
+import { useAppDispatch } from '@store/store';
+import { logoutThunk } from '@store/thunks/authThunks';
+import { useNavigation } from '@react-navigation/native';
 
 const ProfileScreen = () => {
+  const dispatch = useAppDispatch();
+  const navigation = useNavigation<any>();
+
+  const onLogout = async () => {
+    await dispatch(logoutThunk());
+    navigation.reset({ index: 0, routes: [{ name: 'Login' }] });
+  };
   return (
     <ScrollView style={styles.container}>
       <View style={styles.content}>
@@ -33,6 +43,10 @@ const ProfileScreen = () => {
             </Text>
           </View>
         </View>
+
+        <TouchableOpacity style={styles.logoutBtn} onPress={onLogout}>
+          <Text style={styles.logoutText}>Đăng xuất</Text>
+        </TouchableOpacity>
       </View>
     </ScrollView>
   );
@@ -126,6 +140,17 @@ const styles = StyleSheet.create({
     fontSize: 14,
     color: '#666',
     lineHeight: 24,
+  },
+  logoutBtn: {
+    marginTop: 16,
+    backgroundColor: '#E53935',
+    paddingVertical: 12,
+    borderRadius: 10,
+    alignItems: 'center',
+  },
+  logoutText: {
+    color: '#fff',
+    fontWeight: '600',
   },
 });
 
