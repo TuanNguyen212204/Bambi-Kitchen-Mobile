@@ -1,6 +1,3 @@
-<<<<<<< HEAD
-# Bambi-Kitchen-Mobile
-=======
 # GroupProject - MMA301
 
 Dự án React Native Expo cho môn MMA301 - FPT University HCM
@@ -1077,4 +1074,3 @@ Nếu gặp vấn đề:
 **Made with ❤️ by Group [Số nhóm] - MMA301 - FPT University HCM**
 
 **Happy Coding! 🚀**
->>>>>>> develop
