@@ -1,11 +1,12 @@
 import React from 'react';
 import { View, Text, StyleSheet, ScrollView, Image, TouchableOpacity } from 'react-native';
-import { useAppDispatch } from '@store/store';
+import { useAppDispatch, useAppSelector } from '@store/store';
 import { logoutThunk } from '@store/thunks/authThunks';
 import { useNavigation } from '@react-navigation/native';
 
 const ProfileScreen = () => {
   const dispatch = useAppDispatch();
+  const user = useAppSelector((s) => s.auth.user);
   const navigation = useNavigation<any>();
 
   const onLogout = async () => {
@@ -19,8 +20,8 @@ const ProfileScreen = () => {
           <View style={styles.avatarContainer}>
             <Text style={styles.avatarText}>👤</Text>
           </View>
-          <Text style={styles.name}>Tên người dùng</Text>
-          <Text style={styles.email}>user@example.com</Text>
+          <Text style={styles.name}>{user?.name || 'Người dùng'}</Text>
+          <Text style={styles.email}>{user?.mail || '—'}</Text>
         </View>
 
         <View style={styles.section}>
