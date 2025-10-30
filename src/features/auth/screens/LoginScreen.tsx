@@ -1,6 +1,7 @@
 import React, { useState } from 'react';
 import { Alert, KeyboardAvoidingView, Platform } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
+import { Image, ImageBackground } from 'react-native';
 import styled from 'styled-components/native';
 import Button from '@components/common/Button';
 import { COLORS, SIZES } from '@constants';
@@ -23,6 +24,17 @@ const Center = styled.View`
 const Form = styled.View`
   width: 100%;
   max-width: 420px;
+`;
+
+const Banner = styled(ImageBackground)`
+  height: 180px;
+  width: 100%;
+` as any;
+
+const Logo = styled(Image)`
+  width: 64px;
+  height: 64px;
+  margin: 12px auto 8px auto;
 `;
 
 const Title = styled.Text`
@@ -83,6 +95,8 @@ const LoginScreen: React.FC<any> = ({ navigation }) => {
     <SafeAreaView style={{ flex: 1 }}>
       <KeyboardAvoidingView behavior={Platform.OS === 'ios' ? 'padding' : undefined} style={{ flex: 1 }}>
         <Center>
+          <Banner source={require('../../../../assets/LoginPage/loginPage1.png')} resizeMode="cover" />
+          <Logo source={require('../../../../assets/logo.png')} resizeMode="contain" />
           <Form>
             <Title>Chào mừng trở lại 👋</Title>
             <Subtitle>Đăng nhập để tiếp tục với Bambi Kitchen</Subtitle>

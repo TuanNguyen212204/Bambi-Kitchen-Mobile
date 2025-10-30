@@ -6,6 +6,7 @@ import Button from '@components/common/Button';
 import { COLORS, SIZES } from '@constants';
 import { authService } from '@services/api/authService';
 import { Ionicons } from '@expo/vector-icons';
+import { Image, ImageBackground } from 'react-native';
 
 const Container = styled.View`
   flex: 1;
@@ -16,6 +17,17 @@ const Inner = styled.View`
   flex: 1;
   padding: 24px;
   justify-content: center;
+`;
+
+const Banner = styled(ImageBackground)`
+  height: 180px;
+  width: 100%;
+` as any;
+
+const Logo = styled(Image)`
+  width: 64px;
+  height: 64px;
+  margin: 12px auto 8px auto;
 `;
 
 const Title = styled.Text`
@@ -78,6 +90,8 @@ const RegisterScreen: React.FC<any> = ({ navigation }) => {
         <BackButton onPress={() => navigation.goBack()} style={{ top: Math.max(insets.top, 16) }}>
           <Ionicons name="chevron-back" size={28} color="#111" />
         </BackButton>
+        <Banner source={require('../../../../assets/RegisterPage/registerPage.png')} resizeMode="cover" />
+        <Logo source={require('../../../../assets/logo.png')} resizeMode="contain" />
         <Inner>
           <Title>Tạo tài khoản</Title>
           <Subtitle>Đăng ký để trải nghiệm Bambi Kitchen</Subtitle>

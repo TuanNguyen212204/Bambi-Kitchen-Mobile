@@ -1,6 +1,7 @@
 import React, { useState } from 'react';
 import { Alert, KeyboardAvoidingView, Platform, TouchableOpacity } from 'react-native';
 import { SafeAreaView, useSafeAreaInsets } from 'react-native-safe-area-context';
+import { Image, ImageBackground } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
 import styled from 'styled-components/native';
 import Button from '@components/common/Button';
@@ -16,6 +17,17 @@ const Inner = styled.View`
   flex: 1;
   padding: 24px;
   justify-content: center;
+`;
+
+const Banner = styled(ImageBackground)`
+  height: 180px;
+  width: 100%;
+` as any;
+
+const Logo = styled(Image)`
+  width: 64px;
+  height: 64px;
+  margin: 12px auto 8px auto;
 `;
 
 const Title = styled.Text`
@@ -76,6 +88,8 @@ const ForgotPasswordScreen: React.FC<any> = ({ navigation }) => {
         <BackButton onPress={() => navigation.goBack()} style={{ top: Math.max(insets.top, 16) }}>
           <Ionicons name="chevron-back" size={28} color="#111" />
         </BackButton>
+        <Banner source={require('../../../../assets/ForgotPassword/ForgotPassword.png')} resizeMode="cover" />
+        <Logo source={require('../../../../assets/logo.png')} resizeMode="contain" />
         <Inner>
           <Title>Quên mật khẩu</Title>
           <Subtitle>Nhập email để nhận hướng dẫn đặt lại mật khẩu</Subtitle>
