@@ -9,9 +9,9 @@ export type MainTabParamList = {
 // Root Stack Navigator Types
 export type RootStackParamList = {
   MainTabs: NavigatorScreenParams<MainTabParamList>;
-  // Thêm các màn hình khác ở đây
-  // Login: undefined;
-  // Details: { id: string };
+  Login: undefined;
+  Register: undefined;
+  ForgotPassword: undefined;
 };
 
 // Navigation Props Types
