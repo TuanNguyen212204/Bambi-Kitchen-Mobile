@@ -15,8 +15,21 @@ const Container = styled.View`
 
 const Inner = styled.View`
   flex: 1;
+`;
+
+const Sheet = styled.View`
+  position: absolute;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background-color: #fff;
+  border-top-left-radius: 28px;
+  border-top-right-radius: 28px;
   padding: 24px;
-  justify-content: center;
+  shadow-color: #000;
+  shadow-opacity: 0.12;
+  shadow-radius: 12px;
+  elevation: 8;
 `;
 
 const Banner = styled(ImageBackground)`
@@ -93,6 +106,7 @@ const RegisterScreen: React.FC<any> = ({ navigation }) => {
         <Banner source={require('../../../../assets/RegisterPage/registerPage.png')} resizeMode="cover" />
         <Logo source={require('../../../../assets/logo.png')} resizeMode="contain" />
         <Inner>
+          <Sheet>
           <Title>Tạo tài khoản</Title>
           <Subtitle>Đăng ký để trải nghiệm Bambi Kitchen</Subtitle>
 
@@ -119,6 +133,7 @@ const RegisterScreen: React.FC<any> = ({ navigation }) => {
             style={{ marginTop: 8 }}
             fullWidth
           />
+          </Sheet>
         </Inner>
       </KeyboardAvoidingView>
     </SafeAreaView>

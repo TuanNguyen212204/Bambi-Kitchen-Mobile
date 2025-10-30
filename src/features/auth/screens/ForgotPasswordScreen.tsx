@@ -15,8 +15,21 @@ const Container = styled.View`
 
 const Inner = styled.View`
   flex: 1;
+`;
+
+const Sheet = styled.View`
+  position: absolute;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background-color: #fff;
+  border-top-left-radius: 28px;
+  border-top-right-radius: 28px;
   padding: 24px;
-  justify-content: center;
+  shadow-color: #000;
+  shadow-opacity: 0.12;
+  shadow-radius: 12px;
+  elevation: 8;
 `;
 
 const Banner = styled(ImageBackground)`
@@ -91,8 +104,9 @@ const ForgotPasswordScreen: React.FC<any> = ({ navigation }) => {
         <Banner source={require('../../../../assets/ForgotPassword/ForgotPassword.png')} resizeMode="cover" />
         <Logo source={require('../../../../assets/logo.png')} resizeMode="contain" />
         <Inner>
-          <Title>Quên mật khẩu</Title>
-          <Subtitle>Nhập email để nhận hướng dẫn đặt lại mật khẩu</Subtitle>
+          <Sheet>
+            <Title>Quên mật khẩu</Title>
+            <Subtitle>Nhập email để nhận hướng dẫn đặt lại mật khẩu</Subtitle>
 
           <Input
             placeholder="Email"
@@ -102,7 +116,8 @@ const ForgotPasswordScreen: React.FC<any> = ({ navigation }) => {
             keyboardType="email-address"
           />
 
-          <Button title="Gửi yêu cầu" onPress={onSend} loading={loading} fullWidth />
+            <Button title="Gửi yêu cầu" onPress={onSend} loading={loading} fullWidth />
+          </Sheet>
         </Inner>
       </KeyboardAvoidingView>
     </SafeAreaView>

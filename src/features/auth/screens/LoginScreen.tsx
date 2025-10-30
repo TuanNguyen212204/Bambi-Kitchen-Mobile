@@ -16,14 +16,21 @@ const Container = styled.View`
 
 const Center = styled.View`
   flex: 1;
-  justify-content: center;
-  align-items: center;
-  padding: 24px;
 `;
 
-const Form = styled.View`
-  width: 100%;
-  max-width: 420px;
+const Sheet = styled.View`
+  position: absolute;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background-color: #fff;
+  border-top-left-radius: 28px;
+  border-top-right-radius: 28px;
+  padding: 24px;
+  shadow-color: #000;
+  shadow-opacity: 0.12;
+  shadow-radius: 12px;
+  elevation: 8;
 `;
 
 const Banner = styled(ImageBackground)`
@@ -97,7 +104,7 @@ const LoginScreen: React.FC<any> = ({ navigation }) => {
         <Center>
           <Banner source={require('../../../../assets/LoginPage/loginPage1.png')} resizeMode="cover" />
           <Logo source={require('../../../../assets/logo.png')} resizeMode="contain" />
-          <Form>
+          <Sheet>
             <Title>Chào mừng trở lại 👋</Title>
             <Subtitle>Đăng nhập để tiếp tục với Bambi Kitchen</Subtitle>
 
@@ -123,7 +130,7 @@ const LoginScreen: React.FC<any> = ({ navigation }) => {
               <LinkText onPress={() => navigation.navigate('ForgotPassword')}>Quên mật khẩu?</LinkText>
               <LinkText onPress={() => navigation.navigate('Register')}>Tạo tài khoản</LinkText>
             </Row>
-          </Form>
+          </Sheet>
         </Center>
       </KeyboardAvoidingView>
     </SafeAreaView>
