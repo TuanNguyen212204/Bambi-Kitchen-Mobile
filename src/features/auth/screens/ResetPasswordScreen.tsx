@@ -1,21 +1,26 @@
 import React, { useState } from 'react';
-import { Alert, KeyboardAvoidingView, Platform, TouchableOpacity, View, ScrollView, StatusBar, Dimensions, ImageBackground } from 'react-native';
+import { Alert, KeyboardAvoidingView, Platform, TouchableOpacity, View, StatusBar, Dimensions, ImageBackground } from 'react-native';
 import { SafeAreaView, useSafeAreaInsets } from 'react-native-safe-area-context';
+import { Ionicons } from '@expo/vector-icons';
 import styled from 'styled-components/native';
 import Button from '@components/common/Button';
 import { COLORS, SIZES } from '@constants';
 import { authService } from '@services/api/authService';
-import { Ionicons } from '@expo/vector-icons';
 
-const Container = styled.View`
-  flex: 1;
-  background-color: #ffffff;
+const Banner = styled.Image`
+  width: 100%;
+  height: 60%;
+  background-color: ${COLORS.primary};
+  justify-content: center;
+  align-items: center;
 `;
 
-const Inner = styled.View`
-  flex: 1;
-  padding: 24px;
-  justify-content: center;
+const BannerText = styled.Text`
+  font-size: 24px;
+  font-weight: 700;
+  color: #fff;
+  text-align: center;
+  padding: 0 20px;
 `;
 
 const Sheet = styled(View)`
@@ -29,15 +34,10 @@ const Sheet = styled(View)`
   max-width: 420px;
   margin-left: auto;
   margin-right: auto;
-  padding: 72px 24px 48px 24px;
+  margin-top: -24px;
+  min-height: ${Dimensions.get('window').height * 0.54}px;
+  padding: 24px 24px 48px 24px;
 `;
-
-const Banner = styled(ImageBackground)`
-  position: absolute;
-  top: 0px;
-  left: 0;
-  right: 0;
-` as any;
 
 const Title = styled.Text`
   font-size: 26px;
@@ -76,35 +76,42 @@ const BackButton = styled(TouchableOpacity)`
   z-index: 10;
 `;
 
-const RegisterScreen: React.FC<any> = ({ navigation }) => {
-  const [name, setName] = useState('');
-  const [email, setEmail] = useState('');
-  const [password, setPassword] = useState('');
+interface ResetPasswordScreenProps {
+  navigation: any;
+  route: {
+    params: {
+      email: string;
+      otp: string;
+    };
+  };
+}
+
+const ResetPasswordScreen: React.FC<ResetPasswordScreenProps> = ({ navigation, route }) => {
+  const { email, otp } = route.params || {};
+  const [newPassword, setNewPassword] = useState('');
   const [confirmPassword, setConfirmPassword] = useState('');
   const [loading, setLoading] = useState(false);
-  const insets = useSafeAreaInsets();
 
-  const onRegister = async () => {
-    if (!name || !email || !password || !confirmPassword) {
-      Alert.alert('Thiếu thông tin', 'Vui lòng nhập đầy đủ các trường');
+  const onReset = async () => {
+    if (!newPassword || !confirmPassword) {
+      Alert.alert('Thiếu thông tin', 'Vui lòng nhập mật khẩu mới');
       return;
     }
-    if (password !== confirmPassword) {
-      Alert.alert('Mật khẩu không khớp', 'Vui lòng nhập lại mật khẩu để xác nhận.');
+    if (newPassword !== confirmPassword) {
+      Alert.alert('Lỗi', 'Mật khẩu xác nhận không khớp');
+      return;
+    }
+    if (newPassword.length < 6) {
+      Alert.alert('Lỗi', 'Mật khẩu phải có ít nhất 6 ký tự');
       return;
     }
     setLoading(true);
     try {
-      await authService.register({
-        name,
-        mail: email,
-        password,
-        role: 'USER',
-      });
-      Alert.alert('Thành công', 'Đăng ký thành công. Vui lòng đăng nhập.');
+      await authService.resetPassword(email, otp, newPassword);
+      Alert.alert('Thành công', 'Đặt lại mật khẩu thành công. Vui lòng đăng nhập.');
       navigation.navigate('Login');
     } catch (e: any) {
-      Alert.alert('Lỗi', e?.message || 'Không thể đăng ký');
+      Alert.alert('Lỗi', e?.message || 'Không thể đặt lại mật khẩu');
     } finally {
       setLoading(false);
     }
@@ -124,22 +131,25 @@ const RegisterScreen: React.FC<any> = ({ navigation }) => {
             <TouchableOpacity onPress={() => navigation.goBack()} style={{ position: 'absolute', top: 8, left: 8, zIndex: 10 }}>
               <Ionicons name="chevron-back" size={28} color="#111" />
             </TouchableOpacity>
-            <TitleContainer>
-              <Title>Đăng ký</Title>
-            </TitleContainer>
-            <Subtitle>Đăng ký để trải nghiệm Bambi Kitchen</Subtitle>
-            <Input placeholder="Tên" value={name} onChangeText={setName} />
-            <Input placeholder="Email" value={email} onChangeText={setEmail} keyboardType="email-address" autoCapitalize="none" />
-            <Input placeholder="Mật khẩu" value={password} onChangeText={setPassword} secureTextEntry />
-            <Input placeholder="Xác nhận mật khẩu" value={confirmPassword} onChangeText={setConfirmPassword} secureTextEntry />
-            <Button title="Đăng ký" onPress={onRegister} loading={loading} fullWidth style={{ borderRadius: 24, marginTop: 12 }} />
-            <Button
-              title="Đã có tài khoản? Đăng nhập"
-              variant="outline"
-              onPress={() => navigation.navigate('Login')}
-              style={{ marginTop: 8 }}
-              fullWidth
-            />
+            <View style={{ flex: 1, justifyContent: 'center' }}>
+              <TitleContainer>
+                <Title>Đặt lại mật khẩu</Title>
+              </TitleContainer>
+              <Subtitle>Nhập mật khẩu mới của bạn</Subtitle>
+              <Input
+                placeholder="Mật khẩu mới"
+                secureTextEntry
+                value={newPassword}
+                onChangeText={setNewPassword}
+              />
+              <Input
+                placeholder="Xác nhận mật khẩu mới"
+                secureTextEntry
+                value={confirmPassword}
+                onChangeText={setConfirmPassword}
+              />
+              <Button title="Đặt lại mật khẩu" onPress={onReset} loading={loading} fullWidth style={{ borderRadius: 24 }} />
+            </View>
           </Sheet>
         </View>
       </KeyboardAvoidingView>
@@ -147,6 +157,5 @@ const RegisterScreen: React.FC<any> = ({ navigation }) => {
   );
 };
 
-export default RegisterScreen;
-
+export default ResetPasswordScreen;
 

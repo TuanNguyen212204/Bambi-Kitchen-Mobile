@@ -43,12 +43,19 @@ const Title = styled.Text`
   font-weight: 700;
   color: ${COLORS.textPrimary};
   margin-bottom: 8px;
+  text-align: center;
+`;
+
+const TitleContainer = styled.View`
+  align-items: center;
+  margin-bottom: 8px;
 `;
 
 const Subtitle = styled.Text`
   font-size: 14px;
   color: ${COLORS.textSecondary};
   margin-bottom: 24px;
+  text-align: center;
 `;
 
 const Input = styled.TextInput`
@@ -120,7 +127,9 @@ const LoginScreen: React.FC<any> = ({ navigation }) => {
             style={{ height: Dimensions.get('window').height * 0.58 }}
           />
           <Sheet style={{ bottom: -32 }}>
-            <Title>Chào mừng bạn đến với Bambi Kitchen</Title>
+            <TitleContainer>
+              <Title>Đăng nhập</Title>
+            </TitleContainer>
             <Subtitle>Đăng nhập để tiếp tục với Bambi Kitchen</Subtitle>
             <Input
               placeholder="Số điện thoại"

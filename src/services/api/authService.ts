@@ -33,6 +33,23 @@ export const authService = {
     const res = await apiClient.get('/api/user/forgot-password', { params: { email } });
     return res.data;
   },
+
+  sendOTP: async (email: string) => {
+    const res = await apiClient.get('/api/mail/send-otp', { params: { email } });
+    return res.data;
+  },
+
+  verifyOTP: async (email: string, otp: string) => {
+    const res = await apiClient.post('/api/mail/verify-otp', null, { params: { email, otp } });
+    return res.data;
+  },
+
+  resetPassword: async (email: string, otp: string, newPassword: string) => {
+    const res = await apiClient.post('/api/user/reset-password', null, { 
+      params: { email, otp, newPassword } 
+    });
+    return res.data;
+  },
 };
 
 

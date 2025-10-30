@@ -33,16 +33,15 @@ const SearchBar = styled.View`
   align-items: center;
 `;
 
-const ChipRow = styled.View`
-  flex-direction: row;
-  gap: 10px;
-  padding: 0 20px 12px 20px;
+const ChipRow = styled.ScrollView.attrs({ horizontal: true, showsHorizontalScrollIndicator: false })`
+  padding: 0 16px 8px 16px;
 `;
 
 const Chip = styled.TouchableOpacity<{ active?: boolean }>`
   padding: 8px 14px;
   border-radius: 16px;
   background-color: ${(p) => (p.active ? '#ef4444' : '#f3f4f6')};
+  margin-right: 8px;
 `;
 
 const ChipText = styled.Text<{ active?: boolean }>`
@@ -66,16 +65,21 @@ const Price = styled.Text`
 const HomeScreen = () => {
   const user = useAppSelector((s) => s.auth.user);
   const [dishes, setDishes] = useState<DishDto[]>([]);
+  const [categories, setCategories] = useState<{ id: number; name: string }[]>([]);
   const [loading, setLoading] = useState(false);
   const [query, setQuery] = useState('');
-  const [tab, setTab] = useState<'All' | 'Combos' | 'Burgers' | 'Drinks'>('All');
+  const [categoryId, setCategoryId] = useState<number | undefined>(undefined);
 
   useEffect(() => {
     const fetchData = async () => {
       setLoading(true);
       try {
-        const data = await dishService.getAll();
-        setDishes(Array.isArray(data) ? data : []);
+        const [ds, cats] = await Promise.all([
+          dishService.getAll(),
+          dishService.getCategories(),
+        ]);
+        setDishes(Array.isArray(ds) ? ds : []);
+        setCategories(Array.isArray(cats) ? cats : []);
       } catch (e) {
         setDishes([]);
       } finally {
@@ -85,10 +89,15 @@ const HomeScreen = () => {
     fetchData();
   }, []);
 
+  const visible = useMemo(() => dishes.filter((d) => (d as any).public !== false && ((d as any).active ?? true)), [dishes]);
   const filtered = useMemo(() => {
     const q = query.trim().toLowerCase();
-    return dishes.filter((d) => d.name?.toLowerCase().includes(q));
-  }, [dishes, query]);
+    return visible.filter((d) => {
+      const byQ = !q || d.name?.toLowerCase().includes(q) || d.description?.toLowerCase().includes(q);
+      const byCat = !categoryId || d.categoryId === categoryId;
+      return byQ && byCat;
+    });
+  }, [visible, query, categoryId]);
 
   return (
     <Screen>
@@ -107,9 +116,12 @@ const HomeScreen = () => {
       </SearchBar>
 
       <ChipRow>
-        {(['All','Combos','Burgers','Drinks'] as const).map((c) => (
-          <Chip key={c} active={tab===c} onPress={() => setTab(c)}>
-            <ChipText active={tab===c}>{c}</ChipText>
+        <Chip active={!categoryId} onPress={() => setCategoryId(undefined)}>
+          <ChipText active={!categoryId}>Tất cả</ChipText>
+        </Chip>
+        {categories.map((c) => (
+          <Chip key={c.id} active={categoryId===c.id} onPress={() => setCategoryId(c.id)}>
+            <ChipText active={categoryId===c.id}>{c.name}</ChipText>
           </Chip>
         ))}
       </ChipRow>
@@ -131,7 +143,7 @@ const HomeScreen = () => {
             {!!item.description && (
               <Text style={{ color: '#6b7280' }} numberOfLines={1}>{item.description}</Text>
             )}
-            {!!item.price && <Price>${item.price}</Price>}
+            {!!item.price && <Price>{item.price?.toLocaleString('vi-VN')} ₫</Price>}
           </Card>
         )}
         ListEmptyComponent={!loading ? (

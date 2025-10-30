@@ -67,6 +67,25 @@ const Input = styled.TextInput`
   padding: 14px 16px;
   margin-bottom: 12px;
   font-size: 16px;
+  letter-spacing: 8px;
+  text-align: center;
+`;
+
+const OTPInputContainer = styled.View`
+  flex-direction: row;
+  gap: 12px;
+  margin-bottom: 12px;
+`;
+
+const OTPInputBox = styled.TextInput`
+  flex: 1;
+  border-width: 1px;
+  border-color: ${COLORS.border};
+  border-radius: 12px;
+  padding: 14px;
+  text-align: center;
+  font-size: 24px;
+  font-weight: 700;
 `;
 
 const BackButton = styled(TouchableOpacity)`
@@ -76,24 +95,32 @@ const BackButton = styled(TouchableOpacity)`
   z-index: 10;
 `;
 
-const ForgotPasswordScreen: React.FC<any> = ({ navigation }) => {
-  const [email, setEmail] = useState('');
-  const [loading, setLoading] = useState(false);
-  const insets = useSafeAreaInsets();
+interface OTPScreenProps {
+  navigation: any;
+  route: {
+    params: {
+      email: string;
+    };
+  };
+}
 
-  const onSend = async () => {
-    if (!email) {
-      Alert.alert('Thiếu thông tin', 'Vui lòng nhập email');
+const OTPScreen: React.FC<OTPScreenProps> = ({ navigation, route }) => {
+  const { email } = route.params || {};
+  const [otp, setOtp] = useState('');
+  const [loading, setLoading] = useState(false);
+
+  const onVerify = async () => {
+    if (!otp || otp.length !== 6) {
+      Alert.alert('Lỗi', 'Vui lòng nhập mã OTP 6 chữ số');
       return;
     }
     setLoading(true);
     try {
-      // Gửi OTP để xác thực
-      await authService.sendOTP(email);
-      Alert.alert('Thành công', 'Đã gửi mã OTP đến email của bạn');
-      navigation.navigate('OTP', { email });
+      await authService.verifyOTP(email, otp);
+      Alert.alert('Thành công', 'Xác thực OTP thành công');
+      navigation.navigate('ResetPassword', { email, otp });
     } catch (e: any) {
-      Alert.alert('Lỗi', e?.message || 'Không thể gửi mã OTP');
+      Alert.alert('Lỗi', e?.message || 'Mã OTP không đúng');
     } finally {
       setLoading(false);
     }
@@ -115,17 +142,18 @@ const ForgotPasswordScreen: React.FC<any> = ({ navigation }) => {
             </TouchableOpacity>
             <View style={{ flex: 1, justifyContent: 'center' }}>
               <TitleContainer>
-                <Title>Quên mật khẩu</Title>
+                <Title>Nhập mã OTP</Title>
               </TitleContainer>
-              <Subtitle>Nhập email để nhận hướng dẫn đặt lại mật khẩu</Subtitle>
+              <Subtitle>Nhập mã OTP 6 chữ số được gửi đến email của bạn</Subtitle>
               <Input
-                placeholder="Email"
-                value={email}
-                onChangeText={setEmail}
-                keyboardType="email-address"
+                placeholder="000000"
+                value={otp}
+                onChangeText={(text) => setOtp(text.replace(/[^0-9]/g, '').substring(0, 6))}
+                keyboardType="number-pad"
                 autoCapitalize="none"
+                maxLength={6}
               />
-              <Button title="Gửi yêu cầu" onPress={onSend} loading={loading} fullWidth style={{ borderRadius: 24 }} />
+              <Button title="Xác nhận" onPress={onVerify} loading={loading} fullWidth style={{ borderRadius: 24 }} />
             </View>
           </Sheet>
         </View>
@@ -134,6 +162,5 @@ const ForgotPasswordScreen: React.FC<any> = ({ navigation }) => {
   );
 };
 
-export default ForgotPasswordScreen;
-
+export default OTPScreen;
 
