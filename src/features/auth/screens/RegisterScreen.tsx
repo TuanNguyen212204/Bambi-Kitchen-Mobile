@@ -1,12 +1,11 @@
 import React, { useState } from 'react';
-import { Alert, KeyboardAvoidingView, Platform, TouchableOpacity } from 'react-native';
+import { Alert, KeyboardAvoidingView, Platform, TouchableOpacity, View, ScrollView, StatusBar, Dimensions, ImageBackground } from 'react-native';
 import { SafeAreaView, useSafeAreaInsets } from 'react-native-safe-area-context';
 import styled from 'styled-components/native';
 import Button from '@components/common/Button';
 import { COLORS, SIZES } from '@constants';
 import { authService } from '@services/api/authService';
 import { Ionicons } from '@expo/vector-icons';
-import { Image, ImageBackground } from 'react-native';
 
 const Container = styled.View`
   flex: 1;
@@ -15,9 +14,11 @@ const Container = styled.View`
 
 const Inner = styled.View`
   flex: 1;
+  padding: 24px;
+  justify-content: center;
 `;
 
-const Sheet = styled.View`
+const Sheet = styled(View)`
   position: absolute;
   left: 0;
   right: 0;
@@ -25,23 +26,18 @@ const Sheet = styled.View`
   background-color: #fff;
   border-top-left-radius: 36px;
   border-top-right-radius: 36px;
-  padding: 32px 24px 24px 24px;
-  shadow-color: #000;
-  shadow-opacity: 0.12;
-  shadow-radius: 12px;
-  elevation: 8;
+  max-width: 420px;
+  margin-left: auto;
+  margin-right: auto;
+  padding: 72px 24px 48px 24px;
 `;
 
 const Banner = styled(ImageBackground)`
-  height: 180px;
-  width: 100%;
+  position: absolute;
+  top: 0px;
+  left: 0;
+  right: 0;
 ` as any;
-
-const Logo = styled(Image)`
-  width: 64px;
-  height: 64px;
-  margin: 12px auto 8px auto;
-`;
 
 const Title = styled.Text`
   font-size: 26px;
@@ -74,20 +70,34 @@ const BackButton = styled(TouchableOpacity)`
 `;
 
 const RegisterScreen: React.FC<any> = ({ navigation }) => {
-  const [name, setName] = useState('');
+  const [firstName, setFirstName] = useState('');
+  const [lastName, setLastName] = useState('');
   const [email, setEmail] = useState('');
+  const [phone, setPhone] = useState('');
   const [password, setPassword] = useState('');
+  const [confirmPassword, setConfirmPassword] = useState('');
   const [loading, setLoading] = useState(false);
   const insets = useSafeAreaInsets();
 
   const onRegister = async () => {
-    if (!name || !email || !password) {
+    if (!firstName || !lastName || !email || !phone || !password || !confirmPassword) {
       Alert.alert('Thiếu thông tin', 'Vui lòng nhập đầy đủ các trường');
+      return;
+    }
+    if (password !== confirmPassword) {
+      Alert.alert('Mật khẩu không khớp', 'Vui lòng nhập lại mật khẩu để xác nhận.');
       return;
     }
     setLoading(true);
     try {
-      await authService.register({ name, mail: email, password, role: 'USER' });
+      await authService.register({
+        firstName,
+        lastName,
+        email,
+        phone,
+        password,
+        role: 'USER',
+      });
       Alert.alert('Thành công', 'Đăng ký thành công. Vui lòng đăng nhập.');
       navigation.navigate('Login');
     } catch (e: any) {
@@ -98,43 +108,39 @@ const RegisterScreen: React.FC<any> = ({ navigation }) => {
   };
 
   return (
-    <SafeAreaView style={{ flex: 1 }}>
+    <SafeAreaView style={{ flex: 1 }} edges={['left','right','bottom']}>
+      <StatusBar translucent backgroundColor="transparent" barStyle="light-content" />
       <KeyboardAvoidingView behavior={Platform.OS === 'ios' ? 'padding' : undefined} style={{ flex: 1 }}>
-        <BackButton onPress={() => navigation.goBack()} style={{ top: Math.max(insets.top, 16) }}>
-          <Ionicons name="chevron-back" size={28} color="#111" />
-        </BackButton>
-        <Banner source={require('../../../../assets/RegisterPage/registerPage.png')} resizeMode="cover" />
-        <Logo source={require('../../../../assets/logo.png')} resizeMode="contain" />
-        <Inner>
-          <Sheet>
-          <Title>Tạo tài khoản</Title>
-          <Subtitle>Đăng ký để trải nghiệm Bambi Kitchen</Subtitle>
-
-          <Input placeholder="Họ và tên" value={name} onChangeText={setName} />
-          <Input
-            placeholder="Email"
-            value={email}
-            onChangeText={setEmail}
-            autoCapitalize="none"
-            keyboardType="email-address"
+        <View style={{ flex: 1 }}>
+          <Banner
+            source={require('../../../../assets/LoginPage/loginPage1.png')}
+            resizeMode="cover"
+            style={{ height: Dimensions.get('window').height * 0.58 }}
           />
-          <Input
-            placeholder="Mật khẩu"
-            value={password}
-            onChangeText={setPassword}
-            secureTextEntry
-          />
-
-          <Button title="Đăng ký" onPress={onRegister} loading={loading} fullWidth style={{ borderRadius: 24 }} />
-          <Button
-            title="Đã có tài khoản? Đăng nhập"
-            variant="outline"
-            onPress={() => navigation.navigate('Login')}
-            style={{ marginTop: 8 }}
-            fullWidth
-          />
+          <Sheet style={{ bottom: -32 }}>
+            <TouchableOpacity onPress={() => navigation.goBack()} style={{ position: 'absolute', top: 8, left: 8, zIndex: 10 }}>
+              <Ionicons name="chevron-back" size={28} color="#111" />
+            </TouchableOpacity>
+            <Title>Tạo tài khoản</Title>
+            <Subtitle>Đăng ký để trải nghiệm Bambi Kitchen</Subtitle>
+            <ScrollView showsVerticalScrollIndicator={false}>
+              <Input placeholder="Họ" value={firstName} onChangeText={setFirstName} />
+              <Input placeholder="Tên" value={lastName} onChangeText={setLastName} />
+              <Input placeholder="Email" value={email} onChangeText={setEmail} keyboardType="email-address" autoCapitalize="none" />
+              <Input placeholder="Số điện thoại" value={phone} onChangeText={setPhone} keyboardType="phone-pad" autoCapitalize="none" />
+              <Input placeholder="Mật khẩu" value={password} onChangeText={setPassword} secureTextEntry />
+              <Input placeholder="Xác nhận mật khẩu" value={confirmPassword} onChangeText={setConfirmPassword} secureTextEntry />
+              <Button title="Đăng ký" onPress={onRegister} loading={loading} fullWidth />
+              <Button
+                title="Đã có tài khoản? Đăng nhập"
+                variant="outline"
+                onPress={() => navigation.navigate('Login')}
+                style={{ marginTop: 8 }}
+                fullWidth
+              />
+            </ScrollView>
           </Sheet>
-        </Inner>
+        </View>
       </KeyboardAvoidingView>
     </SafeAreaView>
   );

@@ -25,11 +25,10 @@ const Sheet = styled(View)`
   background-color: #fff;
   border-top-left-radius: 36px;
   border-top-right-radius: 36px;
-  padding: 32px 24px 24px 24px;
-  shadow-color: #000;
-  shadow-opacity: 0.12;
-  shadow-radius: 12px;
-  elevation: 8;
+  max-width: 420px;
+  margin-left: auto;
+  margin-right: auto;
+  padding: 56px 24px 12px 24px;
 `;
 
 const Banner = styled(ImageBackground)`
@@ -78,10 +77,11 @@ const GoogleBtn = styled.TouchableOpacity`
   align-items: center;
   justify-content: center;
   width: 100%;
-  padding: 14px 0;
+  padding: 16px 0;
   border-radius: 27px;
   border: 1px solid #e5e7eb;
   margin-top: 28px;
+  margin-bottom: 20px;
   background: #fff;
 `;
 
@@ -119,16 +119,15 @@ const LoginScreen: React.FC<any> = ({ navigation }) => {
             resizeMode="cover"
             style={{ height: Dimensions.get('window').height * 0.58 }}
           />
-          <Sheet style={{ bottom: insets.bottom + 8 }}>
+          <Sheet style={{ bottom: -32 }}>
             <Title>Chào mừng bạn đến với Bambi Kitchen</Title>
             <Subtitle>Đăng nhập để tiếp tục với Bambi Kitchen</Subtitle>
             <Input
-              placeholder="Email hoặc tên đăng nhập"
-              autoCapitalize="none"
+              placeholder="Số điện thoại"
               value={username}
               onChangeText={setUsername}
-              keyboardType="email-address"
-              returnKeyType="next"
+              autoCapitalize="none"
+              keyboardType="phone-pad"
             />
             <Input
               placeholder="Mật khẩu"

@@ -1,23 +1,29 @@
 import React, { useState } from 'react';
-import { Alert, KeyboardAvoidingView, Platform, TouchableOpacity } from 'react-native';
+import { Alert, KeyboardAvoidingView, Platform, TouchableOpacity, View, StatusBar, Dimensions, ImageBackground } from 'react-native';
 import { SafeAreaView, useSafeAreaInsets } from 'react-native-safe-area-context';
-import { Image, ImageBackground } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
 import styled from 'styled-components/native';
 import Button from '@components/common/Button';
 import { COLORS, SIZES } from '@constants';
 import { authService } from '@services/api/authService';
 
-const Container = styled.View`
-  flex: 1;
-  background-color: #ffffff;
+const Banner = styled.Image`
+  width: 100%;
+  height: 60%;
+  background-color: ${COLORS.primary};
+  justify-content: center;
+  align-items: center;
 `;
 
-const Inner = styled.View`
-  flex: 1;
+const BannerText = styled.Text`
+  font-size: 24px;
+  font-weight: 700;
+  color: #fff;
+  text-align: center;
+  padding: 0 20px;
 `;
 
-const Sheet = styled.View`
+const Sheet = styled(View)`
   position: absolute;
   left: 0;
   right: 0;
@@ -25,22 +31,12 @@ const Sheet = styled.View`
   background-color: #fff;
   border-top-left-radius: 36px;
   border-top-right-radius: 36px;
-  padding: 32px 24px 24px 24px;
-  shadow-color: #000;
-  shadow-opacity: 0.12;
-  shadow-radius: 12px;
-  elevation: 8;
-`;
-
-const Banner = styled(ImageBackground)`
-  height: 180px;
-  width: 100%;
-` as any;
-
-const Logo = styled(Image)`
-  width: 64px;
-  height: 64px;
-  margin: 12px auto 8px auto;
+  max-width: 420px;
+  margin-left: auto;
+  margin-right: auto;
+  margin-top: -24px;
+  min-height: ${Dimensions.get('window').height * 0.54}px;
+  padding: 24px 24px 48px 24px;
 `;
 
 const Title = styled.Text`
@@ -86,7 +82,7 @@ const ForgotPasswordScreen: React.FC<any> = ({ navigation }) => {
     setLoading(true);
     try {
       await authService.forgotPassword(email);
-      Alert.alert('Thành công', 'Đã gửi email khôi phục mật khẩu.');
+      Alert.alert('Thành công', 'Đã gửi yêu cầu khôi phục mật khẩu.');
       navigation.goBack();
     } catch (e: any) {
       Alert.alert('Lỗi', e?.message || 'Không thể gửi yêu cầu');
@@ -96,29 +92,33 @@ const ForgotPasswordScreen: React.FC<any> = ({ navigation }) => {
   };
 
   return (
-    <SafeAreaView style={{ flex: 1 }}>
+    <SafeAreaView style={{ flex: 1 }} edges={['left','right','bottom']}>
+      <StatusBar translucent backgroundColor="transparent" barStyle="light-content" />
       <KeyboardAvoidingView behavior={Platform.OS === 'ios' ? 'padding' : undefined} style={{ flex: 1 }}>
-        <BackButton onPress={() => navigation.goBack()} style={{ top: Math.max(insets.top, 16) }}>
-          <Ionicons name="chevron-back" size={28} color="#111" />
-        </BackButton>
-        <Banner source={require('../../../../assets/ForgotPassword/ForgotPassword.png')} resizeMode="cover" />
-        <Logo source={require('../../../../assets/logo.png')} resizeMode="contain" />
-        <Inner>
-          <Sheet>
-            <Title>Quên mật khẩu</Title>
-            <Subtitle>Nhập email để nhận hướng dẫn đặt lại mật khẩu</Subtitle>
-
-          <Input
-            placeholder="Email"
-            value={email}
-            onChangeText={setEmail}
-            autoCapitalize="none"
-            keyboardType="email-address"
+        <View style={{ flex: 1 }}>
+          <Banner
+            source={require('../../../../assets/LoginPage/loginPage1.png')}
+            resizeMode="cover"
+            style={{ height: Dimensions.get('window').height * 0.58 }}
           />
-
-            <Button title="Gửi yêu cầu" onPress={onSend} loading={loading} fullWidth />
+          <Sheet style={{ bottom: -32 }}>
+            <TouchableOpacity onPress={() => navigation.goBack()} style={{ position: 'absolute', top: 8, left: 8, zIndex: 10 }}>
+              <Ionicons name="chevron-back" size={28} color="#111" />
+            </TouchableOpacity>
+            <View style={{ flex: 1, justifyContent: 'center' }}>
+              <Title>Quên mật khẩu</Title>
+              <Subtitle>Nhập email để nhận hướng dẫn đặt lại mật khẩu</Subtitle>
+              <Input
+                placeholder="Email"
+                value={email}
+                onChangeText={setEmail}
+                keyboardType="email-address"
+                autoCapitalize="none"
+              />
+              <Button title="Gửi yêu cầu" onPress={onSend} loading={loading} fullWidth />
+            </View>
           </Sheet>
-        </Inner>
+        </View>
       </KeyboardAvoidingView>
     </SafeAreaView>
   );
