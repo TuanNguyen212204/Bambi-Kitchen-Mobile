@@ -14,7 +14,7 @@ const Screen = styled.ScrollView`
 
 const Header = styled.View`
   background-color: #ef4444;
-  padding: 40px 16px 12px 16px;
+  padding: 32px 16px 12px 16px;
 `;
 
 const SearchContainer = styled.View`
