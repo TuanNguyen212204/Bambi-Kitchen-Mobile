@@ -3,6 +3,8 @@ import { Alert } from 'react-native';
 import styled from 'styled-components/native';
 import Button from '@components/common/Button';
 import { COLORS, SIZES } from '@constants';
+import { useAppDispatch, useAppSelector } from '@store/store';
+import { loginThunk } from '@store/thunks/authThunks';
 
 const Container = styled.View`
   flex: 1;
@@ -48,19 +50,20 @@ const LinkText = styled.Text`
 const LoginScreen: React.FC<any> = ({ navigation }) => {
   const [username, setUsername] = useState('');
   const [password, setPassword] = useState('');
-  const [loading, setLoading] = useState(false);
+  const dispatch = useAppDispatch();
+  const loading = useAppSelector((s) => s.auth.loading);
 
   const onLogin = async () => {
     if (!username || !password) {
       Alert.alert('Thiếu thông tin', 'Vui lòng nhập đầy đủ tài khoản và mật khẩu');
       return;
     }
-    setLoading(true);
-    // UI only – logic sẽ được thêm ở các nhánh kế tiếp
-    setTimeout(() => {
-      setLoading(false);
-      Alert.alert('Thông báo', 'Đăng nhập UI hoạt động');
-    }, 600);
+    try {
+      await dispatch(loginThunk({ username, password } as any)).unwrap();
+      // RootNavigator sẽ điều hướng theo role
+    } catch (e: any) {
+      Alert.alert('Đăng nhập thất bại', e?.message || 'Vui lòng kiểm tra thông tin');
+    }
   };
 
   return (
