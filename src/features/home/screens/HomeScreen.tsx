@@ -14,13 +14,13 @@ const Screen = styled.ScrollView`
 
 const Header = styled.View`
   background-color: #ef4444;
-  padding: 44px 20px 16px 20px;
+  padding: 44px 16px 12px 16px;
 `;
 
 const SearchContainer = styled.View`
   background-color: #ffffff;
   border-radius: 8px;
-  padding: 8px 12px;
+  padding: 6px 12px;
   flex-direction: row;
   align-items: center;
 `;
@@ -119,18 +119,21 @@ const DishCard = styled.TouchableOpacity`
   margin-right: 12px;
   background-color: #ffffff;
   border-radius: 12px;
-  overflow: hidden;
+  overflow: visible;
   shadow-color: #000;
   shadow-offset: 0px 2px;
   shadow-opacity: 0.1;
-  shadow-radius: 4px;
+  shadow-radius: 8px;
   elevation: 3;
+  margin-bottom: 8px;
 `;
 
 const DishImage = styled.Image`
   width: 100%;
   height: 120px;
   resize-mode: cover;
+  border-top-left-radius: 12px;
+  border-top-right-radius: 12px;
 `;
 
 const DishInfo = styled.View`
@@ -162,12 +165,13 @@ const DishGridCard = styled.TouchableOpacity`
   margin: 6px;
   background-color: #ffffff;
   border-radius: 12px;
-  overflow: hidden;
+  overflow: visible;
   shadow-color: #000;
   shadow-offset: 0px 2px;
   shadow-opacity: 0.1;
-  shadow-radius: 4px;
+  shadow-radius: 8px;
   elevation: 3;
+  margin-bottom: 12px;
 `;
 
 const HomeScreen = () => {
