@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
 import { Alert, KeyboardAvoidingView, Platform } from 'react-native';
-import { SafeAreaView, useSafeAreaInsets } from 'react-native-safe-area-context';
+import { SafeAreaView } from 'react-native-safe-area-context';
 import styled from 'styled-components/native';
 import Button from '@components/common/Button';
 import { COLORS, SIZES } from '@constants';
@@ -13,9 +13,16 @@ const Container = styled.View`
   justify-content: center;
 `;
 
-const Inner = styled.View`
-  padding: 24px;
+const Center = styled.View`
+  flex: 1;
   justify-content: center;
+  align-items: center;
+  padding: 24px;
+`;
+
+const Form = styled.View`
+  width: 100%;
+  max-width: 420px;
 `;
 
 const Title = styled.Text`
@@ -57,7 +64,7 @@ const LoginScreen: React.FC<any> = ({ navigation }) => {
   const [password, setPassword] = useState('');
   const dispatch = useAppDispatch();
   const loading = useAppSelector((s) => s.auth.loading);
-  const insets = useSafeAreaInsets();
+  
 
   const onLogin = async () => {
     if (!username || !password) {
@@ -75,9 +82,10 @@ const LoginScreen: React.FC<any> = ({ navigation }) => {
   return (
     <SafeAreaView style={{ flex: 1 }}>
       <KeyboardAvoidingView behavior={Platform.OS === 'ios' ? 'padding' : undefined} style={{ flex: 1 }}>
-        <Inner style={{ paddingTop: Math.max(insets.top, 16) }}>
-          <Title>Chào mừng trở lại 👋</Title>
-          <Subtitle>Đăng nhập để tiếp tục với Bambi Kitchen</Subtitle>
+        <Center>
+          <Form>
+            <Title>Chào mừng trở lại 👋</Title>
+            <Subtitle>Đăng nhập để tiếp tục với Bambi Kitchen</Subtitle>
 
       <Input
         placeholder="Email hoặc tên đăng nhập"
@@ -95,13 +103,14 @@ const LoginScreen: React.FC<any> = ({ navigation }) => {
         returnKeyType="done"
       />
 
-          <Button title="Đăng nhập" onPress={onLogin} loading={loading} fullWidth />
+            <Button title="Đăng nhập" onPress={onLogin} loading={loading} fullWidth />
 
-          <Row>
-            <LinkText onPress={() => navigation.navigate('ForgotPassword')}>Quên mật khẩu?</LinkText>
-            <LinkText onPress={() => navigation.navigate('Register')}>Tạo tài khoản</LinkText>
-          </Row>
-        </Inner>
+            <Row>
+              <LinkText onPress={() => navigation.navigate('ForgotPassword')}>Quên mật khẩu?</LinkText>
+              <LinkText onPress={() => navigation.navigate('Register')}>Tạo tài khoản</LinkText>
+            </Row>
+          </Form>
+        </Center>
       </KeyboardAvoidingView>
     </SafeAreaView>
   );
