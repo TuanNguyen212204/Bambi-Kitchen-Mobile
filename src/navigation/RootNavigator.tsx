@@ -19,16 +19,22 @@ const RootNavigator = () => {
     dispatch(loadSessionThunk());
   }, [dispatch]);
 
-  // Navigate after login based on user role (remove timeout for smoother transition)
+  // Navigate after login based on user role (only navigate once when auth state changes)
   useEffect(() => {
     if (!token || !user) return;
     
-    if (user.role === 'ADMIN') {
-      navigation.navigate('Dashboard');
-    } else {
-      navigation.navigate('MainTabs');
+    // Only navigate if we're not already on the correct screen
+    const currentRoute = navigation.getState()?.routes[navigation.getState()?.index || 0]?.name;
+    const targetRoute = user.role === 'ADMIN' ? 'Dashboard' : 'MainTabs';
+    
+    if (currentRoute !== targetRoute) {
+      if (user.role === 'ADMIN') {
+        navigation.navigate('Dashboard');
+      } else {
+        navigation.navigate('MainTabs');
+      }
     }
-  }, [token, user, navigation]);
+  }, [token, user?.role]); // Remove 'navigation' from dependencies to prevent infinite loop
 
   const initial = useMemo(() => {
     if (!token) return 'Login' as keyof RootStackParamList;
