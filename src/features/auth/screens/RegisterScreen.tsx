@@ -3,6 +3,7 @@ import { Alert } from 'react-native';
 import styled from 'styled-components/native';
 import Button from '@components/common/Button';
 import { COLORS, SIZES } from '@constants';
+import { authService } from '@services/api/authService';
 
 const Container = styled.View`
   flex: 1;
@@ -45,11 +46,15 @@ const RegisterScreen: React.FC<any> = ({ navigation }) => {
       return;
     }
     setLoading(true);
-    setTimeout(() => {
-      setLoading(false);
-      Alert.alert('Thông báo', 'Đăng ký UI hoạt động');
+    try {
+      await authService.register({ name, mail: email, password, role: 'USER' });
+      Alert.alert('Thành công', 'Đăng ký thành công. Vui lòng đăng nhập.');
       navigation.navigate('Login');
-    }, 600);
+    } catch (e: any) {
+      Alert.alert('Lỗi', e?.message || 'Không thể đăng ký');
+    } finally {
+      setLoading(false);
+    }
   };
 
   return (
