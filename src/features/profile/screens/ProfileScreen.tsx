@@ -1,7 +1,18 @@
 import React from 'react';
-import { View, Text, StyleSheet, ScrollView, Image } from 'react-native';
+import { View, Text, StyleSheet, ScrollView, Image, TouchableOpacity } from 'react-native';
+import { useAppDispatch, useAppSelector } from '@store/store';
+import { logoutThunk } from '@store/thunks/authThunks';
+import { useNavigation } from '@react-navigation/native';
 
 const ProfileScreen = () => {
+  const dispatch = useAppDispatch();
+  const user = useAppSelector((s) => s.auth.user);
+  const navigation = useNavigation<any>();
+
+  const onLogout = async () => {
+    await dispatch(logoutThunk());
+    navigation.reset({ index: 0, routes: [{ name: 'Login' }] });
+  };
   return (
     <ScrollView style={styles.container}>
       <View style={styles.content}>
@@ -9,28 +20,31 @@ const ProfileScreen = () => {
           <View style={styles.avatarContainer}>
             <Text style={styles.avatarText}>👤</Text>
           </View>
-          <Text style={styles.name}>Tên người dùng</Text>
-          <Text style={styles.email}>user@example.com</Text>
+          <Text style={styles.name}>{user?.name || 'Người dùng'}</Text>
+          <Text style={styles.email}>{user?.mail || '—'}</Text>
         </View>
 
         <View style={styles.section}>
-          <Text style={styles.sectionTitle}>Thông tin nhóm</Text>
+          <Text style={styles.sectionTitle}>Tài khoản</Text>
           <View style={styles.card}>
-            <InfoRow label="Tên nhóm" value="Group [Số nhóm]" />
-            <InfoRow label="Môn học" value="MMA301" />
-            <InfoRow label="Trường" value="FPT University HCM" />
-            <InfoRow label="Thành viên" value="3 người" />
+            <InfoRow label="Họ tên" value={user?.name || '—'} />
+            <InfoRow label="Email" value={user?.mail || '—'} />
+            <InfoRow label="Vai trò" value={String(user?.role || 'USER')} />
           </View>
         </View>
 
         <View style={styles.section}>
-          <Text style={styles.sectionTitle}>Vai trò trong nhóm</Text>
+          <Text style={styles.sectionTitle}>Thiết lập</Text>
           <View style={styles.card}>
-            <Text style={styles.roleText}>
-              • Thành viên 1: UI/UX Developer{'\n'}
-              • Thành viên 2: API Integration{'\n'}
-              • Thành viên 3: State Management & Testing
-            </Text>
+            <TouchableOpacity style={styles.actionBtn}>
+              <Text style={styles.actionText}>Chỉnh sửa thông tin</Text>
+            </TouchableOpacity>
+            <TouchableOpacity style={styles.actionBtn}>
+              <Text style={styles.actionText}>Đổi mật khẩu</Text>
+            </TouchableOpacity>
+            <TouchableOpacity style={[styles.actionBtn, { backgroundColor: '#E53935' }]} onPress={onLogout}>
+              <Text style={[styles.actionText, { color: '#fff' }]}>Đăng xuất</Text>
+            </TouchableOpacity>
           </View>
         </View>
       </View>
@@ -126,6 +140,17 @@ const styles = StyleSheet.create({
     fontSize: 14,
     color: '#666',
     lineHeight: 24,
+  },
+  actionBtn: {
+    backgroundColor: '#f3f4f6',
+    paddingVertical: 12,
+    borderRadius: 10,
+    alignItems: 'center',
+    marginBottom: 10,
+  },
+  actionText: {
+    fontWeight: '600',
+    color: '#111827',
   },
 });
 

@@ -31,8 +31,8 @@ const MainTabNavigator = () => {
         name="Profile"
         component={ProfileScreen}
         options={{
-          title: 'Hồ sơ',
-          tabBarLabel: 'Hồ sơ',
+          title: 'Tôi',
+          tabBarLabel: 'Tôi',
           tabBarIcon: ({ color, size }) => (
             <Ionicons name="person" size={size} color={color} />
           ),
