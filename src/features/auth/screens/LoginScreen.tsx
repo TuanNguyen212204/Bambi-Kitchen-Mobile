@@ -1,24 +1,24 @@
 import React, { useState } from 'react';
 import { Alert, KeyboardAvoidingView, Platform } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
-import { Image, ImageBackground, Dimensions, StatusBar } from 'react-native';
+import { Image, ImageBackground, Dimensions, StatusBar, View } from 'react-native';
 import styled from 'styled-components/native';
 import Button from '@components/common/Button';
 import { COLORS, SIZES } from '@constants';
 import { useAppDispatch, useAppSelector } from '@store/store';
 import { loginThunk } from '@store/thunks/authThunks';
 
-const Container = styled.View`
+const Container = styled(View)`
   flex: 1;
   background-color: #ffffff;
   justify-content: center;
 `;
 
-const Center = styled.View`
+const Center = styled(View)`
   flex: 1;
 `;
 
-const Sheet = styled.View`
+const Sheet = styled(View)`
   position: absolute;
   left: 0;
   right: 0;
@@ -70,7 +70,7 @@ const Input = styled.TextInput`
   font-size: 16px;
 `;
 
-const Row = styled.View`
+const Row = styled(View)`
   margin-top: 12px;
   flex-direction: row;
   justify-content: space-between;
