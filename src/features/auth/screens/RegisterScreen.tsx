@@ -23,9 +23,9 @@ const Sheet = styled.View`
   right: 0;
   bottom: 0;
   background-color: #fff;
-  border-top-left-radius: 28px;
-  border-top-right-radius: 28px;
-  padding: 24px;
+  border-top-left-radius: 36px;
+  border-top-right-radius: 36px;
+  padding: 32px 24px 24px 24px;
   shadow-color: #000;
   shadow-opacity: 0.12;
   shadow-radius: 12px;
@@ -60,8 +60,8 @@ const Input = styled.TextInput`
   width: 100%;
   border-width: 1px;
   border-color: ${COLORS.border};
-  border-radius: ${SIZES.radiusSM}px;
-  padding: 12px 14px;
+  border-radius: 24px;
+  padding: 14px 16px;
   margin-bottom: 12px;
   font-size: 16px;
 `;
@@ -125,7 +125,7 @@ const RegisterScreen: React.FC<any> = ({ navigation }) => {
             secureTextEntry
           />
 
-          <Button title="Đăng ký" onPress={onRegister} loading={loading} fullWidth />
+          <Button title="Đăng ký" onPress={onRegister} loading={loading} fullWidth style={{ borderRadius: 24 }} />
           <Button
             title="Đã có tài khoản? Đăng nhập"
             variant="outline"

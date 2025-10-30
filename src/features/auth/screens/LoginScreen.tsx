@@ -1,7 +1,7 @@
 import React, { useState } from 'react';
 import { Alert, KeyboardAvoidingView, Platform } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
-import { Image, ImageBackground } from 'react-native';
+import { Image, ImageBackground, Dimensions, StatusBar } from 'react-native';
 import styled from 'styled-components/native';
 import Button from '@components/common/Button';
 import { COLORS, SIZES } from '@constants';
@@ -24,9 +24,9 @@ const Sheet = styled.View`
   right: 0;
   bottom: 0;
   background-color: #fff;
-  border-top-left-radius: 28px;
-  border-top-right-radius: 28px;
-  padding: 24px;
+  border-top-left-radius: 36px;
+  border-top-right-radius: 36px;
+  padding: 32px 24px 24px 24px;
   shadow-color: #000;
   shadow-opacity: 0.12;
   shadow-radius: 12px;
@@ -34,8 +34,11 @@ const Sheet = styled.View`
 `;
 
 const Banner = styled(ImageBackground)`
-  height: 180px;
-  width: 100%;
+  position: absolute;
+  top: 0px;
+  left: 0;
+  right: 0;
+  height: ${Dimensions.get('window').height * 0.5}px;
 ` as any;
 
 const Logo = styled(Image)`
@@ -45,7 +48,7 @@ const Logo = styled(Image)`
 `;
 
 const Title = styled.Text`
-  font-size: 28px;
+  font-size: 26px;
   font-weight: 700;
   color: ${COLORS.textPrimary};
   margin-bottom: 8px;
@@ -61,8 +64,8 @@ const Input = styled.TextInput`
   width: 100%;
   border-width: 1px;
   border-color: ${COLORS.border};
-  border-radius: ${SIZES.radiusSM}px;
-  padding: 12px 14px;
+  border-radius: 24px;
+  padding: 14px 16px;
   margin-bottom: 12px;
   font-size: 16px;
 `;
@@ -100,6 +103,7 @@ const LoginScreen: React.FC<any> = ({ navigation }) => {
 
   return (
     <SafeAreaView style={{ flex: 1 }}>
+      <StatusBar translucent backgroundColor="transparent" barStyle="light-content" />
       <KeyboardAvoidingView behavior={Platform.OS === 'ios' ? 'padding' : undefined} style={{ flex: 1 }}>
         <Center>
           <Banner source={require('../../../../assets/LoginPage/loginPage1.png')} resizeMode="cover" />
@@ -124,12 +128,24 @@ const LoginScreen: React.FC<any> = ({ navigation }) => {
         returnKeyType="done"
       />
 
-            <Button title="Đăng nhập" onPress={onLogin} loading={loading} fullWidth />
+            <Button title="Đăng nhập" onPress={onLogin} loading={loading} fullWidth style={{ borderRadius: 24 }} />
 
             <Row>
               <LinkText onPress={() => navigation.navigate('ForgotPassword')}>Quên mật khẩu?</LinkText>
               <LinkText onPress={() => navigation.navigate('Register')}>Tạo tài khoản</LinkText>
             </Row>
+
+            <View style={{ alignItems: 'center', marginTop: 16 }}>
+              <Text style={{ color: '#9CA3AF' }}>Hoặc tiếp tục với</Text>
+            </View>
+            <View style={{ flexDirection: 'row', gap: 12, marginTop: 12 }}>
+              <View style={{ flex: 1, borderWidth: 1, borderColor: '#E5E7EB', borderRadius: 16, paddingVertical: 12, alignItems: 'center' }}>
+                <Text>Apple</Text>
+              </View>
+              <View style={{ flex: 1, borderWidth: 1, borderColor: '#E5E7EB', borderRadius: 16, paddingVertical: 12, alignItems: 'center' }}>
+                <Text>Google</Text>
+              </View>
+            </View>
           </Sheet>
         </Center>
       </KeyboardAvoidingView>
