@@ -1,10 +1,9 @@
-import React, { useEffect, useMemo, useRef } from 'react';
+import React, { useEffect, useMemo } from 'react';
 import { createNativeStackNavigator } from '@react-navigation/native-stack';
 import { useNavigation } from '@react-navigation/native';
 import MainTabNavigator from './MainTabNavigator';
 import { RootStackParamList } from '@types/navigation';
 import { LoginScreen, RegisterScreen, ForgotPasswordScreen, OTPScreen, ResetPasswordScreen } from '@features/auth/screens';
-import DashboardScreen from '@features/admin/screens/DashboardScreen';
 import { useAppDispatch, useAppSelector } from '@store/store';
 import { loadSessionThunk } from '@store/thunks/authThunks';
 
@@ -21,22 +20,16 @@ const RootNavigator = () => {
 
   useEffect(() => {
     if (!token || !user) return;
-    
+
     const currentRoute = navigation.getState()?.routes[navigation.getState()?.index || 0]?.name;
-    const targetRoute = user.role === 'ADMIN' ? 'Dashboard' : 'MainTabs';
-    
-    if (currentRoute !== targetRoute) {
-      if (user.role === 'ADMIN') {
-        navigation.navigate('Dashboard');
-      } else {
-        navigation.navigate('MainTabs');
-      }
+
+    if (currentRoute !== 'MainTabs') {
+      navigation.navigate('MainTabs');
     }
   }, [token, user?.role]);
 
   const initial = useMemo(() => {
     if (!token) return 'Login' as keyof RootStackParamList;
-    if (user?.role === 'ADMIN') return 'Dashboard' as any;
     return 'MainTabs' as keyof RootStackParamList;
   }, [token, user]);
 
@@ -54,11 +47,6 @@ const RootNavigator = () => {
           <Stack.Screen name="ForgotPassword" component={ForgotPasswordScreen} />
           <Stack.Screen name="OTP" component={OTPScreen} />
           <Stack.Screen name="ResetPassword" component={ResetPasswordScreen} />
-        </>
-      ) : user?.role === 'ADMIN' ? (
-        <>
-          <Stack.Screen name="Dashboard" component={DashboardScreen as any} />
-          <Stack.Screen name="MainTabs" component={MainTabNavigator} />
         </>
       ) : (
         <>
