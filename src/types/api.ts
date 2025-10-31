@@ -47,3 +47,45 @@ export interface Order {
   items: OrderItem[];
 }
 
+// Ingredient management
+export type IngredientUnit = 'GRAM' | 'KILOGRAM' | 'LITER' | 'PCS';
+
+export interface IngredientCategory {
+  id: number;
+  name: string;
+  description?: string;
+  priority?: number;
+}
+
+export interface IngredientDTO {
+  id: number;
+  name: string;
+  category?: { id: number; name: string } | string | null;
+  unit: IngredientUnit | string;
+  active?: boolean;
+  imgUrl?: string | null;
+  quantity?: number | string | null;
+  available?: number | string | null;
+  reserve?: number | string | null;
+  pricePerUnit?: number | string | null;
+}
+
+export interface Ingredient extends Omit<IngredientDTO, 'quantity' | 'available' | 'reserve' | 'unit' | 'category' | 'pricePerUnit'> {
+  unit: IngredientUnit;
+  category?: { id: number; name: string } | null;
+  quantity?: number | null;
+  available?: number | null;
+  reserve?: number | null;
+  pricePerUnit?: number | null;
+  stock: number;
+  stockStatus: 'out' | 'low' | 'normal';
+}
+
+export interface InventoryTransaction {
+  id: number;
+  ingredient: { id: number } | Ingredient;
+  quantity: number;
+  transactionType: boolean; // true: in, false: out
+  createdAt?: string;
+}
+

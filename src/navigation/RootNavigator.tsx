@@ -1,10 +1,9 @@
-import React, { useEffect, useMemo, useRef } from 'react';
+import React, { useEffect, useMemo } from 'react';
 import { createNativeStackNavigator } from '@react-navigation/native-stack';
 import { useNavigation } from '@react-navigation/native';
 import MainTabNavigator from './MainTabNavigator';
 import { RootStackParamList } from '@types/navigation';
 import { LoginScreen, RegisterScreen, ForgotPasswordScreen, OTPScreen, ResetPasswordScreen } from '@features/auth/screens';
-import DashboardScreen from '@features/admin/screens/DashboardScreen';
 import { useAppDispatch, useAppSelector } from '@store/store';
 import { loadSessionThunk } from '@store/thunks/authThunks';
 
@@ -23,21 +22,14 @@ const RootNavigator = () => {
     if (!token || !user) return;
 
     const currentRoute = navigation.getState()?.routes[navigation.getState()?.index || 0]?.name;
-    const isStaffRole = user.role === 'ADMIN' || user.role === 'STAFF';
-    const targetRoute = isStaffRole ? 'Dashboard' : 'MainTabs';
 
-    if (currentRoute !== targetRoute) {
-      if (isStaffRole) {
-        navigation.navigate('Dashboard');
-      } else {
-        navigation.navigate('MainTabs');
-      }
+    if (currentRoute !== 'MainTabs') {
+      navigation.navigate('MainTabs');
     }
   }, [token, user?.role]);
 
   const initial = useMemo(() => {
     if (!token) return 'Login' as keyof RootStackParamList;
-    if (user?.role === 'ADMIN' || user?.role === 'STAFF') return 'Dashboard' as any;
     return 'MainTabs' as keyof RootStackParamList;
   }, [token, user]);
 
@@ -55,11 +47,6 @@ const RootNavigator = () => {
           <Stack.Screen name="ForgotPassword" component={ForgotPasswordScreen} />
           <Stack.Screen name="OTP" component={OTPScreen} />
           <Stack.Screen name="ResetPassword" component={ResetPasswordScreen} />
-        </>
-      ) : (user?.role === 'ADMIN' || user?.role === 'STAFF') ? (
-        <>
-          <Stack.Screen name="Dashboard" component={DashboardScreen as any} />
-          <Stack.Screen name="MainTabs" component={MainTabNavigator} />
         </>
       ) : (
         <>

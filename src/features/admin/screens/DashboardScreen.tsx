@@ -1,5 +1,6 @@
 import React, { useCallback, useState } from 'react';
-import { View, Text, FlatList, RefreshControl } from 'react-native';
+import { View, Text, FlatList, RefreshControl, StatusBar } from 'react-native';
+import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import styled from 'styled-components/native';
 import { useAppSelector } from '@store/store';
 import { useFocusEffect } from '@react-navigation/native';
@@ -12,7 +13,8 @@ const Container = styled.View`
 
 const Header = styled.View`
   background-color: #ffffff;
-  padding: 20px;
+  padding-horizontal: 20px;
+  padding-bottom: 20px;
   border-bottom-width: 1px;
   border-bottom-color: #e5e7eb;
 `;
@@ -205,18 +207,21 @@ const OrderList = () => {
 
 const DashboardScreen = () => {
   const user = useAppSelector((s) => s.auth.user);
-
+  const insets = useSafeAreaInsets();
 
   return (
-    <Container>
-      <Header>
-        <HeaderTitle>Staff Dashboard</HeaderTitle>
-        <HeaderSubtitle>Chào mừng, {user?.name || 'Staff'}</HeaderSubtitle>
-      </Header>
-      <Content>
-        <OrderList />
-      </Content>
-    </Container>
+    <>
+      <StatusBar translucent backgroundColor="transparent" barStyle="dark-content" />
+      <Container>
+        <Header style={{ paddingTop: insets.top + 20 }}>
+          <HeaderTitle>Admin</HeaderTitle>
+          <HeaderSubtitle>Chào mừng, {user?.name || 'Staff'}</HeaderSubtitle>
+        </Header>
+        <Content>
+          <OrderList />
+        </Content>
+      </Container>
+    </>
   );
 };
 
