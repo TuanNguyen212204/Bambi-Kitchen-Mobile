@@ -3,7 +3,7 @@ import { View, Text, TouchableOpacity, StyleSheet, ActivityIndicator, Alert } fr
 import { useRoute, useNavigation } from '@react-navigation/native';
 import { useAppDispatch } from '@/store/store';
 import { saveOrderThunk } from '@/store/thunks/orderThunks';
-import { clearCart } from '../store/slices/cartSlice.js';
+import { clearCart } from '../store/slices/cartSlice';
 import { Order, OrderItem } from '@/types/api';
 
 export default function VNPayMockScreen() {

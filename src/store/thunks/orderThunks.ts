@@ -1,12 +1,12 @@
 import { createAsyncThunk } from '@reduxjs/toolkit';
 import AsyncStorage from '@react-native-async-storage/async-storage';
-import { Order } from '@/types/api.js';
+import { Order } from '@/types/api';
 import {
     fetchOrdersStart,
     fetchOrdersSuccess,
     fetchOrdersFailure,
     addOrder,
-} from '../slices/orderSlice.js';
+} from '../slices/orderSlice';
 
 const ORDER_KEY = '@orders';
 
