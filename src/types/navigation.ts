@@ -4,6 +4,7 @@ export type MainTabParamList = {
   Home: undefined;
   Cart: NavigatorScreenParams<CartStackParamList>;
   Orders: undefined;
+  Dashboard: undefined;
   Profile: undefined;
 };
 

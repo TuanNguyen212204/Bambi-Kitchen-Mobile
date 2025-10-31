@@ -22,6 +22,7 @@ Dự án này được phát triển bởi nhóm 3 thành viên cho môn MMA301 
 - **Thành viên 1**: [DucTrung0704] - UI/UX Development & Components
 - **Thành viên 2**: [TuanNguyen212204] - API Integration & Services  
 - **Thành viên 3**: [hungdo2003] - State Management & Testing
+- **Thành viên 4**: [TriNguyen30] - Code 
 
 ## 🚀 Công nghệ sử dụng
 
