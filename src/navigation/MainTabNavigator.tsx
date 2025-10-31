@@ -2,12 +2,16 @@ import React from 'react';
 import { createBottomTabNavigator } from '@react-navigation/bottom-tabs';
 import { Ionicons } from '@expo/vector-icons';
 import HomeScreen from '@features/home/screens/HomeScreen';
+import AdminNavigator from '@features/admin/AdminNavigator';
 import ProfileScreen from '@features/profile/screens/ProfileScreen';
-import { MainTabParamList } from '@types/navigation';
+// type import removed to avoid lint issue with alias
+import { useAppSelector } from '@store/store';
 
-const Tab = createBottomTabNavigator<MainTabParamList>();
+const Tab = createBottomTabNavigator();
 
 const MainTabNavigator = () => {
+  const role = useAppSelector((s) => s.auth.user?.role);
+  const isAdmin = role === 'ADMIN' || role === 'STAFF';
   return (
     <Tab.Navigator
       screenOptions={{
@@ -27,6 +31,21 @@ const MainTabNavigator = () => {
           ),
         }}
       />
+      {isAdmin && (
+        <Tab.Screen
+          name="Admin"
+          component={AdminNavigator as any}
+          options={{
+            title: 'Admin',
+            tabBarLabel: 'Admin',
+            headerShown: false,
+            tabBarIcon: ({ color, size }) => (
+              <Ionicons name="speedometer" size={size} color={color} />
+            ),
+          }}
+        />
+      )}
+      
       <Tab.Screen
         name="Profile"
         component={ProfileScreen}

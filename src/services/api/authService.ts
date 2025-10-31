@@ -1,4 +1,5 @@
 import apiClient from './apiClient';
+import { storage } from '@utils/storage';
 
 export interface LoginRequest {
   username: string;
@@ -15,7 +16,15 @@ export interface RegisterRequest {
 export const authService = {
   login: async (payload: LoginRequest): Promise<string> => {
     const res = await apiClient.post<string>('/api/user/login', payload);
-    return res.data as unknown as string;
+    const token = res.data as unknown as string;
+    try {
+      await storage.setItem('authToken', token);
+      if (__DEV__) {
+        // eslint-disable-next-line no-console
+        console.log('[AUTH] saved token.len=', token?.length, String(token || '').slice(0, 12));
+      }
+    } catch {}
+    return token;
   },
 
   me: async (): Promise<any> => {
