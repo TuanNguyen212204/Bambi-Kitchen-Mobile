@@ -81,7 +81,7 @@ const MainTabNavigator = () => {
           }}
         />
       )}
-      
+
       <Tab.Screen
         name="Profile"
         component={ProfileScreen}

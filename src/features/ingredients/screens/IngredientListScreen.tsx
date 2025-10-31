@@ -8,7 +8,7 @@ import { toast } from '@utils/toast';
 const IngredientListScreen = () => {
   const dispatch = useAppDispatch();
   const navigation = useNavigation<any>();
-  const { ingredients, categories, loading, filters } = useAppSelector((s) => s.ingredients);
+  const { ingredients, categories, loading, filters } = useAppSelector((s) => s.ingredient);
   const [keyword, setKeyword] = useState(filters.keyword || '');
 
   useEffect(() => {
