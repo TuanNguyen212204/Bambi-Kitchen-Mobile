@@ -25,3 +25,22 @@ export interface Product {
   image?: string;
 }
 
+export type PaymentMethod = "COD" | "VNPAY";
+
+export interface OrderItem {
+  id: number;
+  dishId: number;
+  dishName: string;
+  quantity: number;
+  note?: string;
+}
+
+export interface Order {
+  id: string;
+  items: OrderItem[];
+  totalPrice: number;
+  totalCalories: number;
+  paymentMethod: PaymentMethod;
+  status: 'success' | 'failed' | 'pending';
+  createdAt: string;
+}
