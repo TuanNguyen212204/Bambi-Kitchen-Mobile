@@ -1,10 +1,10 @@
-import React from 'react';
-import { Alert, View, Text, TouchableOpacity, ScrollView } from 'react-native';
+import React, { useCallback, useState } from 'react';
+import { View, Text, FlatList, RefreshControl, StatusBar } from 'react-native';
+import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import styled from 'styled-components/native';
-import { Ionicons } from '@expo/vector-icons';
-import { useAppDispatch, useAppSelector } from '@store/store';
-import { logoutThunk } from '@store/thunks/authThunks';
-import { useNavigation } from '@react-navigation/native';
+import { useAppSelector } from '@store/store';
+import { useFocusEffect } from '@react-navigation/native';
+import { orderService } from '@services/api';
 
 const Container = styled.View`
   flex: 1;
@@ -13,7 +13,8 @@ const Container = styled.View`
 
 const Header = styled.View`
   background-color: #ffffff;
-  padding: 20px;
+  padding-horizontal: 20px;
+  padding-bottom: 20px;
   border-bottom-width: 1px;
   border-bottom-color: #e5e7eb;
 `;
@@ -30,118 +31,197 @@ const HeaderSubtitle = styled.Text`
   margin-top: 4px;
 `;
 
-const Content = styled.ScrollView`
+const Content = styled.View`
   flex: 1;
   padding: 20px;
 `;
 
-const StatCard = styled.View`
+const Card = styled.View`
   background-color: #ffffff;
-  padding: 20px;
+  padding: 16px;
   border-radius: 16px;
-  margin-bottom: 16px;
-  shadow-color: #000;
-  shadow-offset: 0px 2px;
-  shadow-opacity: 0.05;
-  shadow-radius: 8px;
-  elevation: 2;
+  margin-bottom: 12px;
 `;
 
-const StatLabel = styled.Text`
-  font-size: 14px;
-  color: #6b7280;
-  margin-bottom: 8px;
-`;
-
-const StatValue = styled.Text`
-  font-size: 32px;
-  font-weight: 700;
-  color: #ef4444;
-`;
-
-const BottomNav = styled.View`
-  background-color: #ffffff;
-  border-top-width: 1px;
-  border-top-color: #e5e7eb;
-  padding: 12px 20px;
+const Row = styled.View`
   flex-direction: row;
   align-items: center;
+  justify-content: space-between;
 `;
 
-const NavButton = styled.TouchableOpacity`
-  flex: 1;
-  flex-direction: row;
-  align-items: center;
-  justify-content: center;
-  padding: 12px;
-  border-radius: 12px;
-  background-color: #f3f4f6;
-`;
-
-const NavButtonText = styled.Text`
+const Title = styled.Text`
   font-size: 16px;
-  font-weight: 600;
-  color: #111;
-  margin-left: 8px;
+  font-weight: 700;
+  color: #111827;
 `;
 
-const DashboardScreen = () => {
-  const dispatch = useAppDispatch();
-  const user = useAppSelector((s) => s.auth.user);
-  const navigation = useNavigation<any>();
+const Meta = styled.Text`
+  font-size: 12px;
+  color: #6b7280;
+  margin-top: 4px;
+`;
 
-  const handleLogout = () => {
-    Alert.alert('Đăng xuất', 'Bạn có chắc muốn đăng xuất?', [
-      { text: 'Hủy', style: 'cancel' },
-      {
-        text: 'Đăng xuất',
-        onPress: async () => {
-          await dispatch(logoutThunk()).unwrap();
-          navigation.navigate('Login');
-        },
-      },
-    ]);
+const Badge = styled.View`
+  background-color: #f3f4f6;
+  padding: 6px 10px;
+  border-radius: 9999px;
+`;
+
+const BadgeText = styled.Text`
+  font-size: 12px;
+  color: #374151;
+  font-weight: 600;
+`;
+
+const Actions = styled.View`
+  flex-direction: row;
+  margin-top: 12px;
+`;
+
+const ActionBtn = styled.TouchableOpacity`
+  background-color: #111827;
+  padding: 10px 14px;
+  border-radius: 12px;
+  margin-right: 8px;
+`;
+
+const ActionText = styled.Text`
+  color: #fff;
+  font-weight: 600;
+`;
+
+const OrderList = () => {
+  const [orders, setOrders] = useState<any[]>([]);
+  const [loading, setLoading] = useState<boolean>(false);
+  const [refreshing, setRefreshing] = useState<boolean>(false);
+
+  const load = useCallback(async () => {
+    setLoading(true);
+    try {
+      const data = await orderService.getOrders({ status: 'NEW' });
+      setOrders(data as any);
+    } finally {
+      setLoading(false);
+    }
+  }, []);
+
+  useFocusEffect(
+    useCallback(() => {
+      load();
+    }, [load])
+  );
+
+  const onRefresh = useCallback(async () => {
+    setRefreshing(true);
+    await load();
+    setRefreshing(false);
+  }, [load]);
+
+  const assign = async (id: number) => {
+    await orderService.assignOrder(id);
+    await load();
   };
 
-  const handleGoToProfile = () => {
-    navigation.navigate('MainTabs', { screen: 'Profile' });
+  const update = async (id: number, status: any) => {
+    await orderService.updateStatus(id, status);
+    await load();
+  };
+
+  const confirmCOD = async (id: number) => {
+    await orderService.confirmCOD(id);
+    await load();
+  };
+
+  const renderItem = ({ item }: { item: any }) => {
+    const isCOD = (item.paymentMethod || '').toUpperCase() === 'COD';
+    return (
+      <Card>
+        <Row>
+          <View style={{ flex: 1, paddingRight: 8 }}>
+            <Title>{item.code || `Đơn #${item.id}`}</Title>
+            <Meta>
+              {item.customerName || 'Khách lẻ'} • {item.createdAt ? new Date(item.createdAt).toLocaleTimeString() : ''}
+            </Meta>
+          </View>
+          <Badge>
+            <BadgeText>{item.status}</BadgeText>
+          </Badge>
+        </Row>
+        <View style={{ marginTop: 10 }}>
+          {(item.items || []).map((it: any) => (
+            <View key={it.id} style={{ flexDirection: 'row', justifyContent: 'space-between', marginBottom: 6 }}>
+              <Text style={{ color: '#111827', fontWeight: '600' }}>{it.dishName}</Text>
+              <Text style={{ color: '#6b7280' }}>x{it.quantity}</Text>
+            </View>
+          ))}
+        </View>
+        <Actions>
+          {item.status === 'NEW' && (
+            <ActionBtn onPress={() => assign(item.id)}>
+              <ActionText>Nhận đơn</ActionText>
+            </ActionBtn>
+          )}
+          {(item.status === 'ASSIGNED' || item.status === 'NEW') && (
+            <ActionBtn onPress={() => update(item.id, 'PREPARING')}>
+              <ActionText>Bắt đầu nấu</ActionText>
+            </ActionBtn>
+          )}
+          {item.status === 'PREPARING' && (
+            <ActionBtn onPress={() => update(item.id, 'DONE')}>
+              <ActionText>Hoàn tất</ActionText>
+            </ActionBtn>
+          )}
+          {item.status === 'DONE' && isCOD && !item.isPaid && (
+            <ActionBtn onPress={() => confirmCOD(item.id)}>
+              <ActionText>Xác nhận COD</ActionText>
+            </ActionBtn>
+          )}
+        </Actions>
+      </Card>
+    );
   };
 
   return (
-    <Container>
-      <Header>
-        <HeaderTitle>Admin Dashboard</HeaderTitle>
-        <HeaderSubtitle>Chào mừng, {user?.name || 'Admin'}</HeaderSubtitle>
-      </Header>
-      <Content>
-        <StatCard>
-          <StatLabel>Tổng đơn hàng</StatLabel>
-          <StatValue>0</StatValue>
-        </StatCard>
-        <StatCard>
-          <StatLabel>Số người dùng</StatLabel>
-          <StatValue>0</StatValue>
-        </StatCard>
-        <StatCard>
-          <StatLabel>Doanh thu</StatLabel>
-          <StatValue>0 ₫</StatValue>
-        </StatCard>
-        <StatCard>
-          <StatLabel>Món ăn</StatLabel>
-          <StatValue>0</StatValue>
-        </StatCard>
-      </Content>
-      <BottomNav>
-        <NavButton onPress={handleGoToProfile}>
-          <Ionicons name="person-outline" size={24} color="#111" />
-          <NavButtonText>Trang chủ</NavButtonText>
-        </NavButton>
-        <NavButton onPress={handleLogout}>
-          <Ionicons name="log-out-outline" size={24} color="#ef4444" />
-          <NavButtonText style={{ color: '#ef4444' }}>Đăng xuất</NavButtonText>
-        </NavButton>
-      </BottomNav>
-    </Container>
+    <FlatList
+      data={orders}
+      keyExtractor={(it) => String(it.id)}
+      renderItem={renderItem}
+      contentContainerStyle={{ paddingBottom: 24 }}
+      refreshControl={<RefreshControl refreshing={refreshing} onRefresh={onRefresh} />}
+      ListHeaderComponent={() => (
+        <View style={{ marginBottom: 8 }}>
+          <Text style={{ fontSize: 18, fontWeight: '700', color: '#111827' }}>Đơn mới</Text>
+          <Text style={{ fontSize: 12, color: '#6b7280', marginTop: 2 }}>Danh sách đơn hàng chờ xử lý</Text>
+        </View>
+      )}
+      ListEmptyComponent={!loading ? (
+        <Card>
+          <Text style={{ color: '#6b7280' }}>Không có đơn mới</Text>
+        </Card>
+      ) : null}
+    />
+  );
+};
+
+// bottom actions removed; accessible via footbar
+
+const DashboardScreen = () => {
+  const user = useAppSelector((s) => s.auth.user);
+  const insets = useSafeAreaInsets();
+
+  return (
+    <>
+      <StatusBar translucent backgroundColor="transparent" barStyle="dark-content" />
+      <Container>
+        <Header style={{ paddingTop: insets.top + 20 }}>
+          <HeaderTitle>Admin</HeaderTitle>
+          <HeaderSubtitle>Chào mừng, {user?.name || 'Staff'}</HeaderSubtitle>
+        </Header>
+        <Content>
+          <OrderList />
+        </Content>
+      </Container>
+    </>
   );
 };
 
