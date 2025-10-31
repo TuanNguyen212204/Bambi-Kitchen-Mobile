@@ -2,10 +2,11 @@ import React from 'react';
 import { createBottomTabNavigator } from '@react-navigation/bottom-tabs';
 import { Ionicons } from '@expo/vector-icons';
 import HomeScreen from '@features/home/screens/HomeScreen';
+import DashboardScreen from '@features/admin/screens/DashboardScreen';
 import ProfileScreen from '@features/profile/screens/ProfileScreen';
-import { MainTabParamList } from '@types/navigation';
+// type import removed to avoid lint issue with alias
 
-const Tab = createBottomTabNavigator<MainTabParamList>();
+const Tab = createBottomTabNavigator();
 
 const MainTabNavigator = () => {
   return (
@@ -24,6 +25,18 @@ const MainTabNavigator = () => {
           tabBarLabel: 'Trang chủ',
           tabBarIcon: ({ color, size }) => (
             <Ionicons name="home" size={size} color={color} />
+          ),
+        }}
+      />
+      <Tab.Screen
+        name="Dashboard"
+        component={DashboardScreen as any}
+        options={{
+          title: 'Bảng điều khiển',
+          tabBarLabel: 'Bảng điều khiển',
+          headerShown: false,
+          tabBarIcon: ({ color, size }) => (
+            <Ionicons name="speedometer" size={size} color={color} />
           ),
         }}
       />

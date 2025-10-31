@@ -21,12 +21,13 @@ const RootNavigator = () => {
 
   useEffect(() => {
     if (!token || !user) return;
-    
+
     const currentRoute = navigation.getState()?.routes[navigation.getState()?.index || 0]?.name;
-    const targetRoute = user.role === 'ADMIN' ? 'Dashboard' : 'MainTabs';
-    
+    const isStaffRole = user.role === 'ADMIN' || user.role === 'STAFF';
+    const targetRoute = isStaffRole ? 'Dashboard' : 'MainTabs';
+
     if (currentRoute !== targetRoute) {
-      if (user.role === 'ADMIN') {
+      if (isStaffRole) {
         navigation.navigate('Dashboard');
       } else {
         navigation.navigate('MainTabs');
@@ -36,7 +37,7 @@ const RootNavigator = () => {
 
   const initial = useMemo(() => {
     if (!token) return 'Login' as keyof RootStackParamList;
-    if (user?.role === 'ADMIN') return 'Dashboard' as any;
+    if (user?.role === 'ADMIN' || user?.role === 'STAFF') return 'Dashboard' as any;
     return 'MainTabs' as keyof RootStackParamList;
   }, [token, user]);
 
@@ -55,7 +56,7 @@ const RootNavigator = () => {
           <Stack.Screen name="OTP" component={OTPScreen} />
           <Stack.Screen name="ResetPassword" component={ResetPasswordScreen} />
         </>
-      ) : user?.role === 'ADMIN' ? (
+      ) : (user?.role === 'ADMIN' || user?.role === 'STAFF') ? (
         <>
           <Stack.Screen name="Dashboard" component={DashboardScreen as any} />
           <Stack.Screen name="MainTabs" component={MainTabNavigator} />
