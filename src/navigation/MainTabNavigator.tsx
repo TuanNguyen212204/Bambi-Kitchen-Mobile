@@ -39,58 +39,70 @@ const MainTabNavigator = () => {
         tabBarInactiveTintColor: 'gray',
       }}
     >
-      <Tab.Screen
-        name="Home"
-        component={HomeScreen}
-        options={{
-          title: 'Trang chủ',
-          tabBarLabel: 'Trang chủ',
-          tabBarIcon: ({ color, size }) => <Ionicons name="home" size={size} color={color} />,
-        }}
-      />
-      <Tab.Screen
-        name="Cart"
-        component={CartStack}
-        options={{
-          title: 'Giỏ hàng',
-          tabBarLabel: 'Giỏ hàng',
-          tabBarIcon: ({ color, size }) => <Ionicons name="cart" size={size} color={color} />,
-        }}
-      />
-
-      <Tab.Screen
-        name="Orders"
-        component={OrderHistoryScreen}
-        options={{
-          title: 'Đơn hàng',
-          tabBarLabel: 'Đơn hàng',
-          tabBarIcon: ({ color, size }) => <Ionicons name="receipt" size={size} color={color} />,
-        }}
-      />
-      {isAdmin && (
-        <Tab.Screen
-          name="Admin"
-          component={AdminNavigator as any}
-          options={{
-            title: 'Admin',
-            tabBarLabel: 'Admin',
-            headerShown: false,
-            tabBarIcon: ({ color, size }) => (
-              <Ionicons name="speedometer" size={size} color={color} />
-            ),
-          }}
-        />
+      {isAdmin ? (
+        <>
+          <Tab.Screen
+            name="Admin"
+            component={AdminNavigator as any}
+            options={{
+              title: 'Admin',
+              tabBarLabel: 'Admin',
+              headerShown: false,
+              tabBarIcon: ({ color, size }) => (
+                <Ionicons name="speedometer" size={size} color={color} />
+              ),
+            }}
+          />
+          <Tab.Screen
+            name="Profile"
+            component={ProfileScreen}
+            options={{
+              title: 'Tôi',
+              tabBarLabel: 'Tôi',
+              tabBarIcon: ({ color, size }) => <Ionicons name="person" size={size} color={color} />,
+            }}
+          />
+        </>
+      ) : (
+        <>
+          <Tab.Screen
+            name="Home"
+            component={HomeScreen}
+            options={{
+              title: 'Trang chủ',
+              tabBarLabel: 'Trang chủ',
+              tabBarIcon: ({ color, size }) => <Ionicons name="home" size={size} color={color} />,
+            }}
+          />
+          <Tab.Screen
+            name="Cart"
+            component={CartStack}
+            options={{
+              title: 'Giỏ hàng',
+              tabBarLabel: 'Giỏ hàng',
+              tabBarIcon: ({ color, size }) => <Ionicons name="cart" size={size} color={color} />,
+            }}
+          />
+          <Tab.Screen
+            name="Orders"
+            component={OrderHistoryScreen}
+            options={{
+              title: 'Đơn hàng',
+              tabBarLabel: 'Đơn hàng',
+              tabBarIcon: ({ color, size }) => <Ionicons name="receipt" size={size} color={color} />,
+            }}
+          />
+          <Tab.Screen
+            name="Profile"
+            component={ProfileScreen}
+            options={{
+              title: 'Tôi',
+              tabBarLabel: 'Tôi',
+              tabBarIcon: ({ color, size }) => <Ionicons name="person" size={size} color={color} />,
+            }}
+          />
+        </>
       )}
-
-      <Tab.Screen
-        name="Profile"
-        component={ProfileScreen}
-        options={{
-          title: 'Tôi',
-          tabBarLabel: 'Tôi',
-          tabBarIcon: ({ color, size }) => <Ionicons name="person" size={size} color={color} />,
-        }}
-      />
     </Tab.Navigator>
   );
 };

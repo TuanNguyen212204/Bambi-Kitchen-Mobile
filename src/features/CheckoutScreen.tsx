@@ -1,10 +1,10 @@
 import React, { useState } from 'react';
 import { useNavigation } from '@react-navigation/native';
-import { View, Text, TouchableOpacity, ScrollView, Alert, StyleSheet } from 'react-native';
+import { View, Text, TouchableOpacity, ScrollView, Alert, StyleSheet, ActivityIndicator } from 'react-native';
 import { useAppDispatch, useAppSelector } from '@/store/store';
-import { saveOrderThunk } from '@/store/thunks/orderThunks';
 import { clearCart } from '@/store/slices/cartSlice';
-import { OrderItem, Order } from '@/types/api';
+import { OrderItem, OrderItemDTO, MakeOrderRequest } from '@/types/api';
+import orderService from '@/services/api/orderService';
 
 const DISH_PRICES: Record<number, { price: number; calories: number }> = {
   101: { price: 85000, calories: 680 },
@@ -12,10 +12,12 @@ const DISH_PRICES: Record<number, { price: number; calories: number }> = {
 };
 
 export default function CheckoutScreen() {
-  const naviagtion = useNavigation<any>();
+  const navigation = useNavigation<any>();
   const dispatch = useAppDispatch();
   const cartItems = useAppSelector((state) => state.cart.items);
-  const [paymentMethod, setPaymentMethod] = useState<'COD' | 'VNPAY'>('COD');
+  const user = useAppSelector((state) => state.auth.user);
+  const [paymentMethod, setPaymentMethod] = useState<'COD' | 'VNPAY' | 'MOMO'>('COD');
+  const [loading, setLoading] = useState(false);
 
   const totalPrice = cartItems.reduce((sum, item) => {
     const info = DISH_PRICES[item.dishId] || { price: 0 };
@@ -27,34 +29,76 @@ export default function CheckoutScreen() {
     return sum + info.calories * item.quantity;
   }, 0);
 
+  // Convert OrderItem to OrderItemDTO
+  const convertToOrderItemDTO = (item: OrderItem): OrderItemDTO => {
+    return {
+      dishId: item.dishId,
+      name: item.dishName,
+      quantity: item.quantity,
+      note: item.note,
+      // basedOnId, dishTemplate, recipe có thể thêm sau khi có thông tin từ API
+    };
+  };
+
   const handleCheckout = async () => {
     if (cartItems.length === 0) {
       Alert.alert('Giỏ hàng trống', 'Vui lòng thêm món vào giỏ hàng trước khi thanh toán.');
       return;
     }
-    if (paymentMethod === 'COD') {
-      const order: Omit<Order, 'id'> = {
-        items: cartItems,
+
+    if (!user?.id) {
+      Alert.alert('Lỗi', 'Vui lòng đăng nhập để đặt hàng.');
+      return;
+    }
+
+    setLoading(true);
+    try {
+      const orderItems: OrderItemDTO[] = cartItems.map(convertToOrderItemDTO);
+      
+      const orderRequest: MakeOrderRequest = {
+        accountId: user.id,
+        paymentMethod: paymentMethod === 'COD' ? 'COD' : paymentMethod === 'VNPAY' ? 'VNPAY' : 'MOMO',
         totalPrice,
-        totalCalories,
-        paymentMethod,
-        status: 'pending' as const,
-        createdAt: new Date().toISOString(),
+        items: orderItems,
       };
-      try {
-        await dispatch(saveOrderThunk(order)).unwrap();
+
+      const result = await orderService.createOrder(orderRequest);
+
+      if (paymentMethod === 'COD') {
+        // COD - thanh toán khi nhận hàng
         dispatch(clearCart());
-        naviagtion.replace('PaymentResult', { success: true, message: 'Đặt hàng thành công!' });
-      } catch {
-        Alert.alert('Lỗi', 'Đặt hàng thất bại. Vui lòng thử lại.');
+        navigation.replace('PaymentResult', { 
+          success: true, 
+          message: 'Đặt hàng thành công! Vui lòng thanh toán khi nhận hàng.' 
+        });
+      } else {
+        // Online payment - redirect to payment gateway
+        // result có thể là URL payment hoặc order ID
+        if (result && typeof result === 'string') {
+          // Nếu có URL, mở browser để thanh toán
+          // Hoặc navigate đến payment screen
+          navigation.navigate('VNPayMock', {
+            amount: totalPrice,
+            orderInfo: cartItems.map((item) => `${item.dishName} x${item.quantity}`).join(', '),
+            paymentUrl: result,
+            paymentMethod,
+            cartItems,
+            totalCalories,
+          });
+        } else {
+          // Fallback - giả sử đã thanh toán thành công
+          dispatch(clearCart());
+          navigation.replace('PaymentResult', { 
+            success: true, 
+            message: 'Đặt hàng thành công!' 
+          });
+        }
       }
-    } else {
-      naviagtion.navigate('VNPAYMock', {
-        amount: totalPrice,
-        orderInfo: cartItems.map((item) => `${item.dishName} x${item.quantity}`).join(', '),
-        cartItems,
-        totalCalories,
-      });
+    } catch (error: any) {
+      console.error('Checkout error:', error);
+      Alert.alert('Lỗi', error?.message || 'Đặt hàng thất bại. Vui lòng thử lại.');
+    } finally {
+      setLoading(false);
     }
   };
   return (
@@ -89,24 +133,37 @@ export default function CheckoutScreen() {
       </View>
 
       <Text style={styles.sectionTitle}>Phương thức thanh toán</Text>
-      {(['COD', 'VNPAY'] as const).map((method) => (
+      {(['COD', 'VNPAY', 'MOMO'] as const).map((method) => (
         <TouchableOpacity
           key={method}
           onPress={() => setPaymentMethod(method)}
           style={[styles.paymentOption, paymentMethod === method && styles.paymentSelected]}
+          disabled={loading}
         >
           <Text
             style={[styles.paymentText, paymentMethod === method && styles.paymentTextSelected]}
           >
-            {method === 'COD' ? 'Thanh toán khi nhận hàng (COD)' : 'Thanh toán Online (VNPay)'}
+            {method === 'COD' 
+              ? 'Thanh toán khi nhận hàng (COD)' 
+              : method === 'VNPAY'
+              ? 'Thanh toán Online (VNPay)'
+              : 'Thanh toán Online (Momo)'}
           </Text>
         </TouchableOpacity>
       ))}
 
-      <TouchableOpacity onPress={handleCheckout} style={styles.checkoutButton}>
-        <Text style={styles.checkoutButtonText}>
-          {paymentMethod === 'COD' ? 'Đặt hàng' : 'Tiếp tục thanh toán'}
-        </Text>
+      <TouchableOpacity 
+        onPress={handleCheckout} 
+        style={[styles.checkoutButton, loading && styles.checkoutButtonDisabled]}
+        disabled={loading}
+      >
+        {loading ? (
+          <ActivityIndicator color="#fff" />
+        ) : (
+          <Text style={styles.checkoutButtonText}>
+            {paymentMethod === 'COD' ? 'Đặt hàng' : 'Tiếp tục thanh toán'}
+          </Text>
+        )}
       </TouchableOpacity>
     </ScrollView>
   );
@@ -157,6 +214,10 @@ const styles = StyleSheet.create({
     padding: 16,
     borderRadius: 8,
     alignItems: 'center',
+  },
+  checkoutButtonDisabled: {
+    backgroundColor: '#6c757d',
+    opacity: 0.6,
   },
   checkoutButtonText: {
     color: '#fff',

@@ -1,4 +1,5 @@
 import apiClient from './apiClient';
+import { MakeOrderRequest, Orders } from '@/types/api';
 
 export type OrderStatus = 'NEW' | 'ASSIGNED' | 'PREPARING' | 'DONE' | 'CANCELLED';
 
@@ -31,6 +32,21 @@ export const orderService = {
   async getOrder(orderId: number): Promise<OrderDto> {
     const res = await apiClient.get(`/api/order/${orderId}`);
     return (res.data?.data ?? res.data) as OrderDto;
+  },
+
+  async getOrdersByUserId(userId: number): Promise<Orders[]> {
+    const res = await apiClient.get(`/api/order/user/${userId}`);
+    return (res.data?.data ?? res.data ?? []) as Orders[];
+  },
+
+  async createOrder(request: MakeOrderRequest): Promise<string> {
+    const res = await apiClient.post('/api/order', request);
+    return res.data?.data ?? res.data ?? '';
+  },
+
+  async updateOrder(orderUpdate: { orderId: number; comment?: string; ranking?: number }): Promise<Orders> {
+    const res = await apiClient.put('/api/order', orderUpdate);
+    return (res.data?.data ?? res.data) as Orders;
   },
 
   async assignOrder(orderId: number): Promise<OrderDto> {

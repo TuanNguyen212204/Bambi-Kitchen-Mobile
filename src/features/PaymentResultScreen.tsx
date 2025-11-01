@@ -21,7 +21,10 @@ export default function PaymentResultScreen() {
         <Text style={styles.message}>{message}</Text>
 
         <TouchableOpacity
-          onPress={() => navigation.navigate('OrderHistory')}
+          onPress={() => {
+            // Navigate to Orders tab
+            navigation.getParent()?.navigate('Orders');
+          }}
           style={styles.primaryButton}
         >
           <Text style={styles.buttonText}>Xem lịch sử đơn hàng</Text>

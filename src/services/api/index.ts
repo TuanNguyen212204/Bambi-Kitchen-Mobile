@@ -6,5 +6,6 @@ export * from './dishService';
 export * from './ingredientService';
 export * from './categoryService';
 export * from './inventoryService';
+export * from './paymentService';
 export * from './multipartHelpers';
 

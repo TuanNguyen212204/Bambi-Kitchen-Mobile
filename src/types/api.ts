@@ -90,3 +90,55 @@ export interface InventoryTransaction {
   createdAt?: string;
 }
 
+// Order API v3 types
+export interface DishTemplate {
+  size: 'S' | 'M' | 'L';
+  name?: string;
+  priceRatio?: number;
+  quantityRatio?: number;
+  max_Carb?: number;
+  max_Protein?: number;
+  max_Vegetable?: number;
+}
+
+export type RecipeSourceType = 'BASE' | 'ADDON' | 'REMOVED';
+
+export interface RecipeItemDTO {
+  ingredientId: number;
+  quantity: number;
+  sourceType: RecipeSourceType;
+}
+
+export interface OrderItemDTO {
+  dishId: number;
+  basedOnId?: number;
+  name: string;
+  quantity: number;
+  note?: string;
+  dishTemplate?: DishTemplate;
+  recipe?: RecipeItemDTO[];
+}
+
+export interface MakeOrderRequest {
+  accountId: number;
+  paymentMethod: string;
+  note?: string;
+  totalPrice: number;
+  items: OrderItemDTO[];
+}
+
+// Order response từ API v3
+export type OrderStatusV3 = 'PENDING' | 'COMPLETED' | 'PAID' | 'CANCELLED';
+
+export interface Orders {
+  id: number;
+  createAt: string;
+  totalPrice: number;
+  status: OrderStatusV3;
+  userId: number;
+  staffId?: number;
+  note?: string;
+  ranking?: number;
+  comment?: string;
+}
+

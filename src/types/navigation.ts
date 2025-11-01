@@ -14,6 +14,8 @@ export type CartStackParamList = {
   VNPayMock: {
     amount: number;
     orderInfo: string;
+    paymentUrl?: string;
+    paymentMethod?: 'VNPAY' | 'MOMO';
     cartItems: any[];
     totalCalories: number;
   };
