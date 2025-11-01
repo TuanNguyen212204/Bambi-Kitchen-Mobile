@@ -2,6 +2,7 @@ import { NavigatorScreenParams } from '@react-navigation/native';
 
 export type MainTabParamList = {
   Home: undefined;
+  Cart: undefined;
   Dashboard: undefined;
   Profile: undefined;
 };
@@ -14,6 +15,7 @@ export type RootStackParamList = {
   OTP: { email: string };
   ResetPassword: { email: string; otp: string };
   Dashboard?: undefined;
+  DishDetail: { dishId: number };
 };
 
 declare global {
@@ -21,4 +23,3 @@ declare global {
     interface RootParamList extends RootStackParamList {}
   }
 }
-

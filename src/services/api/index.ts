@@ -7,4 +7,3 @@ export * from './ingredientService';
 export * from './categoryService';
 export * from './inventoryService';
 export * from './multipartHelpers';
-

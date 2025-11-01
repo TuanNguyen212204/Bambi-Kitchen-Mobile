@@ -47,8 +47,31 @@ export const orderService = {
     const res = await apiClient.post(`/api/order/${orderId}/cod/confirm`);
     return (res.data?.data ?? res.data) as OrderDto;
   },
+
+  async createOrder(payload: {
+    accountId: number;
+    paymentMethod: 'COD' | 'ONLINE' | string;
+    note?: string;
+    totalPrice: number;
+    items: Array<{
+      dishId: number;
+      quantity: number;
+      note?: string;
+    }>;
+  }): Promise<OrderDto> {
+    const res = await apiClient.post('/api/order', {
+      accountId: payload.accountId,
+      paymentMethod: payload.paymentMethod,
+      note: payload.note || '',
+      totalPrice: payload.totalPrice,
+      items: payload.items.map((item) => ({
+        dishId: item.dishId,
+        quantity: item.quantity,
+        note: item.note || '',
+      })),
+    });
+    return (res.data?.data ?? res.data) as OrderDto;
+  },
 };
 
 export default orderService;
-
-
