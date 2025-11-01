@@ -53,21 +53,45 @@ export default function CheckoutScreen() {
   }, [cartItems, dishes]);
 
   // Convert OrderItem to OrderItemDTO
+  // QUAN TRỌNG: Không gửi dishTemplate nếu không có size hợp lệ
+  // Backend sẽ lỗi nếu gọi getDishTemplate().getSize() khi dishTemplate = null
   const convertToOrderItemDTO = (item: OrderItem): OrderItemDTO => {
     const dto: OrderItemDTO = {
-      dishId: item.dishId,
       name: item.dishName,
       quantity: item.quantity,
+      recipe: item.recipe && item.recipe.length > 0 ? item.recipe : [], // Luôn có recipe (có thể empty)
     };
     
-    // Chỉ thêm các field optional nếu có giá trị
-    if (item.note) {
-      dto.note = item.note;
+    // dishId: chỉ có khi là preset dish (KHÔNG phải custom)
+    if (item.dishId !== undefined && item.dishId !== null) {
+      dto.dishId = item.dishId;
     }
     
-    // Không gửi dishTemplate vì backend đang xử lý null không đúng
-    // Nếu cần dishTemplate, phải có logic chọn size từ user trước
-    // dishTemplate: undefined - không gửi field này
+    // basedOnId: ID của dish gốc (cho preset dish đã chỉnh sửa)
+    if (item.basedOnId !== undefined && item.basedOnId !== null) {
+      dto.basedOnId = item.basedOnId;
+    }
+    
+    // dishTemplate: Backend YÊU CẦU cho MỌI item (kể cả preset dish)
+    // Nếu có dishTemplate và size hợp lệ → dùng nó
+    // Nếu không có → dùng default size "M"
+    if (item.dishTemplate && 
+        item.dishTemplate.size && 
+        ['S', 'M', 'L'].includes(item.dishTemplate.size)) {
+      dto.dishTemplate = {
+        size: item.dishTemplate.size,
+      };
+    } else {
+      // Backend require dishTemplate cho mọi item, set default "M"
+      dto.dishTemplate = {
+        size: 'M',
+      };
+    }
+    
+    // note: Ghi chú của user (optional)
+    if (item.note && item.note.trim()) {
+      dto.note = item.note.trim();
+    }
     
     return dto;
   };
@@ -92,6 +116,8 @@ export default function CheckoutScreen() {
         paymentMethod: paymentMethod === 'COD' ? 'COD' : paymentMethod === 'VNPAY' ? 'VNPAY' : 'MOMO',
         totalPrice,
         items: orderItems,
+        // Note có thể thêm sau nếu có input field cho user nhập note
+        // note: noteText || undefined,
       };
 
       const result = await orderService.createOrder(orderRequest);

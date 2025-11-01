@@ -11,6 +11,8 @@ import {
 import styled from 'styled-components/native';
 import { useNavigation } from '@react-navigation/native';
 import { dishService, type DishDto } from '@services/api/dishService';
+import { orderService } from '@services/api/orderService';
+import { FeedbackDto } from '@/types/api';
 import { useAppSelector } from '@store/store';
 import { COLORS } from '@constants';
 import { Ionicons } from '@expo/vector-icons';
@@ -215,6 +217,7 @@ const HomeScreen = () => {
   const cartItems = useAppSelector((s) => s.cart.items);
   const [dishes, setDishes] = useState<DishDto[]>([]);
   const [categories, setCategories] = useState<{ id: number; name: string }[]>([]);
+  const [feedbacks, setFeedbacks] = useState<FeedbackDto[]>([]);
   const [loading, setLoading] = useState(false);
   const [query, setQuery] = useState('');
   const [categoryId, setCategoryId] = useState<number | undefined>(undefined);
@@ -231,11 +234,21 @@ const HomeScreen = () => {
     const fetchData = async () => {
       setLoading(true);
       try {
-        const [ds, cats] = await Promise.all([dishService.getAll(), dishService.getCategories()]);
+        const [ds, cats, fbs] = await Promise.all([
+          dishService.getAll(),
+          dishService.getCategories(),
+          orderService.getFeedbacks(),
+        ]);
         setDishes(Array.isArray(ds) ? ds : []);
         setCategories(Array.isArray(cats) ? cats : []);
+        // Chỉ hiển thị feedbacks > 3 sao
+        const highRatingFeedbacks = (Array.isArray(fbs) ? fbs : []).filter(
+          (fb: FeedbackDto) => fb.ranking && fb.ranking > 3
+        );
+        setFeedbacks(highRatingFeedbacks);
       } catch (e) {
         setDishes([]);
+        setFeedbacks([]);
       } finally {
         setLoading(false);
       }
@@ -421,6 +434,41 @@ const HomeScreen = () => {
               </DishGridCard>
             ))}
           </DishesGrid>
+        </Section>
+      )}
+
+      {feedbacks.length > 0 && (
+        <Section>
+          <SectionHeader>
+            <SectionTitle>Đánh giá từ khách hàng</SectionTitle>
+          </SectionHeader>
+          <View style={{ paddingHorizontal: 16 }}>
+            {feedbacks.slice(0, 5).map((fb, idx) => (
+              <View
+                key={idx}
+                style={{
+                  backgroundColor: '#f9f9f9',
+                  padding: 12,
+                  borderRadius: 8,
+                  marginBottom: 8,
+                }}
+              >
+                <View style={{ flexDirection: 'row', alignItems: 'center', marginBottom: 4 }}>
+                  <Text style={{ fontSize: 14, fontWeight: '600' }}>
+                    {fb.accountName || 'Khách hàng'}
+                  </Text>
+                  <Text style={{ fontSize: 12, color: '#666', marginLeft: 8 }}>
+                    {'⭐'.repeat(fb.ranking || 0)}
+                  </Text>
+                </View>
+                {fb.comment && (
+                  <Text style={{ fontSize: 13, color: '#444', fontStyle: 'italic' }}>
+                    "{fb.comment}"
+                  </Text>
+                )}
+              </View>
+            ))}
+          </View>
         </Section>
       )}
     </Screen>

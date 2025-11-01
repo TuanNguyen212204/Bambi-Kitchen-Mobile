@@ -1,4 +1,4 @@
-import React, { useEffect } from 'react';
+import React, { useEffect, useCallback, useState } from 'react';
 import {
   View,
   Text,
@@ -6,8 +6,9 @@ import {
   StyleSheet,
   ScrollView,
   ActivityIndicator,
+  RefreshControl,
 } from 'react-native';
-import { useNavigation } from '@react-navigation/native';
+import { useNavigation, useFocusEffect } from '@react-navigation/native';
 import { useAppDispatch, useAppSelector } from '@/store/store';
 import { fetchOrdersThunk } from '../../../store/thunks/orderThunks';
 
@@ -16,12 +17,34 @@ export default function OrderHistoryScreen() {
   const dispatch = useAppDispatch();
   const { orders, loading, error } = useAppSelector((state) => state.order);
   const user = useAppSelector((state) => state.auth.user);
+  const [refreshing, setRefreshing] = useState(false);
 
-  useEffect(() => {
+  const loadOrders = useCallback(() => {
     if (user?.id) {
       dispatch(fetchOrdersThunk(user.id));
     }
   }, [dispatch, user?.id]);
+
+  useEffect(() => {
+    loadOrders();
+  }, [loadOrders]);
+
+  // Auto refresh khi screen được focus (user quay lại từ browser)
+  useFocusEffect(
+    useCallback(() => {
+      // Delay một chút để đảm bảo navigation đã sẵn sàng
+      const timer = setTimeout(() => {
+        loadOrders();
+      }, 500);
+      return () => clearTimeout(timer);
+    }, [loadOrders])
+  );
+
+  const onRefresh = useCallback(() => {
+    setRefreshing(true);
+    loadOrders();
+    setTimeout(() => setRefreshing(false), 1000);
+  }, [loadOrders]);
 
   // Note: API v3 không trả về items chi tiết trong Orders
   // Có thể cần gọi API getOrderById để lấy chi tiết
@@ -46,7 +69,12 @@ export default function OrderHistoryScreen() {
   }
 
   return (
-    <ScrollView style={styles.container}>
+    <ScrollView
+      style={styles.container}
+      refreshControl={
+        <RefreshControl refreshing={refreshing} onRefresh={onRefresh} />
+      }
+    >
       <Text style={styles.title}>Lịch sử đơn hàng</Text>
 
       {orders.length === 0 ? (
@@ -82,11 +110,20 @@ export default function OrderHistoryScreen() {
               </View>
             </View>
 
-            {order.ranking && order.comment && (
+            {order.ranking && order.comment ? (
               <View style={styles.feedback}>
                 <Text style={styles.feedbackTitle}>Đánh giá: ⭐{order.ranking}/5</Text>
                 <Text style={styles.feedbackComment}>{order.comment}</Text>
               </View>
+            ) : (
+              (order.status === 'PAID' || order.status === 'COMPLETED') && (
+                <TouchableOpacity
+                  style={styles.feedbackButton}
+                  onPress={() => navigation.navigate('Feedback', { orderId: order.id })}
+                >
+                  <Text style={styles.feedbackButtonText}>Đánh giá đơn hàng</Text>
+                </TouchableOpacity>
+              )
             )}
           </View>
         ))
@@ -138,4 +175,17 @@ const styles = StyleSheet.create({
   },
   feedbackTitle: { fontSize: 14, fontWeight: '600', marginBottom: 4 },
   feedbackComment: { fontSize: 13, color: '#666', fontStyle: 'italic' },
+  feedbackButton: {
+    marginTop: 12,
+    paddingVertical: 10,
+    paddingHorizontal: 16,
+    backgroundColor: '#007bff',
+    borderRadius: 8,
+    alignItems: 'center',
+  },
+  feedbackButtonText: {
+    color: '#fff',
+    fontSize: 14,
+    fontWeight: '600',
+  },
 });

@@ -1,27 +1,27 @@
 import React, { useEffect, useState } from 'react';
 import { View, Text, FlatList, TouchableOpacity, StyleSheet } from 'react-native';
-import orderService, { OrderDto, OrderStatus } from '@services/api/orderService';
+import { orderService } from '@services/api/orderService';
+import { Orders, OrderStatusV3 } from '@/types/api';
 import { toast } from '@utils/toast';
 
-const statusLabels: Record<OrderStatus, string> = {
-  NEW: 'Mới',
-  ASSIGNED: 'Đã nhận',
-  PREPARING: 'Đang chuẩn bị',
-  DONE: 'Hoàn tất',
-  CANCELLED: 'Đã huỷ',
+const statusLabels: Record<OrderStatusV3, string> = {
+  PENDING: 'Đang chờ',
+  COMPLETED: 'Hoàn thành',
+  PAID: 'Đã thanh toán',
+  CANCELLED: 'Đã hủy',
 };
 
 const OrdersScreen = () => {
-  const [orders, setOrders] = useState<OrderDto[]>([]);
+  const [orders, setOrders] = useState<Orders[]>([]);
   const [loading, setLoading] = useState(false);
-  const [status, setStatus] = useState<OrderStatus | undefined>(undefined);
   const [refreshing, setRefreshing] = useState(false);
 
   const load = async () => {
     try {
       setLoading(true);
-      const data = await orderService.getOrders(status ? { status } : undefined);
-      setOrders(data);
+      // GET /api/order - lấy tất cả orders (API v3)
+      const data = await orderService.getOrders();
+      setOrders(data as Orders[]);
     } catch (e: any) {
       toast.error(e?.toString?.() || 'Lỗi tải danh sách đơn');
     } finally {
@@ -31,55 +31,40 @@ const OrdersScreen = () => {
 
   useEffect(() => {
     load();
-  }, [status]);
-
-  const changeStatus = async (orderId: number, next: OrderStatus) => {
-    try {
-      await orderService.updateStatus(orderId, next);
-      toast.success('Đã cập nhật trạng thái');
-      load();
-    } catch (e: any) {
-      toast.error(e?.toString?.() || 'Lỗi cập nhật trạng thái');
-    }
-  };
-
-  const confirmCOD = async (orderId: number) => {
-    try {
-      await orderService.confirmCOD(orderId);
-      toast.success('Đã xác nhận thanh toán COD');
-      load();
-    } catch (e: any) {
-      toast.error(e?.toString?.() || 'Lỗi xác nhận COD');
-    }
-  };
+  }, []);
 
   return (
     <View style={styles.container}>
-      <View style={styles.filters}>
-        {(['NEW','ASSIGNED','PREPARING','DONE','CANCELLED'] as OrderStatus[]).map((s) => (
-          <TouchableOpacity key={s} onPress={() => setStatus(status === s ? undefined : s)} style={[styles.chip, status === s && styles.chipActive]}>
-            <Text style={status === s ? styles.chipTextActive : undefined}>{statusLabels[s]}</Text>
-          </TouchableOpacity>
-        ))}
-      </View>
-
       <FlatList
         data={orders}
         keyExtractor={(i) => String(i.id)}
         refreshing={refreshing}
-        onRefresh={async () => { setRefreshing(true); await load(); setRefreshing(false); }}
+        onRefresh={async () => {
+          setRefreshing(true);
+          await load();
+          setRefreshing(false);
+        }}
+        ListEmptyComponent={
+          loading ? null : (
+            <View style={{ padding: 20, alignItems: 'center' }}>
+              <Text style={{ color: '#666' }}>Chưa có đơn hàng nào</Text>
+            </View>
+          )
+        }
         renderItem={({ item }) => (
           <View style={styles.card}>
-            <Text style={styles.title}>#{item.id} {item.code ? `• ${item.code}` : ''}</Text>
-            <Text style={styles.meta}>Khách: {item.customerName || '-'} • {item.customerPhone || '-'}</Text>
+            <Text style={styles.title}>Đơn #{item.id}</Text>
+            <Text style={styles.meta}>
+              Ngày: {new Date(item.createAt).toLocaleString('vi-VN')}
+            </Text>
+            <Text style={styles.meta}>Tổng tiền: {item.totalPrice.toLocaleString('vi-VN')}đ</Text>
             <Text style={styles.meta}>Trạng thái: {statusLabels[item.status]}</Text>
-            <View style={styles.row}>
-              <TouchableOpacity onPress={() => changeStatus(item.id, 'ASSIGNED')} style={styles.outline}><Text>Nhận đơn</Text></TouchableOpacity>
-              <TouchableOpacity onPress={() => changeStatus(item.id, 'PREPARING')} style={styles.outline}><Text>Chuẩn bị</Text></TouchableOpacity>
-              <TouchableOpacity onPress={() => changeStatus(item.id, 'DONE')} style={styles.outline}><Text>Hoàn tất</Text></TouchableOpacity>
-            </View>
-            {item.paymentMethod === 'COD' && !item.isPaid && (
-              <TouchableOpacity onPress={() => confirmCOD(item.id)} style={styles.primary}><Text style={{ color: 'white' }}>Xác nhận COD</Text></TouchableOpacity>
+            {item.note && <Text style={styles.meta}>Ghi chú: {item.note}</Text>}
+            {item.ranking && item.comment && (
+              <View style={{ marginTop: 8, padding: 8, backgroundColor: '#f0f0f0', borderRadius: 4 }}>
+                <Text style={styles.meta}>Đánh giá: {'⭐'.repeat(item.ranking)}</Text>
+                <Text style={styles.meta}>{item.comment}</Text>
+              </View>
             )}
           </View>
         )}

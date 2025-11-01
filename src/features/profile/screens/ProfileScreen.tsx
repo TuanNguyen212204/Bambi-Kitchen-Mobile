@@ -30,6 +30,12 @@ const ProfileScreen = () => {
             <InfoRow label="Họ tên" value={user?.name || '—'} />
             <InfoRow label="Email" value={user?.mail || '—'} />
             <InfoRow label="Vai trò" value={String(user?.role || 'USER')} />
+            {user?.id && (
+              <View style={styles.accountIdContainer}>
+                <Text style={styles.accountIdLabel}>Account ID (để test order):</Text>
+                <Text style={styles.accountIdValue}>{user.id}</Text>
+              </View>
+            )}
           </View>
         </View>
 
@@ -157,6 +163,24 @@ const styles = StyleSheet.create({
   actionText: {
     fontWeight: '600',
     color: '#111827',
+  },
+  accountIdContainer: {
+    marginTop: 12,
+    padding: 12,
+    backgroundColor: '#e3f2fd',
+    borderRadius: 8,
+    borderLeftWidth: 4,
+    borderLeftColor: '#1976d2',
+  },
+  accountIdLabel: {
+    fontSize: 12,
+    color: '#666',
+    marginBottom: 4,
+  },
+  accountIdValue: {
+    fontSize: 18,
+    fontWeight: 'bold',
+    color: '#1976d2',
   },
 });
 

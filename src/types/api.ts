@@ -100,13 +100,13 @@ export interface RecipeItemDTO {
 }
 
 export interface OrderItemDTO {
-  dishId: number;
+  dishId?: number; // Optional vì custom dish không có dishId
   basedOnId?: number;
   name: string;
   quantity: number;
   note?: string;
-  dishTemplate?: DishTemplate;
-  recipe?: RecipeItemDTO[];
+  dishTemplate?: DishTemplate; // CHỈ gửi khi có size hợp lệ
+  recipe?: RecipeItemDTO[]; // Luôn gửi (có thể empty array)
 }
 
 export interface MakeOrderRequest {
@@ -134,10 +134,13 @@ export interface Orders {
 
 export interface OrderItem {
   id: number;
-  dishId: number;
+  dishId?: number; // Optional vì custom dish có thể không có dishId
   dishName: string;
   quantity: number;
   note?: string;
+  basedOnId?: number; // ID của dish gốc (cho preset dish đã chỉnh sửa)
+  dishTemplate?: DishTemplate; // Size cho custom dish
+  recipe?: RecipeItemDTO[]; // Recipe modifications (ADDON, REMOVED)
 }
 
 export interface Order {
@@ -181,4 +184,12 @@ export interface OrderUpdateDto {
   orderId: number;
   comment?: string;
   ranking?: number;
+}
+
+export interface FeedbackDto {
+  orderId: number;
+  ranking: number;
+  comment?: string;
+  accountName?: string;
+  accountId?: number;
 }
