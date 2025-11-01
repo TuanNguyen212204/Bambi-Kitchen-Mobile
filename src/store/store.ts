@@ -1,14 +1,16 @@
 import { configureStore } from '@reduxjs/toolkit';
 import { useDispatch, useSelector, TypedUseSelectorHook } from 'react-redux';
 import authReducer from './slices/authSlice';
-import ingredientReducer from './slices/ingredientSlice';
 import cartReducer from './slices/cartSlice';
+import orderReducer from './slices/orderSlice';
+import ingredientReducer from './slices/ingredientSlice';
 
 export const store = configureStore({
   reducer: {
     auth: authReducer,
-    ingredients: ingredientReducer,
     cart: cartReducer,
+    order: orderReducer,
+    ingredient: ingredientReducer,
   },
   middleware: (getDefaultMiddleware) =>
     getDefaultMiddleware({ serializableCheck: false, immutableCheck: false }),

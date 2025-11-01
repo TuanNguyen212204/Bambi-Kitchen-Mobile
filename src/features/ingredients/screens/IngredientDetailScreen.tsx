@@ -12,7 +12,7 @@ const IngredientDetailScreen = () => {
   const route = useRoute<any>();
   const navigation = useNavigation<any>();
   const dispatch = useAppDispatch();
-  const { transactions, categories } = useAppSelector((s) => s.ingredients);
+  const { transactions = [], categories = [] } = useAppSelector((s) => s.ingredient || {});
   const ingredientId: number = route.params?.ingredientId;
 
   const [loading, setLoading] = useState(false);

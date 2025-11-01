@@ -138,12 +138,12 @@ const DishDetailScreen: React.FC = () => {
   const fetchDish = async () => {
     try {
       setLoading(true);
-      const dishes = await dishService.getAll();
-      const foundDish = dishes.find((d) => d.id === dishId);
-      setDish(foundDish || null);
+      const dish = await dishService.getById(dishId);
+      setDish(dish);
     } catch (error) {
       console.error('Error fetching dish:', error);
       Alert.alert('Lỗi', 'Không thể tải thông tin món ăn');
+      setDish(null);
     } finally {
       setLoading(false);
     }

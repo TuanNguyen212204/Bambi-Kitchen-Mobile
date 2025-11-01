@@ -7,7 +7,7 @@ import { fetchAllIngredients } from '@store/slices/ingredientSlice';
 const IngredientStockHistoryScreen = () => {
   const route = useRoute<any>();
   const dispatch = useAppDispatch();
-  const { transactions, ingredients } = useAppSelector((s) => s.ingredients);
+  const { transactions = [], ingredients = [] } = useAppSelector((s) => s.ingredient || {});
   const ingredientId: number = route.params?.ingredientId;
 
   useEffect(() => {
