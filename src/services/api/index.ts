@@ -7,5 +7,6 @@ export * from './ingredientService';
 export * from './categoryService';
 export * from './inventoryService';
 export * from './paymentService';
+export * from './recipeService';
+export * from './accountService';
 export * from './multipartHelpers';
-

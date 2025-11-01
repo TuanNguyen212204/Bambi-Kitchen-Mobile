@@ -1,9 +1,21 @@
 import React, { useEffect, useMemo, useState, useRef } from 'react';
-import { View, Text, ScrollView, Image, TextInput, TouchableOpacity, Dimensions } from 'react-native';
+import {
+  View,
+  Text,
+  ScrollView,
+  Image,
+  TextInput,
+  TouchableOpacity,
+  Dimensions,
+} from 'react-native';
 import styled from 'styled-components/native';
+import { useNavigation } from '@react-navigation/native';
 import { dishService, type DishDto } from '@services/api/dishService';
+import { orderService } from '@services/api/orderService';
+import { FeedbackDto } from '@/types/api';
 import { useAppSelector } from '@store/store';
 import { COLORS } from '@constants';
+import { Ionicons } from '@expo/vector-icons';
 
 const { width: SCREEN_WIDTH } = Dimensions.get('window');
 
@@ -87,9 +99,9 @@ const SectionMore = styled.Text`
   font-weight: 600;
 `;
 
-const CategoryRow = styled.ScrollView.attrs({ 
-  horizontal: true, 
-  showsHorizontalScrollIndicator: false 
+const CategoryRow = styled.ScrollView.attrs({
+  horizontal: true,
+  showsHorizontalScrollIndicator: false,
 })`
   padding-horizontal: 12px;
 `;
@@ -110,9 +122,9 @@ const CategoryText = styled.Text<{ active?: boolean }>`
   font-size: 12px;
 `;
 
-const DishRow = styled.ScrollView.attrs({ 
-  horizontal: true, 
-  showsHorizontalScrollIndicator: false 
+const DishRow = styled.ScrollView.attrs({
+  horizontal: true,
+  showsHorizontalScrollIndicator: false,
 })`
   padding-horizontal: 16px;
 `;
@@ -177,10 +189,35 @@ const DishGridCard = styled.TouchableOpacity`
   margin-bottom: 12px;
 `;
 
+const OrderBuilderButton = styled.TouchableOpacity`
+  background-color: #007aff;
+  border-radius: 12px;
+  padding: 16px;
+  margin: 12px 16px;
+  flex-direction: row;
+  align-items: center;
+  justify-content: center;
+  shadow-color: #000;
+  shadow-offset: 0px 2px;
+  shadow-opacity: 0.1;
+  shadow-radius: 8px;
+  elevation: 3;
+`;
+
+const OrderBuilderText = styled.Text`
+  color: #ffffff;
+  font-size: 16px;
+  font-weight: 700;
+  margin-left: 8px;
+`;
+
 const HomeScreen = () => {
+  const navigation = useNavigation<any>();
   const user = useAppSelector((s) => s.auth.user);
+  const cartItems = useAppSelector((s) => s.cart.items);
   const [dishes, setDishes] = useState<DishDto[]>([]);
   const [categories, setCategories] = useState<{ id: number; name: string }[]>([]);
+  const [feedbacks, setFeedbacks] = useState<FeedbackDto[]>([]);
   const [loading, setLoading] = useState(false);
   const [query, setQuery] = useState('');
   const [categoryId, setCategoryId] = useState<number | undefined>(undefined);
@@ -197,14 +234,21 @@ const HomeScreen = () => {
     const fetchData = async () => {
       setLoading(true);
       try {
-        const [ds, cats] = await Promise.all([
+        const [ds, cats, fbs] = await Promise.all([
           dishService.getAll(),
           dishService.getCategories(),
+          orderService.getFeedbacks(),
         ]);
         setDishes(Array.isArray(ds) ? ds : []);
         setCategories(Array.isArray(cats) ? cats : []);
+        // Chỉ hiển thị feedbacks > 3 sao
+        const highRatingFeedbacks = (Array.isArray(fbs) ? fbs : []).filter(
+          (fb: FeedbackDto) => fb.ranking && fb.ranking > 3
+        );
+        setFeedbacks(highRatingFeedbacks);
       } catch (e) {
         setDishes([]);
+        setFeedbacks([]);
       } finally {
         setLoading(false);
       }
@@ -227,11 +271,15 @@ const HomeScreen = () => {
     return () => clearInterval(interval);
   }, [banners.length]);
 
-  const visible = useMemo(() => dishes.filter((d) => (d as any).public !== false && ((d as any).active ?? true)), [dishes]);
+  const visible = useMemo(
+    () => dishes.filter((d) => (d as any).public !== false && ((d as any).active ?? true)),
+    [dishes]
+  );
   const filtered = useMemo(() => {
     const q = query.trim().toLowerCase();
     return visible.filter((d) => {
-      const byQ = !q || d.name?.toLowerCase().includes(q) || d.description?.toLowerCase().includes(q);
+      const byQ =
+        !q || d.name?.toLowerCase().includes(q) || d.description?.toLowerCase().includes(q);
       const byCat = !categoryId || d.categoryId === categoryId;
       return byQ && byCat;
     });
@@ -243,18 +291,46 @@ const HomeScreen = () => {
   return (
     <Screen showsVerticalScrollIndicator={false}>
       <Header>
-        <SearchContainer>
-          <Image 
-            source={require('../../../../assets/logo.png')} 
-            style={{ width: 20, height: 20 }} 
-          />
-          <SearchInput
-            placeholder="Tìm kiếm món ăn..."
-            value={query}
-            onChangeText={setQuery}
-            placeholderTextColor="#999"
-          />
-        </SearchContainer>
+        <View style={{ flexDirection: 'row', alignItems: 'center', gap: 12 }}>
+          <SearchContainer style={{ flex: 1 }}>
+            <Image
+              source={require('../../../../assets/logo.png')}
+              style={{ width: 20, height: 20 }}
+            />
+            <SearchInput
+              placeholder="Tìm kiếm món ăn..."
+              value={query}
+              onChangeText={setQuery}
+              placeholderTextColor="#999"
+            />
+          </SearchContainer>
+          <TouchableOpacity
+            onPress={() => navigation.navigate('MainTabs', { screen: 'Cart' })}
+            style={{ position: 'relative', padding: 8 }}
+          >
+            <Ionicons name="cart-outline" size={24} color="#ffffff" />
+            {cartItems.length > 0 && (
+              <View
+                style={{
+                  position: 'absolute',
+                  top: 4,
+                  right: 4,
+                  backgroundColor: '#ff3b30',
+                  borderRadius: 10,
+                  minWidth: 20,
+                  height: 20,
+                  paddingHorizontal: 6,
+                  justifyContent: 'center',
+                  alignItems: 'center',
+                }}
+              >
+                <Text style={{ color: '#ffffff', fontSize: 12, fontWeight: '700' }}>
+                  {cartItems.reduce((sum, item) => sum + item.quantity, 0)}
+                </Text>
+              </View>
+            )}
+          </TouchableOpacity>
+        </View>
       </Header>
 
       <BannerContainer>
@@ -279,6 +355,11 @@ const HomeScreen = () => {
         </BannerPagination>
       </BannerContainer>
 
+      <OrderBuilderButton onPress={() => navigation.navigate('OrderBuilder')}>
+        <Text style={{ color: '#ffffff', fontSize: 20 }}>🍽️</Text>
+        <OrderBuilderText>Tạo món theo từng bước</OrderBuilderText>
+      </OrderBuilderButton>
+
       <Section>
         <SectionHeader>
           <SectionTitle>Danh mục</SectionTitle>
@@ -288,7 +369,11 @@ const HomeScreen = () => {
             <CategoryText active={!categoryId}>Tất cả</CategoryText>
           </CategoryChip>
           {categories.map((c) => (
-            <CategoryChip key={c.id} active={categoryId === c.id} onPress={() => setCategoryId(c.id)}>
+            <CategoryChip
+              key={c.id}
+              active={categoryId === c.id}
+              onPress={() => setCategoryId(c.id)}
+            >
               <CategoryText active={categoryId === c.id}>{c.name}</CategoryText>
             </CategoryChip>
           ))}
@@ -305,9 +390,14 @@ const HomeScreen = () => {
           </SectionHeader>
           <DishRow>
             {featured.map((item) => (
-              <DishCard key={item.id}>
+              <DishCard
+                key={item.id}
+                onPress={() => navigation.navigate('DishDetail', { dishId: item.id })}
+              >
                 <DishImage
-                  source={{ uri: item.imageUrl || 'https://via.placeholder.com/300x200.png?text=Dish' }}
+                  source={{
+                    uri: item.imageUrl || 'https://via.placeholder.com/300x200.png?text=Dish',
+                  }}
                 />
                 <DishInfo>
                   <DishName numberOfLines={1}>{item.name}</DishName>
@@ -326,9 +416,14 @@ const HomeScreen = () => {
           </SectionHeader>
           <DishesGrid>
             {rest.map((item) => (
-              <DishGridCard key={item.id}>
+              <DishGridCard
+                key={item.id}
+                onPress={() => navigation.navigate('DishDetail', { dishId: item.id })}
+              >
                 <DishImage
-                  source={{ uri: item.imageUrl || 'https://via.placeholder.com/300x200.png?text=Dish' }}
+                  source={{
+                    uri: item.imageUrl || 'https://via.placeholder.com/300x200.png?text=Dish',
+                  }}
                 />
                 <DishInfo>
                   <DishName numberOfLines={2} style={{ fontSize: 14 }}>
@@ -339,6 +434,41 @@ const HomeScreen = () => {
               </DishGridCard>
             ))}
           </DishesGrid>
+        </Section>
+      )}
+
+      {feedbacks.length > 0 && (
+        <Section>
+          <SectionHeader>
+            <SectionTitle>Đánh giá từ khách hàng</SectionTitle>
+          </SectionHeader>
+          <View style={{ paddingHorizontal: 16 }}>
+            {feedbacks.slice(0, 5).map((fb, idx) => (
+              <View
+                key={idx}
+                style={{
+                  backgroundColor: '#f9f9f9',
+                  padding: 12,
+                  borderRadius: 8,
+                  marginBottom: 8,
+                }}
+              >
+                <View style={{ flexDirection: 'row', alignItems: 'center', marginBottom: 4 }}>
+                  <Text style={{ fontSize: 14, fontWeight: '600' }}>
+                    {fb.accountName || 'Khách hàng'}
+                  </Text>
+                  <Text style={{ fontSize: 12, color: '#666', marginLeft: 8 }}>
+                    {'⭐'.repeat(fb.ranking || 0)}
+                  </Text>
+                </View>
+                {fb.comment && (
+                  <Text style={{ fontSize: 13, color: '#444', fontStyle: 'italic' }}>
+                    "{fb.comment}"
+                  </Text>
+                )}
+              </View>
+            ))}
+          </View>
         </Section>
       )}
     </Screen>

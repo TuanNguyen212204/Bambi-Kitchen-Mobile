@@ -1,8 +1,8 @@
 import { createSlice, PayloadAction } from '@reduxjs/toolkit';
-import { Order } from '@/types/api';
+import { Orders } from '@/types/api';
 
 interface OrderState {
-    orders: Order[];
+    orders: Orders[];
     loading: boolean;
     error: string | null;
 }
@@ -21,7 +21,7 @@ const orderSlice = createSlice({
             state.loading = true;
             state.error = null;
         },
-        fetchOrdersSuccess(state, action: PayloadAction<Order[]>) {
+        fetchOrdersSuccess(state, action: PayloadAction<Orders[]>) {
             state.orders = action.payload;
             state.loading = false;
             state.error = null;
@@ -30,7 +30,7 @@ const orderSlice = createSlice({
             state.loading = false;
             state.error = action.payload;
         },
-        addOrder(state, action: PayloadAction<Order>) {
+        addOrder(state, action: PayloadAction<Orders>) {
             state.orders.unshift(action.payload);
         },
     },

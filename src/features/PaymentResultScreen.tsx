@@ -20,18 +20,22 @@ export default function PaymentResultScreen() {
         </Text>
         <Text style={styles.message}>{message}</Text>
 
-        <TouchableOpacity
-          onPress={() => {
-            // Navigate to Orders tab
-            navigation.getParent()?.navigate('Orders');
-          }}
-          style={styles.primaryButton}
-        >
-          <Text style={styles.buttonText}>Xem lịch sử đơn hàng</Text>
-        </TouchableOpacity>
+        {success && (
+          <TouchableOpacity
+            onPress={() => {
+              // Navigate to Orders tab trong MainTabs
+              navigation.getParent()?.navigate('MainTabs', { screen: 'Orders' });
+            }}
+            style={styles.primaryButton}
+          >
+            <Text style={styles.buttonText}>Xem lịch sử đơn hàng</Text>
+          </TouchableOpacity>
+        )}
 
         <TouchableOpacity
-          onPress={() => navigation.navigate('Home')}
+          onPress={() => {
+            navigation.getParent()?.navigate('MainTabs', { screen: 'Home' });
+          }}
           style={styles.secondaryButton}
         >
           <Text style={styles.buttonText}>Về trang chủ</Text>

@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useEffect, useState, useMemo } from 'react';
 import {
   View,
   Text,
@@ -7,30 +7,55 @@ import {
   Image,
   StyleSheet,
   Alert,
+  ActivityIndicator,
 } from 'react-native';
 import { useNavigation } from '@react-navigation/native';
 import { useAppSelector, useAppDispatch } from '@store/store';
 import { clearCart } from '@store/slices/cartSlice';
-
-const DISH_PRICES: Record<number, { price: number; calories: number; image?: string }> = {
-  101: { price: 85000, calories: 680, image: 'https://i.imgur.com/pho.jpg' },
-  102: { price: 65000, calories: 550, image: 'https://i.imgur.com/comtam.jpg' },
-};
+import { dishService, DishDto } from '@services/api/dishService';
 
 export default function CartScreen() {
   const navigation = useNavigation<any>();
   const dispatch = useAppDispatch();
   const cartItems = useAppSelector((state) => state.cart.items);
+  const [dishes, setDishes] = useState<Record<number, DishDto>>({});
+  const [loading, setLoading] = useState(false);
 
-  const totalPrice = cartItems.reduce((sum, item) => {
-    const info = DISH_PRICES[item.dishId] || { price: 0 };
-    return sum + info.price * item.quantity;
-  }, 0);
+  useEffect(() => {
+    const fetchDishes = async () => {
+      if (cartItems.length === 0) return;
+      
+      setLoading(true);
+      try {
+        const dishIds = [...new Set(cartItems.map(item => item.dishId))];
+        const dishPromises = dishIds.map(id => dishService.getById(id));
+        const dishResults = await Promise.all(dishPromises);
+        
+        const dishesMap: Record<number, DishDto> = {};
+        dishResults.forEach((dish, index) => {
+          if (dish) {
+            dishesMap[dishIds[index]] = dish;
+          }
+        });
+        setDishes(dishesMap);
+      } catch (error) {
+        console.error('Error fetching dishes:', error);
+      } finally {
+        setLoading(false);
+      }
+    };
 
-  const totalCalories = cartItems.reduce((sum, item) => {
-    const info = DISH_PRICES[item.dishId] || { calories: 0 };
-    return sum + info.calories * item.quantity;
-  }, 0);
+    fetchDishes();
+  }, [cartItems]);
+
+  const totalPrice = useMemo(() => {
+    return cartItems.reduce((sum, item) => {
+      const dish = dishes[item.dishId];
+      const price = dish?.price || 0;
+      return sum + price * item.quantity;
+    }, 0);
+  }, [cartItems, dishes]);
+
 
   const goToCheckout = () => {
     if (cartItems.length === 0) {
@@ -68,15 +93,29 @@ export default function CartScreen() {
     );
   }
 
+  if (loading) {
+    return (
+      <View style={styles.container}>
+        <View style={styles.loadingContainer}>
+          <ActivityIndicator size="large" color="#007AFF" />
+          <Text style={styles.loadingText}>Đang tải thông tin món ăn...</Text>
+        </View>
+      </View>
+    );
+  }
+
   return (
     <View style={styles.container}>
       <ScrollView style={styles.list}>
         {cartItems.map((item) => {
-          const { price = 0, calories = 0, image } = DISH_PRICES[item.dishId] || {};
+          const dish = dishes[item.dishId];
+          const price = dish?.price || 0;
+          const imageUrl = dish?.imageUrl;
+          
           return (
             <View key={item.id} style={styles.item}>
-              {image ? (
-                <Image source={{ uri: image }} style={styles.image} />
+              {imageUrl ? (
+                <Image source={{ uri: imageUrl }} style={styles.image} />
               ) : (
                 <View style={[styles.image, styles.placeholderImage]}>
                   <Text style={styles.placeholderText}>?</Text>
@@ -88,11 +127,21 @@ export default function CartScreen() {
                 {item.note && (
                   <Text style={styles.note}>Ghi chú: {item.note}</Text>
                 )}
-                <Text style={styles.calories}>{calories * item.quantity} calo</Text>
+                {dish?.description && (
+                  <Text style={styles.description} numberOfLines={1}>
+                    {dish.description}
+                  </Text>
+                )}
               </View>
-              <Text style={styles.price}>
-                {(price * item.quantity).toLocaleString('vi-VN')}đ
-              </Text>
+              <View style={styles.priceContainer}>
+                {price > 0 ? (
+                  <Text style={styles.price}>
+                    {(price * item.quantity).toLocaleString('vi-VN')}đ
+                  </Text>
+                ) : (
+                  <Text style={styles.priceUnavailable}>Chưa có giá</Text>
+                )}
+              </View>
             </View>
           );
         })}
@@ -105,10 +154,6 @@ export default function CartScreen() {
             <Text style={styles.totalPrice}>
               {totalPrice.toLocaleString('vi-VN')}đ
             </Text>
-          </View>
-          <View style={styles.summaryRow}>
-            <Text style={styles.summaryLabel}>Tổng calo</Text>
-            <Text style={styles.summaryText}>{totalCalories} calo</Text>
           </View>
         </View>
 
@@ -168,8 +213,17 @@ const styles = StyleSheet.create({
   itemName: { fontSize: 16, fontWeight: '600' },
   quantity: { fontSize: 14, color: '#007AFF', marginTop: 2 },
   note: { fontSize: 12, color: '#e67e22', fontStyle: 'italic', marginTop: 2 },
-  calories: { fontSize: 12, color: '#999', marginTop: 2 },
+  description: { fontSize: 11, color: '#999', marginTop: 2 },
+  priceContainer: { alignItems: 'flex-end' },
   price: { fontSize: 16, fontWeight: '600', color: '#d32f2f' },
+  priceUnavailable: { fontSize: 14, color: '#999', fontStyle: 'italic' },
+  loadingContainer: {
+    flex: 1,
+    justifyContent: 'center',
+    alignItems: 'center',
+    padding: 24,
+  },
+  loadingText: { marginTop: 12, fontSize: 14, color: '#666' },
   footer: {
     backgroundColor: '#fff',
     padding: 16,
