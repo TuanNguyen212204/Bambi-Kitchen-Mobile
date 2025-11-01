@@ -1,15 +1,11 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect, useMemo } from 'react';
 import { useNavigation } from '@react-navigation/native';
 import { View, Text, TouchableOpacity, ScrollView, Alert, StyleSheet, ActivityIndicator } from 'react-native';
 import { useAppDispatch, useAppSelector } from '@/store/store';
 import { clearCart } from '@/store/slices/cartSlice';
 import { OrderItem, OrderItemDTO, MakeOrderRequest } from '@/types/api';
 import orderService from '@/services/api/orderService';
-
-const DISH_PRICES: Record<number, { price: number; calories: number }> = {
-  101: { price: 85000, calories: 680 },
-  102: { price: 65000, calories: 550 },
-};
+import { dishService, DishDto } from '@services/api/dishService';
 
 export default function CheckoutScreen() {
   const navigation = useNavigation<any>();
@@ -18,26 +14,62 @@ export default function CheckoutScreen() {
   const user = useAppSelector((state) => state.auth.user);
   const [paymentMethod, setPaymentMethod] = useState<'COD' | 'VNPAY' | 'MOMO'>('COD');
   const [loading, setLoading] = useState(false);
+  const [dishes, setDishes] = useState<Record<number, DishDto>>({});
+  const [fetchingDishes, setFetchingDishes] = useState(false);
 
-  const totalPrice = cartItems.reduce((sum, item) => {
-    const info = DISH_PRICES[item.dishId] || { price: 0 };
-    return sum + info.price * item.quantity;
-  }, 0);
+  useEffect(() => {
+    const fetchDishes = async () => {
+      if (cartItems.length === 0) return;
+      
+      setFetchingDishes(true);
+      try {
+        const dishIds = [...new Set(cartItems.map(item => item.dishId))];
+        const dishPromises = dishIds.map(id => dishService.getById(id));
+        const dishResults = await Promise.all(dishPromises);
+        
+        const dishesMap: Record<number, DishDto> = {};
+        dishResults.forEach((dish, index) => {
+          if (dish) {
+            dishesMap[dishIds[index]] = dish;
+          }
+        });
+        setDishes(dishesMap);
+      } catch (error) {
+        console.error('Error fetching dishes:', error);
+      } finally {
+        setFetchingDishes(false);
+      }
+    };
 
-  const totalCalories = cartItems.reduce((sum, item) => {
-    const info = DISH_PRICES[item.dishId] || { calories: 0 };
-    return sum + info.calories * item.quantity;
-  }, 0);
+    fetchDishes();
+  }, [cartItems]);
+
+  const totalPrice = useMemo(() => {
+    return cartItems.reduce((sum, item) => {
+      const dish = dishes[item.dishId];
+      const price = dish?.price || 0;
+      return sum + price * item.quantity;
+    }, 0);
+  }, [cartItems, dishes]);
 
   // Convert OrderItem to OrderItemDTO
   const convertToOrderItemDTO = (item: OrderItem): OrderItemDTO => {
-    return {
+    const dto: OrderItemDTO = {
       dishId: item.dishId,
       name: item.dishName,
       quantity: item.quantity,
-      note: item.note,
-      // basedOnId, dishTemplate, recipe có thể thêm sau khi có thông tin từ API
     };
+    
+    // Chỉ thêm các field optional nếu có giá trị
+    if (item.note) {
+      dto.note = item.note;
+    }
+    
+    // Không gửi dishTemplate vì backend đang xử lý null không đúng
+    // Nếu cần dishTemplate, phải có logic chọn size từ user trước
+    // dishTemplate: undefined - không gửi field này
+    
+    return dto;
   };
 
   const handleCheckout = async () => {
@@ -77,14 +109,13 @@ export default function CheckoutScreen() {
         if (result && typeof result === 'string') {
           // Nếu có URL, mở browser để thanh toán
           // Hoặc navigate đến payment screen
-          navigation.navigate('VNPayMock', {
-            amount: totalPrice,
-            orderInfo: cartItems.map((item) => `${item.dishName} x${item.quantity}`).join(', '),
-            paymentUrl: result,
-            paymentMethod,
-            cartItems,
-            totalCalories,
-          });
+            navigation.navigate('VNPayMock', {
+              amount: totalPrice,
+              orderInfo: cartItems.map((item) => `${item.dishName} x${item.quantity}`).join(', '),
+              paymentUrl: result,
+              paymentMethod,
+              cartItems,
+            });
         } else {
           // Fallback - giả sử đã thanh toán thành công
           dispatch(clearCart());
@@ -101,12 +132,25 @@ export default function CheckoutScreen() {
       setLoading(false);
     }
   };
+  if (fetchingDishes) {
+    return (
+      <View style={styles.container}>
+        <View style={styles.loadingContainer}>
+          <ActivityIndicator size="large" color="#007bff" />
+          <Text style={styles.loadingText}>Đang tải thông tin món ăn...</Text>
+        </View>
+      </View>
+    );
+  }
+
   return (
     <ScrollView style={styles.container}>
       <Text style={styles.title}>Xác nhận đơn hàng</Text>
 
       {cartItems.map((item) => {
-        const { price = 0, calories = 0 } = DISH_PRICES[item.dishId] || {};
+        const dish = dishes[item.dishId];
+        const price = dish?.price || 0;
+        
         return (
           <View key={item.id} style={styles.itemRow}>
             <View style={styles.itemInfo}>
@@ -114,9 +158,19 @@ export default function CheckoutScreen() {
                 {item.dishName} x{item.quantity}
               </Text>
               {item.note && <Text style={styles.note}>Ghi chú: {item.note}</Text>}
-              <Text style={styles.calories}>{calories * item.quantity} calo</Text>
+              {dish?.description && (
+                <Text style={styles.description} numberOfLines={1}>
+                  {dish.description}
+                </Text>
+              )}
             </View>
-            <Text style={styles.price}>{(price * item.quantity).toLocaleString('vi-VN')}đ</Text>
+            <View style={styles.priceContainer}>
+              {price > 0 ? (
+                <Text style={styles.price}>{(price * item.quantity).toLocaleString('vi-VN')}đ</Text>
+              ) : (
+                <Text style={styles.priceUnavailable}>Chưa có giá</Text>
+              )}
+            </View>
           </View>
         );
       })}
@@ -125,10 +179,6 @@ export default function CheckoutScreen() {
         <View style={styles.summaryRow}>
           <Text style={styles.summaryLabel}>Tổng tiền</Text>
           <Text style={styles.totalPrice}>{totalPrice.toLocaleString('vi-VN')}đ</Text>
-        </View>
-        <View style={styles.summaryRow}>
-          <Text style={styles.summaryLabel}>Tổng calo</Text>
-          <Text style={styles.summaryText}>{totalCalories} calo</Text>
         </View>
       </View>
 
@@ -182,8 +232,17 @@ const styles = StyleSheet.create({
   itemInfo: { flex: 1 },
   itemName: { fontSize: 16, fontWeight: '500' },
   note: { fontSize: 12, color: '#666', fontStyle: 'italic', marginTop: 2 },
-  calories: { fontSize: 12, color: '#999', marginTop: 2 },
+  description: { fontSize: 11, color: '#999', marginTop: 2 },
+  priceContainer: { alignItems: 'flex-end' },
   price: { fontSize: 16, fontWeight: '500' },
+  priceUnavailable: { fontSize: 14, color: '#999', fontStyle: 'italic' },
+  loadingContainer: {
+    flex: 1,
+    justifyContent: 'center',
+    alignItems: 'center',
+    padding: 24,
+  },
+  loadingText: { marginTop: 12, fontSize: 14, color: '#666' },
   summary: {
     marginTop: 16,
     padding: 16,
@@ -193,7 +252,6 @@ const styles = StyleSheet.create({
   summaryRow: { flexDirection: 'row', justifyContent: 'space-between' },
   summaryLabel: { fontWeight: 'bold' },
   totalPrice: { fontSize: 18, fontWeight: 'bold' },
-  summaryText: { color: '#666' },
   sectionTitle: { marginTop: 24, marginBottom: 8, fontWeight: '600', fontSize: 16 },
   paymentOption: {
     padding: 12,

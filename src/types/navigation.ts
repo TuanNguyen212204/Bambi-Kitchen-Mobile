@@ -6,6 +6,7 @@ export type MainTabParamList = {
   Orders: undefined;
   Dashboard: undefined;
   Profile: undefined;
+  Admin: undefined;
 };
 
 export type CartStackParamList = {
@@ -17,7 +18,6 @@ export type CartStackParamList = {
     paymentUrl?: string;
     paymentMethod?: 'VNPAY' | 'MOMO';
     cartItems: any[];
-    totalCalories: number;
   };
   PaymentResult: {
     success: boolean;
@@ -33,6 +33,9 @@ export type RootStackParamList = {
   OTP: { email: string };
   ResetPassword: { email: string; otp: string };
   Dashboard?: undefined;
+  DishDetail: { dishId: number };
+  EditProfile: undefined;
+  ChangePassword: undefined;
 };
 
 declare global {
@@ -40,4 +43,3 @@ declare global {
     interface RootParamList extends RootStackParamList {}
   }
 }
-

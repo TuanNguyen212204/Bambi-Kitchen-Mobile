@@ -28,25 +28,6 @@ export interface Product {
 export type PaymentMethod = "COD" | "VNPAY";
 export type OrderStatus = 'NEW' | 'ASSIGNED' | 'PREPARING' | 'DONE' | 'CANCELLED';
 
-export interface OrderItem {
-  id: number;
-  dishId: number;
-  dishName: string;
-  quantity: number;
-  note?: string;
-}
-
-export interface Order {
-  id: number;
-  code?: string;
-  customerName?: string;
-  customerPhone?: string;
-  paymentMethod?: 'COD' | 'ONLINE' | string;
-  isPaid?: boolean;
-  status: OrderStatus;
-  createdAt?: string;
-  items: OrderItem[];
-}
 
 // Ingredient management
 export type IngredientUnit = 'GRAM' | 'KILOGRAM' | 'LITER' | 'PCS';
@@ -61,30 +42,39 @@ export interface IngredientCategory {
 export interface IngredientDTO {
   id: number;
   name: string;
-  category?: { id: number; name: string } | string | null;
-  unit: IngredientUnit | string;
+  category?: IngredientCategory;
+  unit: IngredientUnit;
   active?: boolean;
-  imgUrl?: string | null;
-  quantity?: number | string | null;
-  available?: number | string | null;
-  reserve?: number | string | null;
-  pricePerUnit?: number | string | null;
+  imgUrl?: string;
+  publicId?: string;
+  quantity?: number;
+  reserve?: number;
+  lastReserveAt?: string;
+  available?: number;
+  pricePerUnit?: number;
 }
 
-export interface Ingredient extends Omit<IngredientDTO, 'quantity' | 'available' | 'reserve' | 'unit' | 'category' | 'pricePerUnit'> {
+export interface Ingredient {
+  id: number;
+  name: string;
+  category?: IngredientCategory;
   unit: IngredientUnit;
-  category?: { id: number; name: string } | null;
-  quantity?: number | null;
-  available?: number | null;
-  reserve?: number | null;
-  pricePerUnit?: number | null;
-  stock: number;
-  stockStatus: 'out' | 'low' | 'normal';
+  active?: boolean;
+  imgUrl?: string;
+  publicId?: string;
+  quantity?: number;
+  reserve?: number;
+  lastReserveAt?: string;
+  available?: number;
+  pricePerUnit?: number;
 }
+
 
 export interface InventoryTransaction {
   id: number;
-  ingredient: { id: number } | Ingredient;
+  ingredient?: IngredientDTO;
+  orders?: Orders;
+  createAt?: string;
   quantity: number;
   transactionType: boolean; // true: in, false: out
   createdAt?: string;
@@ -142,3 +132,53 @@ export interface Orders {
   comment?: string;
 }
 
+export interface OrderItem {
+  id: number;
+  dishId: number;
+  dishName: string;
+  quantity: number;
+  note?: string;
+}
+
+export interface Order {
+  id: number;
+  code?: string;
+  customerName?: string;
+  customerPhone?: string;
+  paymentMethod?: 'COD' | 'ONLINE' | string;
+  isPaid?: boolean;
+  status: OrderStatus;
+  createdAt?: string;
+  totalPrice?: number;
+  totalCalories?: number;
+  items: OrderItem[];
+}
+
+// Account types từ API v3
+export interface Account {
+  id: number;
+  name: string;
+  role: 'ADMIN' | 'STAFF' | 'USER';
+  createAt?: string;
+  updateAt?: string;
+  password?: string;
+  mail: string;
+  phone?: string;
+  active?: boolean;
+}
+
+export interface AccountUpdateRequest {
+  id: number;
+  name: string;
+  role?: 'ADMIN' | 'STAFF' | 'USER';
+  mail?: string;
+  phone?: string;
+  password?: string;
+  active?: boolean;
+}
+
+export interface OrderUpdateDto {
+  orderId: number;
+  comment?: string;
+  ranking?: number;
+}

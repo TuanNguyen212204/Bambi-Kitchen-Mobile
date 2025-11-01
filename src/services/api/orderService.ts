@@ -40,7 +40,28 @@ export const orderService = {
   },
 
   async createOrder(request: MakeOrderRequest): Promise<string> {
-    const res = await apiClient.post('/api/order', request);
+    // Loại bỏ các field undefined để tránh backend xử lý null không đúng
+    const cleanRequest: any = {
+      accountId: request.accountId,
+      paymentMethod: request.paymentMethod,
+      totalPrice: request.totalPrice,
+      items: request.items.map((item) => {
+        const cleanItem: any = {
+          dishId: item.dishId,
+          name: item.name,
+          quantity: item.quantity,
+        };
+        if (item.note) cleanItem.note = item.note;
+        if (item.basedOnId) cleanItem.basedOnId = item.basedOnId;
+        // Không gửi dishTemplate nếu không có để tránh lỗi backend
+        // Backend đang cố gọi getSize() trên null object
+        if (item.recipe && item.recipe.length > 0) cleanItem.recipe = item.recipe;
+        return cleanItem;
+      }),
+    };
+    if (request.note) cleanRequest.note = request.note;
+    
+    const res = await apiClient.post('/api/order', cleanRequest);
     return res.data?.data ?? res.data ?? '';
   },
 
@@ -66,5 +87,3 @@ export const orderService = {
 };
 
 export default orderService;
-
-

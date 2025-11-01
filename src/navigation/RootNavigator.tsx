@@ -4,6 +4,9 @@ import { useNavigation } from '@react-navigation/native';
 import MainTabNavigator from './MainTabNavigator';
 import { RootStackParamList } from '@/types/navigation';
 import { LoginScreen, RegisterScreen, ForgotPasswordScreen, OTPScreen, ResetPasswordScreen } from '@features/auth/screens';
+import DishDetailScreen from '@features/home/screens/DishDetailScreen';
+import EditProfileScreen from '@features/profile/screens/EditProfileScreen';
+import ChangePasswordScreen from '@features/profile/screens/ChangePasswordScreen';
 import { useAppDispatch, useAppSelector } from '@store/store';
 import { loadSessionThunk } from '@store/thunks/authThunks';
 
@@ -51,6 +54,31 @@ const RootNavigator = () => {
       ) : (
         <>
           <Stack.Screen name="MainTabs" component={MainTabNavigator} />
+          <Stack.Screen
+            name="DishDetail"
+            component={DishDetailScreen}
+            options={{ headerShown: false }}
+          />
+          <Stack.Screen
+            name="EditProfile"
+            component={EditProfileScreen}
+            options={{ 
+              headerShown: true,
+              title: 'Chỉnh sửa thông tin',
+              headerStyle: { backgroundColor: '#007bff' },
+              headerTintColor: '#fff',
+            }}
+          />
+          <Stack.Screen
+            name="ChangePassword"
+            component={ChangePasswordScreen}
+            options={{ 
+              headerShown: true,
+              title: 'Đổi mật khẩu',
+              headerStyle: { backgroundColor: '#007bff' },
+              headerTintColor: '#fff',
+            }}
+          />
         </>
       )}
     </Stack.Navigator>
@@ -58,4 +86,3 @@ const RootNavigator = () => {
 };
 
 export default RootNavigator;
-

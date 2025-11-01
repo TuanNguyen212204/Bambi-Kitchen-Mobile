@@ -2,6 +2,7 @@ import React from 'react';
 import { createBottomTabNavigator } from '@react-navigation/bottom-tabs';
 import { createNativeStackNavigator } from '@react-navigation/native-stack';
 import { Ionicons } from '@expo/vector-icons';
+import { View, Text } from 'react-native';
 import HomeScreen from '@features/home/screens/HomeScreen';
 import AdminNavigator from '@features/admin/AdminNavigator';
 import ProfileScreen from '@features/profile/screens/ProfileScreen';
@@ -31,6 +32,9 @@ const Tab = createBottomTabNavigator();
 const MainTabNavigator = () => {
   const role = useAppSelector((s) => s.auth.user?.role);
   const isAdmin = role === 'ADMIN' || role === 'STAFF';
+  const cartItems = useAppSelector((s) => s.cart.items);
+  const cartItemsCount = cartItems.reduce((sum, item) => sum + item.quantity, 0);
+
   return (
     <Tab.Navigator
       screenOptions={{
@@ -80,7 +84,33 @@ const MainTabNavigator = () => {
             options={{
               title: 'Giỏ hàng',
               tabBarLabel: 'Giỏ hàng',
-              tabBarIcon: ({ color, size }) => <Ionicons name="cart" size={size} color={color} />,
+              tabBarIcon: ({ color, size }) => (
+                <View style={{ position: 'relative' }}>
+                  <Ionicons name="cart" size={size} color={color} />
+                  {cartItemsCount > 0 && (
+                    <View
+                      style={{
+                        position: 'absolute',
+                        top: -6,
+                        right: -6,
+                        backgroundColor: '#ff3b30',
+                        borderRadius: 10,
+                        minWidth: 18,
+                        height: 18,
+                        paddingHorizontal: 4,
+                        justifyContent: 'center',
+                        alignItems: 'center',
+                        borderWidth: 2,
+                        borderColor: '#ffffff',
+                      }}
+                    >
+                      <Text style={{ color: '#ffffff', fontSize: 10, fontWeight: '700' }}>
+                        {cartItemsCount > 99 ? '99+' : cartItemsCount}
+                      </Text>
+                    </View>
+                  )}
+                </View>
+              ),
             }}
           />
           <Tab.Screen

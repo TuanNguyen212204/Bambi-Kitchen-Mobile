@@ -16,14 +16,12 @@ export default function VNPayMockScreen() {
     paymentUrl, 
     paymentMethod = 'VNPAY',
     cartItems,
-    totalCalories 
   } = route.params as {
     amount: number;
     orderInfo: string;
     paymentUrl?: string;
     paymentMethod?: 'VNPAY' | 'MOMO';
     cartItems: OrderItem[];
-    totalCalories: number;
   };
   const [loading, setLoading] = useState(true);
   const [processing, setProcessing] = useState(false);
