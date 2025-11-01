@@ -2,7 +2,7 @@ import React, { useEffect, useMemo } from 'react';
 import { createNativeStackNavigator } from '@react-navigation/native-stack';
 import { useNavigation } from '@react-navigation/native';
 import MainTabNavigator from './MainTabNavigator';
-import { RootStackParamList } from '@types/navigation';
+import { RootStackParamList } from '@/types/navigation';
 import { LoginScreen, RegisterScreen, ForgotPasswordScreen, OTPScreen, ResetPasswordScreen } from '@features/auth/screens';
 import { useAppDispatch, useAppSelector } from '@store/store';
 import { loadSessionThunk } from '@store/thunks/authThunks';
