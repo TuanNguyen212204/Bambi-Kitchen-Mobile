@@ -52,30 +52,58 @@ const OrdersScreen = () => {
           )
         }
         renderItem={({ item }) => {
-          const createDate = item.createAt ? new Date(item.createAt).toLocaleString('vi-VN') : 'N/A';
-          const totalPrice = item.totalPrice != null ? item.totalPrice.toLocaleString('vi-VN') : '0';
-          const statusText = item.status && statusLabels[item.status] ? statusLabels[item.status] : String(item.status || 'N/A');
-          const rankingStars = item.ranking && item.ranking > 0 ? '⭐'.repeat(item.ranking) : '';
-          
-          return (
-            <View style={styles.card}>
-              <Text style={styles.title}>Đơn #{item.id || 'N/A'}</Text>
-              <Text style={styles.meta}>
-                Ngày: {createDate}
-              </Text>
-              <Text style={styles.meta}>Tổng tiền: {totalPrice}đ</Text>
-              <Text style={styles.meta}>Trạng thái: {statusText}</Text>
-              {item.note && (
-                <Text style={styles.meta}>Ghi chú: {String(item.note || '')}</Text>
-              )}
-              {item.ranking && item.comment && (
-                <View style={{ marginTop: 8, padding: 8, backgroundColor: '#f0f0f0', borderRadius: 4 }}>
-                  <Text style={styles.meta}>Đánh giá: {rankingStars}</Text>
-                  <Text style={styles.meta}>{String(item.comment || '')}</Text>
-                </View>
-              )}
-            </View>
-          );
+          // Đảm bảo tất cả giá trị đều là string trước khi render
+          try {
+            const orderId = item?.id != null ? String(item.id) : 'N/A';
+            
+            let createDate = 'N/A';
+            if (item?.createAt) {
+              try {
+                const date = new Date(item.createAt);
+                if (!isNaN(date.getTime())) {
+                  createDate = date.toLocaleString('vi-VN');
+                }
+              } catch (e) {
+                createDate = String(item.createAt || 'N/A');
+              }
+            }
+            
+            const totalPrice = item?.totalPrice != null ? String(item.totalPrice.toLocaleString('vi-VN')) : '0';
+            
+            let statusText = 'N/A';
+            if (item?.status) {
+              statusText = statusLabels[item.status] || String(item.status);
+            }
+            
+            const ranking = item?.ranking != null && item.ranking > 0 ? item.ranking : 0;
+            const rankingStars = ranking > 0 ? '⭐'.repeat(ranking) : '';
+            
+            return (
+              <View style={styles.card}>
+                <Text style={styles.title}>Đơn #{orderId}</Text>
+                <Text style={styles.meta}>Ngày: {createDate}</Text>
+                <Text style={styles.meta}>Tổng tiền: {totalPrice}đ</Text>
+                <Text style={styles.meta}>Trạng thái: {statusText}</Text>
+                {item?.note && String(item.note).trim() && (
+                  <Text style={styles.meta}>Ghi chú: {String(item.note)}</Text>
+                )}
+                {ranking > 0 && item?.comment && String(item.comment).trim() && (
+                  <View style={{ marginTop: 8, padding: 8, backgroundColor: '#f0f0f0', borderRadius: 4 }}>
+                    <Text style={styles.meta}>Đánh giá: {rankingStars}</Text>
+                    <Text style={styles.meta}>{String(item.comment)}</Text>
+                  </View>
+                )}
+              </View>
+            );
+          } catch (error) {
+            // Fallback nếu có lỗi
+            return (
+              <View style={styles.card}>
+                <Text style={styles.title}>Đơn hàng</Text>
+                <Text style={styles.meta}>Lỗi hiển thị thông tin</Text>
+              </View>
+            );
+          }
         }}
       />
     </View>
