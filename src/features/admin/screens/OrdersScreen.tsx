@@ -51,23 +51,32 @@ const OrdersScreen = () => {
             </View>
           )
         }
-        renderItem={({ item }) => (
-          <View style={styles.card}>
-            <Text style={styles.title}>Đơn #{item.id}</Text>
-            <Text style={styles.meta}>
-              Ngày: {new Date(item.createAt).toLocaleString('vi-VN')}
-            </Text>
-            <Text style={styles.meta}>Tổng tiền: {item.totalPrice.toLocaleString('vi-VN')}đ</Text>
-            <Text style={styles.meta}>Trạng thái: {statusLabels[item.status]}</Text>
-            {item.note && <Text style={styles.meta}>Ghi chú: {String(item.note || '')}</Text>}
-            {item.ranking && item.comment && (
-              <View style={{ marginTop: 8, padding: 8, backgroundColor: '#f0f0f0', borderRadius: 4 }}>
-                <Text style={styles.meta}>Đánh giá: {'⭐'.repeat(item.ranking)}</Text>
-                <Text style={styles.meta}>{String(item.comment || '')}</Text>
-              </View>
-            )}
-          </View>
-        )}
+        renderItem={({ item }) => {
+          const createDate = item.createAt ? new Date(item.createAt).toLocaleString('vi-VN') : 'N/A';
+          const totalPrice = item.totalPrice != null ? item.totalPrice.toLocaleString('vi-VN') : '0';
+          const statusText = item.status && statusLabels[item.status] ? statusLabels[item.status] : String(item.status || 'N/A');
+          const rankingStars = item.ranking && item.ranking > 0 ? '⭐'.repeat(item.ranking) : '';
+          
+          return (
+            <View style={styles.card}>
+              <Text style={styles.title}>Đơn #{item.id || 'N/A'}</Text>
+              <Text style={styles.meta}>
+                Ngày: {createDate}
+              </Text>
+              <Text style={styles.meta}>Tổng tiền: {totalPrice}đ</Text>
+              <Text style={styles.meta}>Trạng thái: {statusText}</Text>
+              {item.note && (
+                <Text style={styles.meta}>Ghi chú: {String(item.note || '')}</Text>
+              )}
+              {item.ranking && item.comment && (
+                <View style={{ marginTop: 8, padding: 8, backgroundColor: '#f0f0f0', borderRadius: 4 }}>
+                  <Text style={styles.meta}>Đánh giá: {rankingStars}</Text>
+                  <Text style={styles.meta}>{String(item.comment || '')}</Text>
+                </View>
+              )}
+            </View>
+          );
+        }}
       />
     </View>
   );
