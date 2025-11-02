@@ -8,6 +8,7 @@ import AdminNavigator from '@features/admin/AdminNavigator';
 import ProfileScreen from '@features/profile/screens/ProfileScreen';
 import CartScreen from '@/features/cart/screens/CartScreen';
 import OrderHistoryScreen from '@/features/order/screens/OrderHisotryScreen';
+import DashboardScreen from '@/features/dashboard/screen/DashboardScreen';
 import { MainTabParamList, CartStackParamList } from '@/types/navigation';
 
 import CheckoutScreen from '@/features/CheckoutScreen';
@@ -54,6 +55,17 @@ const MainTabNavigator = () => {
               headerShown: false,
               tabBarIcon: ({ color, size }) => (
                 <Ionicons name="speedometer" size={size} color={color} />
+              ),
+            }}
+          />
+          <Tab.Screen
+            name="Dashboard"
+            component={DashboardScreen}
+            options={{
+              title: 'Bảng điều khiển',
+              tabBarLabel: 'Bảng điều khiển',
+              tabBarIcon: ({ color, size }) => (
+                <Ionicons name="grid" size={size} color={color} />
               ),
             }}
           />
