@@ -31,6 +31,7 @@ const Sheet = styled(View)`
   margin-left: auto;
   margin-right: auto;
   padding: 0 24px;
+  min-height: ${Dimensions.get('window').height * 0.58}px;
 `;
 
 const Banner = styled(ImageBackground)`
@@ -170,11 +171,11 @@ const RegisterScreen: React.FC<any> = ({ navigation }) => {
           style={{ height: Dimensions.get('window').height * 0.58 }}
         />
         <KeyboardAvoidingView 
-          behavior={Platform.OS === 'ios' ? 'padding' : 'height'} 
+          behavior={Platform.OS === 'ios' ? 'padding' : undefined} 
           style={{ flex: 1 }}
           keyboardVerticalOffset={Platform.OS === 'ios' ? 0 : 0}
         >
-          <Sheet style={{ bottom: -32, flex: 1 }}>
+          <Sheet style={{ bottom: -32 }}>
             <TouchableOpacity 
               onPress={() => {
                 Keyboard.dismiss();
@@ -185,11 +186,16 @@ const RegisterScreen: React.FC<any> = ({ navigation }) => {
               <Ionicons name="chevron-back" size={28} color="#111" />
             </TouchableOpacity>
             <ScrollView 
-              contentContainerStyle={{ paddingTop: 40, paddingBottom: 40 }}
+              contentContainerStyle={{ 
+                paddingTop: 40, 
+                paddingBottom: 60,
+                minHeight: Dimensions.get('window').height * 0.58
+              }}
               showsVerticalScrollIndicator={true}
               keyboardShouldPersistTaps="handled"
               nestedScrollEnabled={true}
               bounces={true}
+              style={{ flex: 1 }}
             >
               <TitleContainer>
                 <Title>Đăng ký</Title>
