@@ -23,13 +23,14 @@ const Sheet = styled(View)`
   left: 0;
   right: 0;
   bottom: 0;
+  top: ${Dimensions.get('window').height * 0.42}px;
   background-color: #fff;
   border-top-left-radius: 36px;
   border-top-right-radius: 36px;
   max-width: 420px;
   margin-left: auto;
   margin-right: auto;
-  padding: 72px 24px 48px 24px;
+  padding: 0 24px;
 `;
 
 const Banner = styled(ImageBackground)`
@@ -162,18 +163,18 @@ const RegisterScreen: React.FC<any> = ({ navigation }) => {
   return (
     <SafeAreaView style={{ flex: 1 }} edges={['left','right','bottom']}>
       <StatusBar translucent backgroundColor="transparent" barStyle="light-content" />
-      <KeyboardAvoidingView 
-        behavior={Platform.OS === 'ios' ? 'padding' : 'height'} 
-        style={{ flex: 1 }}
-        keyboardVerticalOffset={Platform.OS === 'ios' ? 0 : 20}
-      >
-        <View style={{ flex: 1 }}>
-          <Banner
-            source={require('../../../../assets/LoginPage/loginPage1.png')}
-            resizeMode="cover"
-            style={{ height: Dimensions.get('window').height * 0.58 }}
-          />
-          <Sheet style={{ bottom: -32 }}>
+      <View style={{ flex: 1 }}>
+        <Banner
+          source={require('../../../../assets/LoginPage/loginPage1.png')}
+          resizeMode="cover"
+          style={{ height: Dimensions.get('window').height * 0.58 }}
+        />
+        <KeyboardAvoidingView 
+          behavior={Platform.OS === 'ios' ? 'padding' : 'height'} 
+          style={{ flex: 1 }}
+          keyboardVerticalOffset={Platform.OS === 'ios' ? 0 : 0}
+        >
+          <Sheet style={{ bottom: -32, flex: 1 }}>
             <TouchableOpacity 
               onPress={() => {
                 Keyboard.dismiss();
@@ -184,9 +185,11 @@ const RegisterScreen: React.FC<any> = ({ navigation }) => {
               <Ionicons name="chevron-back" size={28} color="#111" />
             </TouchableOpacity>
             <ScrollView 
-              contentContainerStyle={{ paddingBottom: 20 }}
-              showsVerticalScrollIndicator={false}
+              contentContainerStyle={{ paddingTop: 40, paddingBottom: 40 }}
+              showsVerticalScrollIndicator={true}
               keyboardShouldPersistTaps="handled"
+              nestedScrollEnabled={true}
+              bounces={true}
             >
               <TitleContainer>
                 <Title>Đăng ký</Title>
@@ -271,8 +274,8 @@ const RegisterScreen: React.FC<any> = ({ navigation }) => {
               </TouchableOpacity>
             </ScrollView>
           </Sheet>
-        </View>
-      </KeyboardAvoidingView>
+        </KeyboardAvoidingView>
+      </View>
     </SafeAreaView>
   );
 };
