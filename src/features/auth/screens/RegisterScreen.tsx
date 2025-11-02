@@ -106,6 +106,7 @@ const RegisterScreen: React.FC<any> = ({ navigation }) => {
   const [showPassword, setShowPassword] = useState(false);
   const [showConfirmPassword, setShowConfirmPassword] = useState(false);
   const [loading, setLoading] = useState(false);
+  const [keyboardVisible, setKeyboardVisible] = useState(false);
   const insets = useSafeAreaInsets();
   const scrollViewRef = useRef<ScrollView>(null);
   const passwordInputRef = useRef<TextInput>(null);
@@ -166,6 +167,20 @@ const RegisterScreen: React.FC<any> = ({ navigation }) => {
     }
   };
 
+  React.useEffect(() => {
+    const keyboardDidShowListener = Keyboard.addListener('keyboardDidShow', () => {
+      setKeyboardVisible(true);
+    });
+    const keyboardDidHideListener = Keyboard.addListener('keyboardDidHide', () => {
+      setKeyboardVisible(false);
+    });
+
+    return () => {
+      keyboardDidShowListener.remove();
+      keyboardDidHideListener.remove();
+    };
+  }, []);
+
   const scrollToInput = (inputY: number) => {
     scrollViewRef.current?.scrollTo({
       y: inputY,
@@ -180,14 +195,23 @@ const RegisterScreen: React.FC<any> = ({ navigation }) => {
         <Banner
           source={require('../../../../assets/LoginPage/loginPage1.png')}
           resizeMode="cover"
-          style={{ height: Dimensions.get('window').height * 0.58 }}
+          style={{ 
+            height: keyboardVisible 
+              ? Dimensions.get('window').height * 0.3 
+              : Dimensions.get('window').height * 0.58 
+          }}
         />
         <KeyboardAvoidingView 
-          behavior={Platform.OS === 'ios' ? 'padding' : undefined} 
+          behavior={Platform.OS === 'ios' ? 'padding' : 'height'} 
           style={{ flex: 1 }}
           keyboardVerticalOffset={Platform.OS === 'ios' ? 0 : 0}
         >
-          <Sheet style={{ bottom: -32 }}>
+          <Sheet style={{ 
+            bottom: -32,
+            top: keyboardVisible 
+              ? Dimensions.get('window').height * 0.3 
+              : Dimensions.get('window').height * 0.42 
+          }}>
             <TouchableOpacity 
               onPress={() => {
                 Keyboard.dismiss();
