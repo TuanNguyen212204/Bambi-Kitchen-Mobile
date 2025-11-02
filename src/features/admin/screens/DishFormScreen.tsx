@@ -5,6 +5,7 @@ import { useRoute, useNavigation, useFocusEffect } from '@react-navigation/nativ
 import { useAppSelector } from '@store/store';
 import { dishService, DishDto, DishCreateRequest, DishUpdateRequest } from '@services/api/dishService';
 import { getIngredients } from '@services/api/ingredientService';
+import { getAllCategories } from '@services/api/categoryService';
 import recipeService from '@services/api/recipeService';
 import { toast } from '@utils/toast';
 
@@ -30,14 +31,21 @@ const DishFormScreen = () => {
   
   // Ingredients selection
   const [allIngredients, setAllIngredients] = useState<any[]>([]);
+  const [categories, setCategories] = useState<any[]>([]);
   const [selectedIngredients, setSelectedIngredients] = useState<Record<number, number>>({}); // Map<ingredientId, quantity>
   const [loadingIngredients, setLoadingIngredients] = useState(false);
+  const [selectedCategoryId, setSelectedCategoryId] = useState<number | null>(null); // Filter by category
+  const [ingredientSearch, setIngredientSearch] = useState(''); // Search by name
 
   const loadIngredients = useCallback(async () => {
     setLoadingIngredients(true);
     try {
-      const ingredients = await getIngredients();
+      const [ingredients, cats] = await Promise.all([
+        getIngredients(),
+        getAllCategories(),
+      ]);
       setAllIngredients(ingredients || []);
+      setCategories(cats || []);
     } catch (error: any) {
       toast.error(error?.message || 'Lỗi tải danh sách nguyên liệu');
     } finally {
@@ -149,10 +157,35 @@ const DishFormScreen = () => {
         return next;
       });
     } else {
-      // Add ingredient with default quantity 1
+      // Add ingredient with default quantity 1 (user can change immediately)
       setSelectedIngredients((prev) => ({ ...prev, [ingredientId]: 1 }));
     }
   };
+
+  // Filter ingredients by category and search
+  const filteredIngredients = allIngredients.filter((ing) => {
+    // Filter by active
+    if (ing.active === false) return false;
+    
+    // Filter by category
+    if (selectedCategoryId != null) {
+      if (ing.category?.id !== selectedCategoryId) return false;
+    }
+    
+    // Filter by search keyword
+    if (ingredientSearch.trim()) {
+      const keyword = ingredientSearch.trim().toLowerCase();
+      const name = (ing.name || '').toLowerCase();
+      if (!name.includes(keyword)) return false;
+    }
+    
+    return true;
+  });
+
+  // Get selected ingredients details for summary
+  const selectedIngredientsList = allIngredients.filter((ing) => 
+    selectedIngredients[ing.id] != null && selectedIngredients[ing.id] > 0
+  );
 
   const onSubmit = async () => {
     if (!name.trim()) {
@@ -321,6 +354,76 @@ const DishFormScreen = () => {
       </View>
 
       <Text style={styles.label}>Nguyên liệu *</Text>
+      
+      {/* Search và Filter */}
+      <TextInput
+        placeholder="Tìm kiếm nguyên liệu..."
+        value={ingredientSearch}
+        onChangeText={setIngredientSearch}
+        style={[styles.input, { marginBottom: 8 }]}
+        autoCorrect={true}
+        autoCapitalize="words"
+        keyboardType="default"
+      />
+      
+      {/* Category Filter */}
+      <ScrollView 
+        horizontal 
+        showsHorizontalScrollIndicator={false}
+        style={styles.categoryFilter}
+        contentContainerStyle={styles.categoryFilterContent}
+      >
+        <TouchableOpacity
+          onPress={() => setSelectedCategoryId(null)}
+          style={[
+            styles.categoryChip,
+            selectedCategoryId === null && styles.categoryChipActive
+          ]}
+        >
+          <Text style={selectedCategoryId === null ? styles.categoryChipTextActive : undefined}>
+            Tất cả
+          </Text>
+        </TouchableOpacity>
+        {categories.map((cat) => (
+          <TouchableOpacity
+            key={cat.id}
+            onPress={() => setSelectedCategoryId(cat.id)}
+            style={[
+              styles.categoryChip,
+              selectedCategoryId === cat.id && styles.categoryChipActive
+            ]}
+          >
+            <Text style={selectedCategoryId === cat.id ? styles.categoryChipTextActive : undefined}>
+              {cat.name || 'N/A'}
+            </Text>
+          </TouchableOpacity>
+        ))}
+      </ScrollView>
+
+      {/* Selected Ingredients Summary */}
+      {selectedIngredientsList.length > 0 && (
+        <View style={styles.selectedSummary}>
+          <Text style={styles.selectedSummaryTitle}>Đã chọn ({selectedIngredientsList.length}):</Text>
+          {selectedIngredientsList.map((ing) => {
+            const qty = selectedIngredients[ing.id];
+            return (
+              <View key={ing.id} style={styles.selectedItem}>
+                <Text style={styles.selectedItemName}>
+                  {ing.name || 'N/A'} - {qty} {ing.unit || ''}
+                </Text>
+                <TouchableOpacity
+                  onPress={() => toggleIngredient(ing.id)}
+                  style={styles.removeBtn}
+                >
+                  <Text style={styles.removeBtnText}>Xóa</Text>
+                </TouchableOpacity>
+              </View>
+            );
+          })}
+        </View>
+      )}
+
+      {/* Ingredients List */}
       {loadingIngredients ? (
         <Text style={styles.hint}>Đang tải danh sách nguyên liệu...</Text>
       ) : (
@@ -329,43 +432,49 @@ const DishFormScreen = () => {
           nestedScrollEnabled={true}
           showsVerticalScrollIndicator={true}
         >
-          {allIngredients
-            .filter((ing) => ing.active !== false)
-            .map((ingredient) => {
-              const isSelected = selectedIngredients[ingredient.id] != null;
-              const quantity = selectedIngredients[ingredient.id] || 0;
+          {filteredIngredients.map((ingredient) => {
+            const isSelected = selectedIngredients[ingredient.id] != null;
+            const quantity = selectedIngredients[ingredient.id] || 0;
 
-              return (
-                <View key={ingredient.id} style={styles.ingredientItem}>
-                  <TouchableOpacity
-                    onPress={() => toggleIngredient(ingredient.id)}
-                    style={[styles.checkbox, isSelected && styles.checkboxActive]}
-                  >
-                    {isSelected && <Text style={styles.checkmark}>✓</Text>}
-                  </TouchableOpacity>
-                  <View style={styles.ingredientInfo}>
-                    <Text style={styles.ingredientName}>{ingredient.name || 'N/A'}</Text>
+            return (
+              <View key={ingredient.id} style={styles.ingredientItem}>
+                <TouchableOpacity
+                  onPress={() => toggleIngredient(ingredient.id)}
+                  style={[styles.checkbox, isSelected && styles.checkboxActive]}
+                >
+                  {isSelected && <Text style={styles.checkmark}>✓</Text>}
+                </TouchableOpacity>
+                <View style={styles.ingredientInfo}>
+                  <Text style={styles.ingredientName}>{ingredient.name || 'N/A'}</Text>
+                  <View style={styles.ingredientMeta}>
                     {ingredient.unit && (
                       <Text style={styles.ingredientUnit}>Đơn vị: {ingredient.unit}</Text>
                     )}
+                    {ingredient.category?.name && (
+                      <Text style={styles.ingredientCategory}> • Danh mục: {ingredient.category.name}</Text>
+                    )}
                   </View>
-                  {isSelected && (
-                    <TextInput
-                      value={quantity > 0 ? String(quantity) : ''}
-                      onChangeText={(text) => {
-                        const num = Number(text) || 0;
-                        updateIngredientQuantity(ingredient.id, num);
-                      }}
-                      placeholder="Số lượng"
-                      keyboardType="numeric"
-                      style={styles.quantityInput}
-                    />
-                  )}
                 </View>
-              );
-            })}
-          {allIngredients.filter((ing) => ing.active !== false).length === 0 && (
-            <Text style={styles.hint}>Chưa có nguyên liệu nào</Text>
+                {isSelected && (
+                  <TextInput
+                    value={quantity > 0 ? String(quantity) : ''}
+                    onChangeText={(text) => {
+                      const num = Number(text) || 0;
+                      updateIngredientQuantity(ingredient.id, num);
+                    }}
+                    placeholder="SL"
+                    keyboardType="numeric"
+                    style={styles.quantityInput}
+                    autoFocus={quantity === 1} // Auto focus when first selected
+                  />
+                )}
+              </View>
+            );
+          })}
+          {filteredIngredients.length === 0 && (
+            <Text style={styles.hint}>
+              {ingredientSearch || selectedCategoryId ? 'Không tìm thấy nguyên liệu' : 'Chưa có nguyên liệu nào'}
+            </Text>
           )}
         </ScrollView>
       )}
@@ -573,6 +682,75 @@ const styles = StyleSheet.create({
     width: 80,
     textAlign: 'center',
     backgroundColor: '#f9fafb',
+  },
+  categoryFilter: {
+    marginBottom: 12,
+  },
+  categoryFilterContent: {
+    paddingHorizontal: 4,
+  },
+  categoryChip: {
+    paddingHorizontal: 16,
+    paddingVertical: 8,
+    borderWidth: 1,
+    borderColor: '#e5e7eb',
+    borderRadius: 20,
+    backgroundColor: '#fff',
+    marginRight: 8,
+  },
+  categoryChipActive: {
+    backgroundColor: '#007AFF',
+    borderColor: '#007AFF',
+  },
+  categoryChipTextActive: {
+    color: 'white',
+    fontWeight: '600',
+  },
+  selectedSummary: {
+    backgroundColor: '#f0f9ff',
+    borderWidth: 1,
+    borderColor: '#007AFF',
+    borderRadius: 8,
+    padding: 12,
+    marginBottom: 12,
+  },
+  selectedSummaryTitle: {
+    fontSize: 14,
+    fontWeight: '600',
+    color: '#007AFF',
+    marginBottom: 8,
+  },
+  selectedItem: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    alignItems: 'center',
+    paddingVertical: 6,
+    borderBottomWidth: 1,
+    borderBottomColor: '#e0f2fe',
+  },
+  selectedItemName: {
+    fontSize: 14,
+    color: '#111827',
+    flex: 1,
+  },
+  removeBtn: {
+    paddingHorizontal: 12,
+    paddingVertical: 4,
+    backgroundColor: '#fee2e2',
+    borderRadius: 6,
+  },
+  removeBtnText: {
+    color: '#dc2626',
+    fontSize: 12,
+    fontWeight: '600',
+  },
+  ingredientMeta: {
+    flexDirection: 'row',
+    flexWrap: 'wrap',
+  },
+  ingredientCategory: {
+    fontSize: 12,
+    color: '#6b7280',
   },
 });
 
