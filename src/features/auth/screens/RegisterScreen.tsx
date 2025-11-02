@@ -1,5 +1,5 @@
-import React, { useState } from 'react';
-import { Alert, KeyboardAvoidingView, Platform, TouchableOpacity, View, ScrollView, StatusBar, Dimensions, ImageBackground, Text, Keyboard } from 'react-native';
+import React, { useState, useRef } from 'react';
+import { Alert, KeyboardAvoidingView, Platform, TouchableOpacity, View, ScrollView, StatusBar, Dimensions, ImageBackground, Text, Keyboard, TextInput } from 'react-native';
 import { SafeAreaView, useSafeAreaInsets } from 'react-native-safe-area-context';
 import styled from 'styled-components/native';
 import Button from '@components/common/Button';
@@ -61,7 +61,9 @@ const Subtitle = styled.Text`
   text-align: center;
 `;
 
-const Input = styled.TextInput`
+const Input = styled.TextInput.attrs(() => ({
+  as: TextInput,
+}))`
   width: 100%;
   border-width: 1px;
   border-color: ${COLORS.border};
@@ -69,7 +71,7 @@ const Input = styled.TextInput`
   padding: 14px 48px 14px 16px;
   margin-bottom: 12px;
   font-size: 16px;
-`;
+` as any;
 
 const InputContainer = styled.View`
   position: relative;
@@ -105,6 +107,9 @@ const RegisterScreen: React.FC<any> = ({ navigation }) => {
   const [showConfirmPassword, setShowConfirmPassword] = useState(false);
   const [loading, setLoading] = useState(false);
   const insets = useSafeAreaInsets();
+  const scrollViewRef = useRef<ScrollView>(null);
+  const passwordInputRef = useRef<TextInput>(null);
+  const confirmPasswordInputRef = useRef<TextInput>(null);
 
   // Format phone number to +84 format if needed
   const formatPhone = (phoneNumber: string): string => {
@@ -161,6 +166,13 @@ const RegisterScreen: React.FC<any> = ({ navigation }) => {
     }
   };
 
+  const scrollToInput = (inputY: number) => {
+    scrollViewRef.current?.scrollTo({
+      y: inputY,
+      animated: true,
+    });
+  };
+
   return (
     <SafeAreaView style={{ flex: 1 }} edges={['left','right','bottom']}>
       <StatusBar translucent backgroundColor="transparent" barStyle="light-content" />
@@ -186,9 +198,10 @@ const RegisterScreen: React.FC<any> = ({ navigation }) => {
               <Ionicons name="chevron-back" size={28} color="#111" />
             </TouchableOpacity>
             <ScrollView 
+              ref={scrollViewRef}
               contentContainerStyle={{ 
                 paddingTop: 40, 
-                paddingBottom: 60,
+                paddingBottom: 100,
                 minHeight: Dimensions.get('window').height * 0.58
               }}
               showsVerticalScrollIndicator={true}
@@ -196,6 +209,9 @@ const RegisterScreen: React.FC<any> = ({ navigation }) => {
               nestedScrollEnabled={true}
               bounces={true}
               style={{ flex: 1 }}
+              onContentSizeChange={() => {
+                // Auto scroll khi content size thay đổi
+              }}
             >
               <TitleContainer>
                 <Title>Đăng ký</Title>
@@ -242,12 +258,23 @@ const RegisterScreen: React.FC<any> = ({ navigation }) => {
               />
               <InputContainer>
                 <Input 
+                  ref={passwordInputRef}
                   placeholder="Mật khẩu" 
                   value={password} 
                   onChangeText={setPassword} 
                   secureTextEntry={!showPassword}
                   textContentType="newPassword"
                   autoCorrect={false}
+                  onFocus={(e) => {
+                    setTimeout(() => {
+                      passwordInputRef.current?.measure((x, y, width, height, pageX, pageY) => {
+                        scrollViewRef.current?.scrollTo({
+                          y: pageY - 100,
+                          animated: true,
+                        });
+                      });
+                    }, 300);
+                  }}
                 />
                 <EyeIcon onPress={() => setShowPassword(!showPassword)}>
                   <Ionicons 
@@ -259,12 +286,23 @@ const RegisterScreen: React.FC<any> = ({ navigation }) => {
               </InputContainer>
               <InputContainer>
                 <Input 
+                  ref={confirmPasswordInputRef}
                   placeholder="Xác nhận mật khẩu" 
                   value={confirmPassword} 
                   onChangeText={setConfirmPassword} 
                   secureTextEntry={!showConfirmPassword}
                   textContentType="newPassword"
-                  autoCorrect={false} 
+                  autoCorrect={false}
+                  onFocus={(e) => {
+                    setTimeout(() => {
+                      confirmPasswordInputRef.current?.measure((x, y, width, height, pageX, pageY) => {
+                        scrollViewRef.current?.scrollTo({
+                          y: pageY - 100,
+                          animated: true,
+                        });
+                      });
+                    }, 300);
+                  }}
                 />
                 <EyeIcon onPress={() => setShowConfirmPassword(!showConfirmPassword)}>
                   <Ionicons 
