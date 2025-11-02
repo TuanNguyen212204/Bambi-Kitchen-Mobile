@@ -25,7 +25,7 @@ export interface OrderDto {
 }
 
 export const orderService = {
-  async getOrders(): Promise<Orders[]> {
+  async getOrders(p0: { status: string; }): Promise<Orders[]> {
     // GET /api/order - lấy tất cả orders (API v3)
     const res = await apiClient.get('/api/order');
     return (res.data?.data ?? res.data ?? []) as Orders[];

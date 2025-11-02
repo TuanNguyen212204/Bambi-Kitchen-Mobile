@@ -78,7 +78,7 @@ export const dishService = {
     const res = await apiClient.get<DishDto[]>('/api/dish/get-all');
     return (res.data?.data ?? res.data ?? []) as DishDto[];
   },
-  
+
   getById: async (id: number): Promise<DishDto | null> => {
     try {
       const res = await apiClient.get<DishDto>(`/api/dish/${id}`);
@@ -152,10 +152,14 @@ export const dishService = {
       params: { id, isPublic },
     });
   },
-  
+
   getCategories: async (): Promise<DishCategory[]> => {
     const res = await apiClient.get<DishCategory[]>('/api/dish-category');
     return (res.data?.data ?? res.data ?? []) as DishCategory[];
+  },
+
+  delete: async (id: number): Promise<void> => {
+    await apiClient.delete(`/api/dish/${id}`);
   },
 };
 

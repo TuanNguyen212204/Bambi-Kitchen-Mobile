@@ -8,6 +8,8 @@ import IngredientCategoryListScreen from '@features/ingredients/screens/Ingredie
 import IngredientStockHistoryScreen from '@features/ingredients/screens/IngredientStockHistoryScreen';
 import IngredientDetailScreen from '@features/ingredients/screens/IngredientDetailScreen';
 import IngredientCategoryFormScreen from '@features/ingredients/screens/IngredientCategoryFormScreen';
+import DishListScreen from './screens/DishListScreen';
+import DishFormScreen from './screens/DishFormScreen';
 
 export type AdminStackParamList = {
   AdminHub: undefined;
@@ -18,6 +20,8 @@ export type AdminStackParamList = {
   AdminOrders: undefined;
   AdminIngredientDetail: { ingredientId: number };
   AdminIngredientCategoryForm: { mode: 'create' } | { mode: 'edit'; categoryId: number };
+  AdminDishList: undefined;
+  AdminDishForm: { mode: 'create' } | { mode: 'edit'; dishId: number };
 };
 
 const Stack = createNativeStackNavigator<AdminStackParamList>();
@@ -33,6 +37,8 @@ const AdminNavigator = () => {
       <Stack.Screen name="AdminIngredientHistory" component={IngredientStockHistoryScreen} options={{ title: 'Lịch sử tồn kho' }} />
       <Stack.Screen name="AdminOrders" component={OrdersScreen} options={{ title: 'Đơn hàng' }} />
       <Stack.Screen name="AdminIngredientDetail" component={IngredientDetailScreen} options={{ title: 'Chi tiết nguyên liệu' }} />
+      <Stack.Screen name="AdminDishList" component={DishListScreen} options={{ title: 'Quản lý món ăn' }} />
+      <Stack.Screen name="AdminDishForm" component={DishFormScreen} options={{ title: 'Món ăn' }} />
     </Stack.Navigator>
   );
 };
