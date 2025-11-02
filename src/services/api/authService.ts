@@ -10,7 +10,8 @@ export interface RegisterRequest {
   name: string;
   mail: string;
   password: string;
-  role: 'USER' | 'STAFF' | 'ADMIN';
+  phone?: string;
+  role?: 'USER' | 'STAFF' | 'ADMIN';
 }
 
 export const authService = {

@@ -93,8 +93,10 @@ const BackButton = styled(TouchableOpacity)`
 `;
 
 const RegisterScreen: React.FC<any> = ({ navigation }) => {
-  const [name, setName] = useState('');
+  const [firstName, setFirstName] = useState('');
+  const [lastName, setLastName] = useState('');
   const [email, setEmail] = useState('');
+  const [phone, setPhone] = useState('');
   const [password, setPassword] = useState('');
   const [confirmPassword, setConfirmPassword] = useState('');
   const [showPassword, setShowPassword] = useState(false);
@@ -102,8 +104,20 @@ const RegisterScreen: React.FC<any> = ({ navigation }) => {
   const [loading, setLoading] = useState(false);
   const insets = useSafeAreaInsets();
 
+  // Format phone number to +84 format if needed
+  const formatPhone = (phoneNumber: string): string => {
+    let cleaned = phoneNumber.replace(/\D/g, ''); // Remove non-digits
+    if (cleaned.startsWith('0')) {
+      cleaned = cleaned.substring(1); // Remove leading 0
+    }
+    if (!cleaned.startsWith('84')) {
+      cleaned = '84' + cleaned; // Add country code if not present
+    }
+    return '+' + cleaned;
+  };
+
   const onRegister = async () => {
-    if (!name || !email || !password || !confirmPassword) {
+    if (!firstName.trim() || !lastName.trim() || !email.trim() || !phone.trim() || !password || !confirmPassword) {
       Alert.alert('Thiếu thông tin', 'Vui lòng nhập đầy đủ các trường');
       return;
     }
@@ -111,18 +125,35 @@ const RegisterScreen: React.FC<any> = ({ navigation }) => {
       Alert.alert('Mật khẩu không khớp', 'Vui lòng nhập lại mật khẩu để xác nhận.');
       return;
     }
+    // Basic email validation
+    const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+    if (!emailRegex.test(email)) {
+      Alert.alert('Email không hợp lệ', 'Vui lòng nhập địa chỉ email hợp lệ.');
+      return;
+    }
+    // Basic phone validation (should have at least 9 digits)
+    const phoneDigits = phone.replace(/\D/g, '');
+    if (phoneDigits.length < 9) {
+      Alert.alert('Số điện thoại không hợp lệ', 'Vui lòng nhập số điện thoại hợp lệ.');
+      return;
+    }
+    
     setLoading(true);
     try {
+      const fullName = `${firstName.trim()} ${lastName.trim()}`.trim();
+      const formattedPhone = formatPhone(phone);
+      
       await authService.register({
-        name,
-        mail: email,
+        name: fullName,
+        mail: email.trim(),
         password,
+        phone: formattedPhone,
         role: 'USER',
       });
       Alert.alert('Thành công', 'Đăng ký thành công. Vui lòng đăng nhập.');
       navigation.navigate('Login');
     } catch (e: any) {
-      Alert.alert('Lỗi', e?.message || 'Không thể đăng ký');
+      Alert.alert('Lỗi', e?.response?.data?.message || e?.message || 'Không thể đăng ký');
     } finally {
       setLoading(false);
     }
@@ -148,12 +179,22 @@ const RegisterScreen: React.FC<any> = ({ navigation }) => {
             <Subtitle>Đăng ký để trải nghiệm Bambi Kitchen</Subtitle>
             <Input 
               placeholder="Tên" 
-              value={name} 
-              onChangeText={setName}
+              value={firstName} 
+              onChangeText={setFirstName}
               autoCorrect={true}
               autoCapitalize="words"
               keyboardType="default"
-              textContentType="none"
+              textContentType="givenName"
+              enablesReturnKeyAutomatically={false}
+            />
+            <Input 
+              placeholder="Họ" 
+              value={lastName} 
+              onChangeText={setLastName}
+              autoCorrect={true}
+              autoCapitalize="words"
+              keyboardType="default"
+              textContentType="familyName"
               enablesReturnKeyAutomatically={false}
             />
             <Input 
@@ -164,6 +205,16 @@ const RegisterScreen: React.FC<any> = ({ navigation }) => {
               autoCapitalize="none"
               autoCorrect={false}
               textContentType="emailAddress"
+            />
+            <Input 
+              placeholder="Số điện thoại (VD: 0912345678 hoặc +84912345678)" 
+              value={phone} 
+              onChangeText={setPhone} 
+              keyboardType="phone-pad"
+              autoCapitalize="none"
+              autoCorrect={false}
+              textContentType="telephoneNumber"
+              enablesReturnKeyAutomatically={false}
             />
             <InputContainer>
               <Input 
