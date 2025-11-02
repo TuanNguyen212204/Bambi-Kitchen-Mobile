@@ -112,6 +112,8 @@ export default function FeedbackScreen() {
           autoCorrect={true}
           autoCapitalize="sentences"
           keyboardType="default"
+          textContentType="none"
+          enablesReturnKeyAutomatically={false}
         />
       </View>
 

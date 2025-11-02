@@ -144,6 +144,8 @@ const DishListScreen = () => {
           autoCorrect={true}
           autoCapitalize="words"
           keyboardType="default"
+          textContentType="none"
+          enablesReturnKeyAutomatically={false}
         />
         <View style={{ flexDirection: 'row', gap: 8, marginBottom: 8 }}>
           <TouchableOpacity

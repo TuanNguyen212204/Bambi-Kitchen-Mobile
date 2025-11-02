@@ -93,47 +93,132 @@ export const dishService = {
     return (res.data?.data ?? res.data ?? []) as DishDto[];
   },
 
-  // API v3: POST /api/dish với query params (Spring @RequestParam binding)
-  // Backend Spring bind FormData fields to DishCreateRequest via @RequestParam("request")
+  // API v3: POST /api/dish - dùng chung cho cả create và update
+  // Theo web implementation: gửi FormData với các field riêng lẻ
+  // CREATE: KHÔNG gửi field 'id' (hoặc id = null/undefined)
+  // UPDATE: GỬI field 'id' với giá trị số hợp lệ
+  // Ingredients format: ingredients[<ingredientId>] = <quantity> trong FormData
   create: async (request: DishCreateRequest): Promise<DishDto> => {
     const formData = new FormData();
-    if (request.id) formData.append('id', String(request.id));
+    
+    // QUAN TRỌNG: CREATE không gửi id (để backend tự tạo)
+    // Chỉ gửi id khi update (id != null)
+    const isUpdate = request.id != null && request.id !== undefined;
+    if (isUpdate) {
+      formData.append('id', String(request.id));
+    }
+    
+    // Required fields
     formData.append('name', request.name);
-    if (request.description) formData.append('description', request.description);
-    if (request.price != null) formData.append('price', String(request.price));
-    formData.append('account', JSON.stringify(request.account));
     formData.append('dishType', request.dishType);
-    formData.append('ingredients', JSON.stringify(request.ingredients));
-    if (request.usedQuantity != null) formData.append('usedQuantity', String(request.usedQuantity));
+    
+    // Optional fields
+    if (request.description) {
+      formData.append('description', request.description);
+    }
+    if (request.price != null) {
+      formData.append('price', String(request.price));
+    }
+    
+    // Account chỉ cần gửi id (theo web implementation: account.id = string number)
+    if (request.account?.id != null) {
+      formData.append('account.id', String(request.account.id));
+    }
+    
+    // Public và Active
+    if (request.public !== undefined) {
+      formData.append('public', String(request.public));
+    }
+    if (request.active !== undefined) {
+      formData.append('active', String(request.active));
+    }
+    
+    // Ingredients: format ingredients[<ingredientId>] = <quantity>
+    // CHỈ gửi những ingredients có quantity > 0 (theo web implementation)
+    const ingredients = request.ingredients || {};
+    Object.entries(ingredients)
+      .filter(([, qty]) => qty > 0)
+      .forEach(([ingId, qty]) => {
+        formData.append(`ingredients[${ingId}]`, String(qty));
+      });
+    
+    // UsedQuantity (nếu có)
+    if (request.usedQuantity != null) {
+      formData.append('usedQuantity', String(request.usedQuantity));
+    }
+    
+    // File: Luôn gửi field 'file' (kể cả khi là empty file nếu không có file mới)
     if (request.file && typeof request.file !== 'string') {
       formData.append('file', request.file as any);
+    } else {
+      // Gửi empty file nếu không có file mới (theo web implementation)
+      // Trong React Native, có thể tạo empty file object hoặc không gửi
+      // Tạm thời không gửi nếu không có file
     }
-    if (request.public !== undefined) formData.append('public', String(request.public));
-    if (request.active !== undefined) formData.append('active', String(request.active));
 
-    // Spring @RequestParam với multipart sẽ bind từ form fields
     const res = await apiClient.post<DishDto>('/api/dish', formData);
     return (res.data?.data ?? res.data) as DishDto;
   },
 
-  // API v3: PUT /api/dish với query params (Spring @RequestParam binding)
+  // API v3: POST /api/dish - dùng chung cho cả create và update
+  // UPDATE: GỬI field 'id' với giá trị số hợp lệ
+  // Theo web implementation: cùng endpoint với create, chỉ khác là có id
   update: async (request: DishUpdateRequest): Promise<DishDto> => {
     const formData = new FormData();
+    
+    // UPDATE: PHẢI gửi id
     formData.append('id', String(request.id));
-    if (request.name) formData.append('name', request.name);
-    if (request.description !== undefined) formData.append('description', request.description);
-    if (request.price != null) formData.append('price', String(request.price));
-    if (request.account) formData.append('account', JSON.stringify(request.account));
-    if (request.dishType) formData.append('dishType', request.dishType);
-    if (request.usedQuantity != null) formData.append('usedQuantity', String(request.usedQuantity));
+    
+    // Required fields
+    if (request.name) {
+      formData.append('name', request.name);
+    }
+    if (request.dishType) {
+      formData.append('dishType', request.dishType);
+    }
+    
+    // Optional fields
+    if (request.description !== undefined) {
+      formData.append('description', request.description);
+    }
+    if (request.price != null) {
+      formData.append('price', String(request.price));
+    }
+    
+    // Account chỉ cần gửi id (theo web implementation: account.id = string number)
+    if (request.account?.id != null) {
+      formData.append('account.id', String(request.account.id));
+    }
+    
+    // Public và Active
+    if (request.public !== undefined) {
+      formData.append('public', String(request.public));
+    }
+    if (request.active !== undefined) {
+      formData.append('active', String(request.active));
+    }
+    
+    // Ingredients: format ingredients[<ingredientId>] = <quantity>
+    // Nếu có ingredients trong request (DishUpdateRequest không có ingredients field mặc định)
+    // Nhưng theo web implementation, update cũng có thể có ingredients
+    // Tạm thời không xử lý ingredients cho update (vì DishUpdateRequest không có field này)
+    
+    // UsedQuantity (nếu có)
+    if (request.usedQuantity != null) {
+      formData.append('usedQuantity', String(request.usedQuantity));
+    }
+    
+    // File: Luôn gửi field 'file' (kể cả khi là empty file nếu không có file mới)
     if (request.file && typeof request.file !== 'string') {
       formData.append('file', request.file as any);
+    } else {
+      // Gửi empty file nếu không có file mới (theo web implementation)
+      // Trong React Native, có thể tạo empty file object hoặc không gửi
+      // Tạm thời không gửi nếu không có file
     }
-    if (request.public !== undefined) formData.append('public', String(request.public));
-    if (request.active !== undefined) formData.append('active', String(request.active));
 
-    // Spring @RequestParam với multipart sẽ bind từ form fields
-    const res = await apiClient.put<DishDto>('/api/dish', formData);
+    // Dùng POST /api/dish (giống create) vì web cũng dùng POST cho cả create và update
+    const res = await apiClient.post<DishDto>('/api/dish', formData);
     return (res.data?.data ?? res.data) as DishDto;
   },
 

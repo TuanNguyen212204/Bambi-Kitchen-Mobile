@@ -113,6 +113,8 @@ const MenuScreen = () => {
           autoCorrect={true}
           autoCapitalize="words"
           keyboardType="default"
+          textContentType="none"
+          enablesReturnKeyAutomatically={false}
         />
       </SearchBar>
 

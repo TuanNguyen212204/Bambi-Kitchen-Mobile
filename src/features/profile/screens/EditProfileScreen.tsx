@@ -138,6 +138,8 @@ export default function EditProfileScreen() {
           autoCorrect={true}
           autoCapitalize="words"
           keyboardType="default"
+          textContentType="none"
+          enablesReturnKeyAutomatically={false}
         />
 
         <Text style={styles.label}>Email *</Text>
