@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { Alert, KeyboardAvoidingView, Platform, TouchableOpacity, View, ScrollView, StatusBar, Dimensions, ImageBackground, Text } from 'react-native';
+import { Alert, KeyboardAvoidingView, Platform, TouchableOpacity, View, ScrollView, StatusBar, Dimensions, ImageBackground, Text, Keyboard } from 'react-native';
 import { SafeAreaView, useSafeAreaInsets } from 'react-native-safe-area-context';
 import styled from 'styled-components/native';
 import Button from '@components/common/Button';
@@ -162,7 +162,11 @@ const RegisterScreen: React.FC<any> = ({ navigation }) => {
   return (
     <SafeAreaView style={{ flex: 1 }} edges={['left','right','bottom']}>
       <StatusBar translucent backgroundColor="transparent" barStyle="light-content" />
-      <KeyboardAvoidingView behavior={Platform.OS === 'ios' ? 'padding' : undefined} style={{ flex: 1 }}>
+      <KeyboardAvoidingView 
+        behavior={Platform.OS === 'ios' ? 'padding' : 'height'} 
+        style={{ flex: 1 }}
+        keyboardVerticalOffset={Platform.OS === 'ios' ? 0 : 20}
+      >
         <View style={{ flex: 1 }}>
           <Banner
             source={require('../../../../assets/LoginPage/loginPage1.png')}
@@ -170,90 +174,102 @@ const RegisterScreen: React.FC<any> = ({ navigation }) => {
             style={{ height: Dimensions.get('window').height * 0.58 }}
           />
           <Sheet style={{ bottom: -32 }}>
-            <TouchableOpacity onPress={() => navigation.goBack()} style={{ position: 'absolute', top: 8, left: 8, zIndex: 10 }}>
+            <TouchableOpacity 
+              onPress={() => {
+                Keyboard.dismiss();
+                navigation.goBack();
+              }} 
+              style={{ position: 'absolute', top: 8, left: 8, zIndex: 10 }}
+            >
               <Ionicons name="chevron-back" size={28} color="#111" />
             </TouchableOpacity>
-            <TitleContainer>
-              <Title>Đăng ký</Title>
-            </TitleContainer>
-            <Subtitle>Đăng ký để trải nghiệm Bambi Kitchen</Subtitle>
-            <Input 
-              placeholder="Tên" 
-              value={firstName} 
-              onChangeText={setFirstName}
-              autoCorrect={true}
-              autoCapitalize="words"
-              keyboardType="default"
-              textContentType="givenName"
-              enablesReturnKeyAutomatically={false}
-            />
-            <Input 
-              placeholder="Họ" 
-              value={lastName} 
-              onChangeText={setLastName}
-              autoCorrect={true}
-              autoCapitalize="words"
-              keyboardType="default"
-              textContentType="familyName"
-              enablesReturnKeyAutomatically={false}
-            />
-            <Input 
-              placeholder="Email" 
-              value={email} 
-              onChangeText={setEmail} 
-              keyboardType="email-address" 
-              autoCapitalize="none"
-              autoCorrect={false}
-              textContentType="emailAddress"
-            />
-            <Input 
-              placeholder="Số điện thoại (VD: 0912345678 hoặc +84912345678)" 
-              value={phone} 
-              onChangeText={setPhone} 
-              keyboardType="phone-pad"
-              autoCapitalize="none"
-              autoCorrect={false}
-              textContentType="telephoneNumber"
-              enablesReturnKeyAutomatically={false}
-            />
-            <InputContainer>
+            <ScrollView 
+              contentContainerStyle={{ paddingBottom: 20 }}
+              showsVerticalScrollIndicator={false}
+              keyboardShouldPersistTaps="handled"
+            >
+              <TitleContainer>
+                <Title>Đăng ký</Title>
+              </TitleContainer>
+              <Subtitle>Đăng ký để trải nghiệm Bambi Kitchen</Subtitle>
               <Input 
-                placeholder="Mật khẩu" 
-                value={password} 
-                onChangeText={setPassword} 
-                secureTextEntry={!showPassword}
-                textContentType="newPassword"
+                placeholder="Tên" 
+                value={firstName} 
+                onChangeText={setFirstName}
+                autoCorrect={true}
+                autoCapitalize="words"
+                keyboardType="default"
+                textContentType="givenName"
+                enablesReturnKeyAutomatically={false}
+              />
+              <Input 
+                placeholder="Họ" 
+                value={lastName} 
+                onChangeText={setLastName}
+                autoCorrect={true}
+                autoCapitalize="words"
+                keyboardType="default"
+                textContentType="familyName"
+                enablesReturnKeyAutomatically={false}
+              />
+              <Input 
+                placeholder="Email" 
+                value={email} 
+                onChangeText={setEmail} 
+                keyboardType="email-address" 
+                autoCapitalize="none"
                 autoCorrect={false}
+                textContentType="emailAddress"
               />
-              <EyeIcon onPress={() => setShowPassword(!showPassword)}>
-                <Ionicons 
-                  name={showPassword ? "eye-off-outline" : "eye-outline"} 
-                  size={24} 
-                  color={COLORS.textSecondary} 
-                />
-              </EyeIcon>
-            </InputContainer>
-            <InputContainer>
               <Input 
-                placeholder="Xác nhận mật khẩu" 
-                value={confirmPassword} 
-                onChangeText={setConfirmPassword} 
-                secureTextEntry={!showConfirmPassword}
-                textContentType="newPassword"
-                autoCorrect={false} 
+                placeholder="Số điện thoại (VD: 0912345678 hoặc +84912345678)" 
+                value={phone} 
+                onChangeText={setPhone} 
+                keyboardType="phone-pad"
+                autoCapitalize="none"
+                autoCorrect={false}
+                textContentType="telephoneNumber"
+                enablesReturnKeyAutomatically={false}
               />
-              <EyeIcon onPress={() => setShowConfirmPassword(!showConfirmPassword)}>
-                <Ionicons 
-                  name={showConfirmPassword ? "eye-off-outline" : "eye-outline"} 
-                  size={24} 
-                  color={COLORS.textSecondary} 
+              <InputContainer>
+                <Input 
+                  placeholder="Mật khẩu" 
+                  value={password} 
+                  onChangeText={setPassword} 
+                  secureTextEntry={!showPassword}
+                  textContentType="newPassword"
+                  autoCorrect={false}
                 />
-              </EyeIcon>
-            </InputContainer>
-            <Button title="Đăng ký" onPress={onRegister} loading={loading} fullWidth style={{ borderRadius: 24, marginTop: 12 }} />
-            <TouchableOpacity onPress={() => navigation.navigate('Login')} style={{ marginTop: 12, alignItems: 'center' }}>
-              <Text style={{ color: COLORS.primary, fontWeight: '600' }}>Đã có tài khoản? Đăng nhập</Text>
-            </TouchableOpacity>
+                <EyeIcon onPress={() => setShowPassword(!showPassword)}>
+                  <Ionicons 
+                    name={showPassword ? "eye-off-outline" : "eye-outline"} 
+                    size={24} 
+                    color={COLORS.textSecondary} 
+                  />
+                </EyeIcon>
+              </InputContainer>
+              <InputContainer>
+                <Input 
+                  placeholder="Xác nhận mật khẩu" 
+                  value={confirmPassword} 
+                  onChangeText={setConfirmPassword} 
+                  secureTextEntry={!showConfirmPassword}
+                  textContentType="newPassword"
+                  autoCorrect={false} 
+                />
+                <EyeIcon onPress={() => setShowConfirmPassword(!showConfirmPassword)}>
+                  <Ionicons 
+                    name={showConfirmPassword ? "eye-off-outline" : "eye-outline"} 
+                    size={24} 
+                    color={COLORS.textSecondary} 
+                  />
+                </EyeIcon>
+              </InputContainer>
+              <Button title="Đăng ký" onPress={onRegister} loading={loading} fullWidth style={{ borderRadius: 24, marginTop: 12 }} />
+              <TouchableOpacity onPress={() => navigation.navigate('Login')} style={{ marginTop: 12, alignItems: 'center', marginBottom: 20 }}>
+                <Text style={{ color: COLORS.primary, fontWeight: '600' }}>Đã có tài khoản? Đăng nhập</Text>
+              </TouchableOpacity>
+            </ScrollView>
           </Sheet>
         </View>
       </KeyboardAvoidingView>
