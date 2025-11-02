@@ -109,16 +109,24 @@ const RegisterScreen: React.FC<any> = ({ navigation }) => {
   const passwordInputRef = useRef<TextInput>(null);
   const confirmPasswordInputRef = useRef<TextInput>(null);
 
-  // Format phone number to +84 format if needed
+  // Format phone number to 0xxx format (same as web)
   const formatPhone = (phoneNumber: string): string => {
     let cleaned = phoneNumber.replace(/\D/g, ''); // Remove non-digits
-    if (cleaned.startsWith('0')) {
-      cleaned = cleaned.substring(1); // Remove leading 0
+    
+    // Nếu bắt đầu bằng +84, chuyển thành 0
+    if (cleaned.startsWith('84')) {
+      cleaned = '0' + cleaned.substring(2); // Chuyển 84xxx thành 0xxx
     }
-    if (!cleaned.startsWith('84')) {
-      cleaned = '84' + cleaned; // Add country code if not present
+    
+    // Đảm bảo bắt đầu bằng 0
+    if (!cleaned.startsWith('0')) {
+      // Nếu có 9-10 chữ số và không bắt đầu bằng 0, thêm 0 vào đầu
+      if (cleaned.length >= 9 && cleaned.length <= 10) {
+        cleaned = '0' + cleaned;
+      }
     }
-    return '+' + cleaned;
+    
+    return cleaned;
   };
 
   const onRegister = async () => {
