@@ -187,7 +187,9 @@ const RegisterScreen: React.FC<any> = ({ navigation }) => {
                 placeholder="Xác nhận mật khẩu" 
                 value={confirmPassword} 
                 onChangeText={setConfirmPassword} 
-                secureTextEntry={!showConfirmPassword} 
+                secureTextEntry={!showConfirmPassword}
+                textContentType="newPassword"
+                autoCorrect={false} 
               />
               <EyeIcon onPress={() => setShowConfirmPassword(!showConfirmPassword)}>
                 <Ionicons 
