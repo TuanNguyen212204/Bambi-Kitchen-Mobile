@@ -146,8 +146,22 @@ const RegisterScreen: React.FC<any> = ({ navigation }) => {
               <Title>Đăng ký</Title>
             </TitleContainer>
             <Subtitle>Đăng ký để trải nghiệm Bambi Kitchen</Subtitle>
-            <Input placeholder="Tên" value={name} onChangeText={setName} />
-            <Input placeholder="Email" value={email} onChangeText={setEmail} keyboardType="email-address" autoCapitalize="none" />
+            <Input 
+              placeholder="Tên" 
+              value={name} 
+              onChangeText={setName}
+              autoCorrect={true}
+              autoCapitalize="words"
+              keyboardType="default"
+            />
+            <Input 
+              placeholder="Email" 
+              value={email} 
+              onChangeText={setEmail} 
+              keyboardType="email-address" 
+              autoCapitalize="none"
+              autoCorrect={false}
+            />
             <InputContainer>
               <Input 
                 placeholder="Mật khẩu" 

@@ -110,6 +110,9 @@ const MenuScreen = () => {
           style={{ flex: 1 }}
           value={query}
           onChangeText={setQuery}
+          autoCorrect={true}
+          autoCapitalize="words"
+          keyboardType="default"
         />
       </SearchBar>
 

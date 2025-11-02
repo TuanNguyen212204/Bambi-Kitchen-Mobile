@@ -79,7 +79,15 @@ const IngredientFormScreen = () => {
   return (
     <ScrollView contentContainerStyle={styles.container}>
       <Text style={styles.label}>Tên</Text>
-      <TextInput value={name} onChangeText={setName} placeholder="Nhập tên" style={styles.input} />
+      <TextInput 
+        value={name} 
+        onChangeText={setName} 
+        placeholder="Nhập tên" 
+        style={styles.input}
+        autoCorrect={true}
+        autoCapitalize="words"
+        keyboardType="default"
+      />
 
       <Text style={styles.label}>Danh mục</Text>
       <ScrollView horizontal showsHorizontalScrollIndicator={false} style={{ marginBottom: 8 }}>

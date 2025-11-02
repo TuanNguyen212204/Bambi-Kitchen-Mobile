@@ -162,7 +162,7 @@ const OrderDetailScreen: React.FC = () => {
           {order.note && (
             <View style={styles.infoRow}>
               <Text style={styles.infoLabel}>Ghi chú:</Text>
-              <Text style={styles.infoValue}>{order.note}</Text>
+              <Text style={styles.infoValue}>{String(order.note || '')}</Text>
             </View>
           )}
         </View>
@@ -230,7 +230,7 @@ const OrderDetailScreen: React.FC = () => {
             {order.comment && order.comment !== '0' && (
               <View style={styles.infoRow}>
                 <Text style={styles.infoLabel}>Bình luận:</Text>
-                <Text style={[styles.infoValue, styles.commentText]}>{order.comment}</Text>
+                <Text style={[styles.infoValue, styles.commentText]}>{String(order.comment || '')}</Text>
               </View>
             )}
           </View>

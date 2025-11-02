@@ -59,11 +59,11 @@ const OrdersScreen = () => {
             </Text>
             <Text style={styles.meta}>Tổng tiền: {item.totalPrice.toLocaleString('vi-VN')}đ</Text>
             <Text style={styles.meta}>Trạng thái: {statusLabels[item.status]}</Text>
-            {item.note && <Text style={styles.meta}>Ghi chú: {item.note}</Text>}
+            {item.note && <Text style={styles.meta}>Ghi chú: {String(item.note || '')}</Text>}
             {item.ranking && item.comment && (
               <View style={{ marginTop: 8, padding: 8, backgroundColor: '#f0f0f0', borderRadius: 4 }}>
                 <Text style={styles.meta}>Đánh giá: {'⭐'.repeat(item.ranking)}</Text>
-                <Text style={styles.meta}>{item.comment}</Text>
+                <Text style={styles.meta}>{String(item.comment || '')}</Text>
               </View>
             )}
           </View>

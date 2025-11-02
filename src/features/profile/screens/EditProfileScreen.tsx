@@ -135,6 +135,9 @@ export default function EditProfileScreen() {
           onChangeText={setName}
           placeholder="Nhập họ tên"
           editable={!loading}
+          autoCorrect={true}
+          autoCapitalize="words"
+          keyboardType="default"
         />
 
         <Text style={styles.label}>Email *</Text>
@@ -145,6 +148,7 @@ export default function EditProfileScreen() {
           placeholder="Nhập email"
           keyboardType="email-address"
           autoCapitalize="none"
+          autoCorrect={false}
           editable={!loading}
         />
 
@@ -155,6 +159,7 @@ export default function EditProfileScreen() {
           onChangeText={setPhone}
           placeholder="Nhập số điện thoại (ví dụ: 0912345678)"
           keyboardType="phone-pad"
+          autoCorrect={false}
           editable={!loading}
         />
 

@@ -162,6 +162,9 @@ const DishFormScreen = () => {
         onChangeText={setName}
         placeholder="Nhập tên món"
         style={styles.input}
+        autoCorrect={true}
+        autoCapitalize="words"
+        keyboardType="default"
       />
 
       <Text style={styles.label}>Mô tả</Text>
@@ -172,6 +175,9 @@ const DishFormScreen = () => {
         style={[styles.input, styles.textArea]}
         multiline
         numberOfLines={3}
+        autoCorrect={true}
+        autoCapitalize="sentences"
+        keyboardType="default"
       />
 
       <Text style={styles.label}>Giá (₫)</Text>

@@ -109,6 +109,9 @@ export default function FeedbackScreen() {
           onChangeText={setComment}
           editable={!loading}
           textAlignVertical="top"
+          autoCorrect={true}
+          autoCapitalize="sentences"
+          keyboardType="default"
         />
       </View>
 

@@ -141,6 +141,9 @@ const DishListScreen = () => {
           value={keyword}
           onChangeText={setKeyword}
           style={styles.search}
+          autoCorrect={true}
+          autoCapitalize="words"
+          keyboardType="default"
         />
         <View style={{ flexDirection: 'row', gap: 8, marginBottom: 8 }}>
           <TouchableOpacity

@@ -101,7 +101,15 @@ const IngredientCategoryListScreen = () => {
   return (
     <View style={styles.container}>
       <Text style={styles.title}>Danh mục nguyên liệu</Text>
-      <TextInput placeholder="Tìm kiếm danh mục..." value={search} onChangeText={setSearch} style={[styles.input, { marginBottom: 8 }]} />
+      <TextInput 
+        placeholder="Tìm kiếm danh mục..." 
+        value={search} 
+        onChangeText={setSearch} 
+        style={[styles.input, { marginBottom: 8 }]}
+        autoCorrect={true}
+        autoCapitalize="words"
+        keyboardType="default"
+      />
       
       <View style={{ flexDirection: 'row', gap: 8, marginBottom: 8 }}>
         <TouchableOpacity onPress={() => navigation.navigate('AdminIngredientCategoryForm', { mode: 'create' })} style={styles.createBtn}>

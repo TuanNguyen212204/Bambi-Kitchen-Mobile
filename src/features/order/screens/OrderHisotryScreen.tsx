@@ -92,7 +92,7 @@ export default function OrderHistoryScreen() {
               </Text>
             </View>
 
-            {order.note && <Text style={styles.note}>Ghi chú: {order.note}</Text>}
+            {order.note && <Text style={styles.note}>Ghi chú: {String(order.note || '')}</Text>}
 
             <View style={styles.footer}>
               <Text style={styles.totalPrice}>{order.totalPrice.toLocaleString('vi-VN')}đ</Text>
@@ -114,7 +114,7 @@ export default function OrderHistoryScreen() {
             {order.ranking && order.comment ? (
               <View style={styles.feedback}>
                 <Text style={styles.feedbackTitle}>Đánh giá: ⭐{order.ranking}/5</Text>
-                <Text style={styles.feedbackComment}>{order.comment}</Text>
+                <Text style={styles.feedbackComment}>{String(order.comment || '')}</Text>
               </View>
             ) : (
               (order.status === 'PAID' || order.status === 'COMPLETED') && (
