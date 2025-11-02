@@ -10,3 +10,6 @@ export * from './paymentService';
 export * from './recipeService';
 export * from './accountService';
 export * from './multipartHelpers';
+export * from './notificationService';
+export * from './dishTemplateService';
+export * from './dishCategoryService';

@@ -29,17 +29,25 @@ apiClient.interceptors.response.use(
   (response: AxiosResponse) => {
     return response;
   },
-  (error) => {
+  async (error) => {
     const status = error?.response?.status;
     const method = (error?.config?.method || 'GET').toUpperCase?.();
     const url = `${error?.config?.baseURL || ''}${error?.config?.url || ''}`;
     const data = error?.response?.data;
     const message = data?.message || error?.message || 'Network error';
+    
+    // Kiểm tra xem có token không
+    const token = await storage.getItem<string>('authToken');
+    const isUnauthenticated = status === 401 && !token;
+    
     // Log chi tiết giúp debug nhanh lỗi 4xx/5xx và network
-    // Lưu ý: Chỉ toast trong dev để tránh làm phiền người dùng sản xuất
     if (__DEV__) {
       console.error('API Error:', { method, url, status, message, data });
-      toast.error(`${status || ''} ${message}`.trim());
+      // Chỉ toast lỗi nếu không phải là 401 khi chưa login (tránh spam khi app mới start)
+      // Hoặc nếu là lỗi khác (network, 500, etc.)
+      if (!isUnauthenticated && (status !== 401 || token)) {
+        toast.error(`${status || ''} ${message}`.trim());
+      }
     }
     return Promise.reject(error);
   }

@@ -234,19 +234,46 @@ const HomeScreen = () => {
     const fetchData = async () => {
       setLoading(true);
       try {
-        const [ds, cats, fbs] = await Promise.all([
-          dishService.getAll(),
-          dishService.getCategories(),
-          orderService.getFeedbacks(),
-        ]);
-        setDishes(Array.isArray(ds) ? ds : []);
-        setCategories(Array.isArray(cats) ? cats : []);
-        // Chỉ hiển thị feedbacks > 3 sao
-        const highRatingFeedbacks = (Array.isArray(fbs) ? fbs : []).filter(
-          (fb: FeedbackDto) => fb.ranking && fb.ranking > 3
-        );
-        setFeedbacks(highRatingFeedbacks);
+        // Public APIs - thử gọi, nếu lỗi 401 thì có thể backend yêu cầu auth
+        // Nhưng vẫn cố gắng load để user có thể xem menu khi đã login
+        try {
+          const [ds, cats] = await Promise.all([
+            dishService.getAll(),
+            dishService.getCategories(),
+          ]);
+          setDishes(Array.isArray(ds) ? ds : []);
+          setCategories(Array.isArray(cats) ? cats : []);
+        } catch (e: any) {
+          // Nếu lỗi auth (401), có thể backend yêu cầu login
+          // Chỉ log trong dev, không spam user
+          if (__DEV__ && e?.response?.status === 401) {
+            console.log('[HOME] Dish/category APIs require auth, will retry after login');
+          }
+          setDishes([]);
+          setCategories([]);
+        }
+        
+        // Chỉ gọi getFeedbacks nếu user đã đăng nhập
+        if (user) {
+          try {
+            const fbs = await orderService.getFeedbacks();
+            // Chỉ hiển thị feedbacks > 3 sao
+            const highRatingFeedbacks = (Array.isArray(fbs) ? fbs : []).filter(
+              (fb: FeedbackDto) => fb.ranking && fb.ranking > 3
+            );
+            setFeedbacks(highRatingFeedbacks);
+          } catch (e) {
+            // Nếu lỗi getFeedbacks, vẫn tiếp tục hiển thị dishes và categories
+            setFeedbacks([]);
+          }
+        } else {
+          setFeedbacks([]);
+        }
       } catch (e) {
+        // Fallback error handling
+        if (__DEV__) {
+          console.error('[HOME] Unexpected error:', e);
+        }
         setDishes([]);
         setFeedbacks([]);
       } finally {
@@ -254,7 +281,7 @@ const HomeScreen = () => {
       }
     };
     fetchData();
-  }, []);
+  }, [user]);
 
   useEffect(() => {
     const interval = setInterval(() => {

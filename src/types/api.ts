@@ -180,6 +180,13 @@ export interface AccountUpdateRequest {
   active?: boolean;
 }
 
+export interface AccountCreateRequest {
+  name: string;
+  mail: string;
+  role: 'ADMIN' | 'STAFF' | 'USER';
+  password: string; // minLength: 6, maxLength: 50
+}
+
 export interface OrderUpdateDto {
   orderId: number;
   comment?: string;

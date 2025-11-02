@@ -1,5 +1,5 @@
 import apiClient from './apiClient';
-import { MakeOrderRequest, Orders } from '@/types/api';
+import { MakeOrderRequest, Orders, FeedbackDto } from '@/types/api';
 
 // Legacy types kept for backward compatibility (old API)
 export type OrderStatus = 'NEW' | 'ASSIGNED' | 'PREPARING' | 'DONE' | 'CANCELLED';
@@ -51,14 +51,14 @@ export const orderService = {
     comment?: string;
     ranking?: number;
   }): Promise<Orders> {
-    // Dùng PUT /api/order với body { orderId, comment, ranking }
-    const res = await apiClient.put('/api/order', orderUpdate);
+    // API v3: PUT /api/order/feedback với body { orderId, comment, ranking }
+    const res = await apiClient.put('/api/order/feedback', orderUpdate);
     return (res.data?.data ?? res.data) as Orders;
   },
 
-  async getFeedbacks(): Promise<any[]> {
+  async getFeedbacks(): Promise<FeedbackDto[]> {
     const res = await apiClient.get('/api/order/getFeedbacks');
-    return (res.data?.data ?? res.data ?? []) as any[];
+    return (res.data?.data ?? res.data ?? []) as FeedbackDto[];
   },
 
   async createOrder(request: MakeOrderRequest): Promise<string> {
