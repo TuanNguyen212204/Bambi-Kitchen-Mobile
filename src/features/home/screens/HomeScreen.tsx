@@ -24,7 +24,7 @@ const Screen = styled.ScrollView`
 
 const Header = styled.View`
   background-color: #ef4444;
-  padding: 20px 16px 12px 16px;
+  padding: 30px 16px 12px 16px;
 `;
 
 const SearchContainer = styled.View`
@@ -341,11 +341,6 @@ const HomeScreen = () => {
           ))}
         </BannerPagination>
       </BannerContainer>
-
-      <OrderBuilderButton onPress={() => navigation.navigate('OrderBuilder')}>
-        <Text style={{ color: '#ffffff', fontSize: 20 }}>🍽️</Text>
-        <OrderBuilderText>Tạo món theo từng bước</OrderBuilderText>
-      </OrderBuilderButton>
 
       <Section>
         <SectionHeader>
