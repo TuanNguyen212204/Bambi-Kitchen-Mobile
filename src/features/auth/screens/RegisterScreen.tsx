@@ -22,8 +22,6 @@ const Sheet = styled(View)`
   position: absolute;
   left: 0;
   right: 0;
-  bottom: 0;
-  top: ${Dimensions.get('window').height * 0.42}px;
   background-color: #fff;
   border-top-left-radius: 36px;
   border-top-right-radius: 36px;
@@ -31,7 +29,6 @@ const Sheet = styled(View)`
   margin-left: auto;
   margin-right: auto;
   padding: 0 24px;
-  min-height: ${Dimensions.get('window').height * 0.58}px;
 `;
 
 const Banner = styled(ImageBackground)`
@@ -197,7 +194,7 @@ const RegisterScreen: React.FC<any> = ({ navigation }) => {
           resizeMode="cover"
           style={{ 
             height: keyboardVisible 
-              ? Dimensions.get('window').height * 0.3 
+              ? Dimensions.get('window').height * 0.2 
               : Dimensions.get('window').height * 0.58 
           }}
         />
@@ -207,10 +204,11 @@ const RegisterScreen: React.FC<any> = ({ navigation }) => {
           keyboardVerticalOffset={Platform.OS === 'ios' ? 0 : 0}
         >
           <Sheet style={{ 
-            bottom: -32,
             top: keyboardVisible 
-              ? Dimensions.get('window').height * 0.3 
-              : Dimensions.get('window').height * 0.42 
+              ? Dimensions.get('window').height * 0.2 
+              : Dimensions.get('window').height * 0.42,
+            bottom: keyboardVisible ? 0 : -32,
+            flex: keyboardVisible ? 1 : undefined,
           }}>
             <TouchableOpacity 
               onPress={() => {
@@ -225,17 +223,14 @@ const RegisterScreen: React.FC<any> = ({ navigation }) => {
               ref={scrollViewRef}
               contentContainerStyle={{ 
                 paddingTop: 40, 
-                paddingBottom: 100,
-                minHeight: Dimensions.get('window').height * 0.58
+                paddingBottom: 150,
+                flexGrow: 1,
               }}
               showsVerticalScrollIndicator={true}
               keyboardShouldPersistTaps="handled"
               nestedScrollEnabled={true}
               bounces={true}
               style={{ flex: 1 }}
-              onContentSizeChange={() => {
-                // Auto scroll khi content size thay đổi
-              }}
             >
               <TitleContainer>
                 <Title>Đăng ký</Title>
