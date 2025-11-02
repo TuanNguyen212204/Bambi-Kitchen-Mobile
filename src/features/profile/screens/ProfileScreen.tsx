@@ -1,38 +1,60 @@
 import React from 'react';
-import { View, Text, StyleSheet, ScrollView, Image, TouchableOpacity, Alert } from 'react-native';
+import { View, Text, StyleSheet, ScrollView, TouchableOpacity, Alert } from 'react-native';
 import { useAppDispatch, useAppSelector } from '@store/store';
 import { logoutThunk } from '@store/thunks/authThunks';
 import { useNavigation, useFocusEffect } from '@react-navigation/native';
+import { storage } from '@utils/storage';
 
 const ProfileScreen = () => {
   const dispatch = useAppDispatch();
   const user = useAppSelector((s) => s.auth.user);
   const navigation = useNavigation<any>();
 
-  // Check xem user có cần setup password/phone không (Google login lần đầu)
+  // Check xem user có cần setup phone không (Google login lần đầu)
   useFocusEffect(
     React.useCallback(() => {
-      if (user && (!user.password || !user.phone)) {
-        // Delay một chút để screen render xong
-        setTimeout(() => {
-          Alert.alert(
-            'Thiết lập tài khoản',
-            'Đây là lần đầu bạn đăng nhập với Google. Vui lòng cập nhật mật khẩu và số điện thoại để hoàn tất thiết lập tài khoản.',
-            [
-              {
-                text: 'Để sau',
-                style: 'cancel',
-              },
-              {
-                text: 'Cập nhật ngay',
-                onPress: () => {
-                  navigation.navigate('EditProfile');
+      const checkAndShowSetupAlert = async () => {
+        if (!user?.id) return;
+        
+        // Nếu user đã có phone thì không cần setup nữa
+        if (user.phone && user.phone.trim()) {
+          return;
+        }
+
+        // Kiểm tra xem đã hiện alert cho user này chưa
+        const alertKey = `setup_alert_shown_${user.id}`;
+        const hasShown = await storage.getItem<boolean>(alertKey);
+        
+        if (!hasShown) {
+          // Delay một chút để screen render xong
+          setTimeout(() => {
+            Alert.alert(
+              'Thiết lập tài khoản',
+              'Vui lòng cập nhật số điện thoại để hoàn tất thiết lập tài khoản.',
+              [
+                {
+                  text: 'Để sau',
+                  style: 'cancel',
+                  onPress: async () => {
+                    // Lưu flag để không hiện lại
+                    await storage.setItem(alertKey, true);
+                  },
                 },
-              },
-            ]
-          );
-        }, 500);
-      }
+                {
+                  text: 'Cập nhật ngay',
+                  onPress: async () => {
+                    // Lưu flag để không hiện lại
+                    await storage.setItem(alertKey, true);
+                    navigation.navigate('EditProfile');
+                  },
+                },
+              ]
+            );
+          }, 500);
+        }
+      };
+
+      checkAndShowSetupAlert();
     }, [user, navigation])
   );
 

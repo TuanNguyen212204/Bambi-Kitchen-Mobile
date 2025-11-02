@@ -22,7 +22,8 @@ export default function App() {
       console.log('[DEEP_LINK] Received URL:', url);
       
       // Kiểm tra xem có phải OAuth callback không (ưu tiên OAuth trước)
-      const isOAuth = url.includes('/oauth2/callback') || url.includes('oauth2/callback');
+      // Hỗ trợ cả oauth2/callback và oauth-redirect.html
+      const isOAuth = url.includes('/oauth2/callback') || url.includes('oauth2/callback') || url.includes('oauth-redirect.html');
       if (isOAuth) {
         await handleOAuthDeepLink(url, navigationRef.current);
       } else {
@@ -55,7 +56,7 @@ export default function App() {
         AsyncStorage.getItem(PENDING_PAYMENT_KEY).then((storedUrl) => {
           if (storedUrl) {
             console.log('[APP] Found pending payment URL, processing...');
-            const isOAuth = storedUrl.includes('/oauth2/callback') || storedUrl.includes('oauth2/callback');
+            const isOAuth = storedUrl.includes('/oauth2/callback') || storedUrl.includes('oauth2/callback') || storedUrl.includes('oauth-redirect.html');
             if (isOAuth) {
               handleOAuthDeepLink(storedUrl, navigationRef.current);
             } else {

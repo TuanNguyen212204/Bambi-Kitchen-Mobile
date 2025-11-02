@@ -99,6 +99,7 @@ export default function EditProfileScreen() {
           name: updatedAccount.name,
           mail: updatedAccount.mail,
           role: updatedAccount.role,
+          phone: updatedAccount.phone,
         })
       );
 
