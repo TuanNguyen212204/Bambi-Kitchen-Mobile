@@ -94,26 +94,45 @@ export const dishService = {
   },
 
   // API v3: POST /api/dish với query params (Spring @RequestParam binding)
-  // Backend Spring bind FormData fields to DishCreateRequest via @RequestParam("request")
+  // Theo API docs: "Account chỉ cần gửi Id, mấy field khác để trống"
+  // Backend có thể dùng @RequestParam("request") String requestJson để parse JSON
+  // Hoặc @ModelAttribute để bind từ FormData fields
+  // Thử gửi request như query param JSON trước, nếu lỗi thì dùng FormData
   create: async (request: DishCreateRequest): Promise<DishDto> => {
-    const formData = new FormData();
-    if (request.id) formData.append('id', String(request.id));
-    formData.append('name', request.name);
-    if (request.description) formData.append('description', request.description);
-    if (request.price != null) formData.append('price', String(request.price));
-    formData.append('account', JSON.stringify(request.account));
-    formData.append('dishType', request.dishType);
-    formData.append('ingredients', JSON.stringify(request.ingredients));
-    if (request.usedQuantity != null) formData.append('usedQuantity', String(request.usedQuantity));
-    if (request.file && typeof request.file !== 'string') {
-      formData.append('file', request.file as any);
-    }
-    if (request.public !== undefined) formData.append('public', String(request.public));
-    if (request.active !== undefined) formData.append('active', String(request.active));
+    // Build request payload theo API v3 format
+    const requestPayload = {
+      id: request.id,
+      name: request.name,
+      description: request.description,
+      price: request.price,
+      account: { id: request.account.id }, // Chỉ gửi id
+      dishType: request.dishType,
+      ingredients: request.ingredients || {}, // Map<Integer, Integer>
+      usedQuantity: request.usedQuantity,
+      public: request.public,
+      active: request.active,
+    };
 
-    // Spring @RequestParam với multipart sẽ bind từ form fields
-    const res = await apiClient.post<DishDto>('/api/dish', formData);
-    return (res.data?.data ?? res.data) as DishDto;
+    // Cách 1: Gửi request như query param (JSON string) theo API docs
+    // File (nếu có) gửi trong FormData body
+    if (request.file && typeof request.file !== 'string') {
+      const formData = new FormData();
+      formData.append('file', request.file as any);
+      const res = await apiClient.post<DishDto>('/api/dish', formData, {
+        params: {
+          request: JSON.stringify(requestPayload),
+        },
+      });
+      return (res.data?.data ?? res.data) as DishDto;
+    } else {
+      // Không có file, gửi request như query param, body rỗng
+      const res = await apiClient.post<DishDto>('/api/dish', undefined, {
+        params: {
+          request: JSON.stringify(requestPayload),
+        },
+      });
+      return (res.data?.data ?? res.data) as DishDto;
+    }
   },
 
   // API v3: PUT /api/dish với query params (Spring @RequestParam binding)
