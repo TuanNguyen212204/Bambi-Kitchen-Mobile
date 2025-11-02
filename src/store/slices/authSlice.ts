@@ -5,6 +5,8 @@ export interface AuthUser {
   name: string;
   mail?: string;
   role?: 'ADMIN' | 'STAFF' | 'USER' | string;
+  phone?: string;
+  password?: string; // Để check xem user có đặt password chưa (Google login lần đầu)
 }
 
 interface AuthState {

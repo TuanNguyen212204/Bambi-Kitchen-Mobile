@@ -312,8 +312,25 @@ const HomeScreen = () => {
     });
   }, [visible, query, categoryId]);
 
-  const featured = filtered.slice(0, 5);
-  const rest = filtered.slice(5);
+  // Sắp xếp món ăn: món có usedQuantity cao hơn (được order nhiều hơn) sẽ được ưu tiên
+  // Món nổi bật = top 5 món được order nhiều nhất
+  const sorted = useMemo(() => {
+    return [...filtered].sort((a, b) => {
+      // Ưu tiên món có usedQuantity cao hơn
+      const qtyA = a.usedQuantity || 0;
+      const qtyB = b.usedQuantity || 0;
+      if (qtyB !== qtyA) {
+        return qtyB - qtyA; // Giảm dần
+      }
+      // Nếu usedQuantity bằng nhau, ưu tiên món có giá cao hơn (thường là món premium)
+      return (b.price || 0) - (a.price || 0);
+    });
+  }, [filtered]);
+
+  // Món nổi bật: top 5 món được order nhiều nhất (hoặc tất cả nếu < 5 món)
+  const featured = sorted.slice(0, 5);
+  // Tất cả món ăn: phần còn lại (từ món thứ 6 trở đi)
+  const rest = sorted.slice(5);
 
   return (
     <Screen showsVerticalScrollIndicator={false}>

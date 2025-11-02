@@ -1,13 +1,40 @@
 import React from 'react';
-import { View, Text, StyleSheet, ScrollView, Image, TouchableOpacity } from 'react-native';
+import { View, Text, StyleSheet, ScrollView, Image, TouchableOpacity, Alert } from 'react-native';
 import { useAppDispatch, useAppSelector } from '@store/store';
 import { logoutThunk } from '@store/thunks/authThunks';
-import { useNavigation } from '@react-navigation/native';
+import { useNavigation, useFocusEffect } from '@react-navigation/native';
 
 const ProfileScreen = () => {
   const dispatch = useAppDispatch();
   const user = useAppSelector((s) => s.auth.user);
   const navigation = useNavigation<any>();
+
+  // Check xem user có cần setup password/phone không (Google login lần đầu)
+  useFocusEffect(
+    React.useCallback(() => {
+      if (user && (!user.password || !user.phone)) {
+        // Delay một chút để screen render xong
+        setTimeout(() => {
+          Alert.alert(
+            'Thiết lập tài khoản',
+            'Đây là lần đầu bạn đăng nhập với Google. Vui lòng cập nhật mật khẩu và số điện thoại để hoàn tất thiết lập tài khoản.',
+            [
+              {
+                text: 'Để sau',
+                style: 'cancel',
+              },
+              {
+                text: 'Cập nhật ngay',
+                onPress: () => {
+                  navigation.navigate('EditProfile');
+                },
+              },
+            ]
+          );
+        }, 500);
+      }
+    }, [user, navigation])
+  );
 
   const onLogout = async () => {
     await dispatch(logoutThunk());
@@ -30,12 +57,6 @@ const ProfileScreen = () => {
             <InfoRow label="Họ tên" value={user?.name || '—'} />
             <InfoRow label="Email" value={user?.mail || '—'} />
             <InfoRow label="Vai trò" value={String(user?.role || 'USER')} />
-            {user?.id && (
-              <View style={styles.accountIdContainer}>
-                <Text style={styles.accountIdLabel}>Account ID (để test order):</Text>
-                <Text style={styles.accountIdValue}>{user.id}</Text>
-              </View>
-            )}
           </View>
         </View>
 
@@ -163,24 +184,6 @@ const styles = StyleSheet.create({
   actionText: {
     fontWeight: '600',
     color: '#111827',
-  },
-  accountIdContainer: {
-    marginTop: 12,
-    padding: 12,
-    backgroundColor: '#e3f2fd',
-    borderRadius: 8,
-    borderLeftWidth: 4,
-    borderLeftColor: '#1976d2',
-  },
-  accountIdLabel: {
-    fontSize: 12,
-    color: '#666',
-    marginBottom: 4,
-  },
-  accountIdValue: {
-    fontSize: 18,
-    fontWeight: 'bold',
-    color: '#1976d2',
   },
 });
 
