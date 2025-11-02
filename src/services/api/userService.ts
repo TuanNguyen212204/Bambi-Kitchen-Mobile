@@ -1,20 +1,11 @@
 import apiClient from './apiClient';
-import { ApiResponse, User } from '@types/api';
+import { Account } from '@/types/api';
 
 export const userService = {
-  getUserProfile: async (userId: string): Promise<User> => {
-    const response = await apiClient.get<ApiResponse<User>>(`/users/${userId}`);
-    return response.data.data;
-  },
-
-  updateUserProfile: async (userId: string, data: Partial<User>): Promise<User> => {
-    const response = await apiClient.put<ApiResponse<User>>(`/users/${userId}`, data);
-    return response.data.data;
-  },
-
-  getUsers: async (): Promise<User[]> => {
-    const response = await apiClient.get<ApiResponse<User[]>>('/users');
-    return response.data.data;
+  // Lấy thông tin user hiện tại từ /api/user/me
+  getCurrentUser: async (): Promise<Account> => {
+    const res = await apiClient.get('/api/user/me');
+    return (res.data?.data ?? res.data) as Account;
   },
 };
 

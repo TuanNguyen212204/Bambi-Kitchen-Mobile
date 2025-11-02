@@ -8,7 +8,7 @@ import { useNavigation } from '@react-navigation/native';
 
 const IngredientCategoryListScreen = () => {
   const dispatch = useAppDispatch();
-  const { categories, loading } = useAppSelector((s) => s.ingredients);
+  const { categories = [], loading = false } = useAppSelector((s) => s.ingredient || {});
   const navigation = useNavigation<any>();
   const [name, setName] = useState('');
   const [description, setDescription] = useState('');
@@ -72,7 +72,7 @@ const IngredientCategoryListScreen = () => {
       {loading && <Text style={styles.loading}>Đang tải...</Text>}
 
       <FlatList
-        data={categories.filter(c => !search || c.name.toLowerCase().includes(search.toLowerCase()))}
+        data={categories?.filter(c => !search || c.name?.toLowerCase().includes(search.toLowerCase())) || []}
         keyExtractor={(i) => String(i.id)}
         renderItem={({ item }) => (
           <TouchableOpacity onPress={() => navigation.navigate('AdminIngredientCategoryForm', { mode: 'edit', categoryId: item.id })} style={styles.item}>

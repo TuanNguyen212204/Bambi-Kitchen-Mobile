@@ -12,7 +12,7 @@ const IngredientFormScreen = () => {
   const route = useRoute<any>();
   const navigation = useNavigation<any>();
   const dispatch = useAppDispatch();
-  const { categories, ingredients } = useAppSelector((s) => s.ingredients);
+  const { categories = [], ingredients = [] } = useAppSelector((s) => s.ingredient || {});
 
   const mode: 'create' | 'edit' = route.params?.mode || 'create';
   const editing = useMemo(() => ingredients.find((i) => i.id === route.params?.ingredientId), [ingredients, route.params]);

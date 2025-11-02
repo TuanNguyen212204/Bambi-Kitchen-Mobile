@@ -30,16 +30,28 @@ const ProfileScreen = () => {
             <InfoRow label="Họ tên" value={user?.name || '—'} />
             <InfoRow label="Email" value={user?.mail || '—'} />
             <InfoRow label="Vai trò" value={String(user?.role || 'USER')} />
+            {user?.id && (
+              <View style={styles.accountIdContainer}>
+                <Text style={styles.accountIdLabel}>Account ID (để test order):</Text>
+                <Text style={styles.accountIdValue}>{user.id}</Text>
+              </View>
+            )}
           </View>
         </View>
 
         <View style={styles.section}>
           <Text style={styles.sectionTitle}>Thiết lập</Text>
           <View style={styles.card}>
-            <TouchableOpacity style={styles.actionBtn}>
+            <TouchableOpacity 
+              style={styles.actionBtn}
+              onPress={() => navigation.navigate('EditProfile')}
+            >
               <Text style={styles.actionText}>Chỉnh sửa thông tin</Text>
             </TouchableOpacity>
-            <TouchableOpacity style={styles.actionBtn}>
+            <TouchableOpacity 
+              style={styles.actionBtn}
+              onPress={() => navigation.navigate('ChangePassword')}
+            >
               <Text style={styles.actionText}>Đổi mật khẩu</Text>
             </TouchableOpacity>
             <TouchableOpacity style={[styles.actionBtn, { backgroundColor: '#E53935' }]} onPress={onLogout}>
@@ -151,6 +163,24 @@ const styles = StyleSheet.create({
   actionText: {
     fontWeight: '600',
     color: '#111827',
+  },
+  accountIdContainer: {
+    marginTop: 12,
+    padding: 12,
+    backgroundColor: '#e3f2fd',
+    borderRadius: 8,
+    borderLeftWidth: 4,
+    borderLeftColor: '#1976d2',
+  },
+  accountIdLabel: {
+    fontSize: 12,
+    color: '#666',
+    marginBottom: 4,
+  },
+  accountIdValue: {
+    fontSize: 18,
+    fontWeight: 'bold',
+    color: '#1976d2',
   },
 });
 
