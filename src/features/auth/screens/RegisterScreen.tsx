@@ -153,6 +153,8 @@ const RegisterScreen: React.FC<any> = ({ navigation }) => {
               autoCorrect={true}
               autoCapitalize="words"
               keyboardType="default"
+              textContentType="none"
+              enablesReturnKeyAutomatically={false}
             />
             <Input 
               placeholder="Email" 
@@ -161,13 +163,16 @@ const RegisterScreen: React.FC<any> = ({ navigation }) => {
               keyboardType="email-address" 
               autoCapitalize="none"
               autoCorrect={false}
+              textContentType="emailAddress"
             />
             <InputContainer>
               <Input 
                 placeholder="Mật khẩu" 
                 value={password} 
                 onChangeText={setPassword} 
-                secureTextEntry={!showPassword} 
+                secureTextEntry={!showPassword}
+                textContentType="newPassword"
+                autoCorrect={false}
               />
               <EyeIcon onPress={() => setShowPassword(!showPassword)}>
                 <Ionicons 

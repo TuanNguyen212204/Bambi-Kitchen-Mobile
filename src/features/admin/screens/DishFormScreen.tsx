@@ -284,6 +284,8 @@ const DishFormScreen = () => {
         autoCorrect={true}
         autoCapitalize="words"
         keyboardType="default"
+        textContentType="none"
+        enablesReturnKeyAutomatically={false}
       />
 
       <Text style={styles.label}>Mô tả</Text>
@@ -297,6 +299,8 @@ const DishFormScreen = () => {
         autoCorrect={true}
         autoCapitalize="sentences"
         keyboardType="default"
+        textContentType="none"
+        enablesReturnKeyAutomatically={false}
       />
 
       <Text style={styles.label}>Giá (₫)</Text>
@@ -364,6 +368,8 @@ const DishFormScreen = () => {
         autoCorrect={true}
         autoCapitalize="words"
         keyboardType="default"
+        textContentType="none"
+        enablesReturnKeyAutomatically={false}
       />
       
       {/* Category Filter */}
@@ -463,9 +469,10 @@ const DishFormScreen = () => {
                       updateIngredientQuantity(ingredient.id, num);
                     }}
                     placeholder="SL"
-                    keyboardType="numeric"
+                    keyboardType="number-pad"
                     style={styles.quantityInput}
                     autoFocus={quantity === 1} // Auto focus when first selected
+                    textContentType="none"
                   />
                 )}
               </View>

@@ -87,6 +87,8 @@ const IngredientFormScreen = () => {
         autoCorrect={true}
         autoCapitalize="words"
         keyboardType="default"
+        textContentType="none"
+        enablesReturnKeyAutomatically={false}
       />
 
       <Text style={styles.label}>Danh mục</Text>

@@ -66,7 +66,7 @@ const Input = styled.TextInput`
   padding: 14px 48px 14px 16px;
   margin-bottom: 12px;
   font-size: 16px;
-`;
+` as any;
 
 const InputContainer = styled.View`
   position: relative;
@@ -167,6 +167,8 @@ const LoginScreen: React.FC<any> = ({ navigation }) => {
               autoCapitalize="none"
               keyboardType="phone-pad"
               style={{ borderWidth: 1, borderColor: COLORS.border }}
+              textContentType="telephoneNumber"
+              enablesReturnKeyAutomatically={false}
             />
             <InputContainer>
               <Input
@@ -176,6 +178,8 @@ const LoginScreen: React.FC<any> = ({ navigation }) => {
                 onChangeText={setPassword}
                 returnKeyType="done"
                 style={{ borderWidth: 1, borderColor: COLORS.border }}
+                textContentType="password"
+                autoCorrect={false}
               />
               <EyeIcon onPress={() => setShowPassword(!showPassword)}>
                 <Ionicons 

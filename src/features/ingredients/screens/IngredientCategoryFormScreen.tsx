@@ -64,6 +64,8 @@ const IngredientCategoryFormScreen = () => {
         autoCorrect={true}
         autoCapitalize="words"
         keyboardType="default"
+        textContentType="none"
+        enablesReturnKeyAutomatically={false}
       />
       <Text style={styles.label}>Mô tả (tuỳ chọn)</Text>
       <TextInput 
@@ -74,6 +76,8 @@ const IngredientCategoryFormScreen = () => {
         autoCorrect={true}
         autoCapitalize="sentences"
         keyboardType="default"
+        textContentType="none"
+        enablesReturnKeyAutomatically={false}
       />
       <TouchableOpacity onPress={onSubmit} style={styles.saveBtn} disabled={loading}>
         <Text style={{ color: 'white', fontWeight: '600' }}>{loading ? 'Đang lưu...' : 'Lưu'}</Text>
