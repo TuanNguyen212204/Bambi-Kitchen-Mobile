@@ -26,7 +26,7 @@ const Screen = styled.ScrollView`
 
 const Header = styled.View`
   background-color: #ef4444;
-  padding: 20px 16px 12px 16px;
+  padding: 15px 16px 12px 16px;
 `;
 
 const SearchContainer = styled.View`
@@ -234,19 +234,46 @@ const HomeScreen = () => {
     const fetchData = async () => {
       setLoading(true);
       try {
-        const [ds, cats, fbs] = await Promise.all([
-          dishService.getAll(),
-          dishService.getCategories(),
-          orderService.getFeedbacks(),
-        ]);
-        setDishes(Array.isArray(ds) ? ds : []);
-        setCategories(Array.isArray(cats) ? cats : []);
-        // Chỉ hiển thị feedbacks > 3 sao
-        const highRatingFeedbacks = (Array.isArray(fbs) ? fbs : []).filter(
-          (fb: FeedbackDto) => fb.ranking && fb.ranking > 3
-        );
-        setFeedbacks(highRatingFeedbacks);
+        // Public APIs - thử gọi, nếu lỗi 401 thì có thể backend yêu cầu auth
+        // Nhưng vẫn cố gắng load để user có thể xem menu khi đã login
+        try {
+          const [ds, cats] = await Promise.all([
+            dishService.getAll(),
+            dishService.getCategories(),
+          ]);
+          setDishes(Array.isArray(ds) ? ds : []);
+          setCategories(Array.isArray(cats) ? cats : []);
+        } catch (e: any) {
+          // Nếu lỗi auth (401), có thể backend yêu cầu login
+          // Chỉ log trong dev, không spam user
+          if (__DEV__ && e?.response?.status === 401) {
+            console.log('[HOME] Dish/category APIs require auth, will retry after login');
+          }
+          setDishes([]);
+          setCategories([]);
+        }
+        
+        // Chỉ gọi getFeedbacks nếu user đã đăng nhập
+        if (user) {
+          try {
+            const fbs = await orderService.getFeedbacks();
+            // Chỉ hiển thị feedbacks > 3 sao
+            const highRatingFeedbacks = (Array.isArray(fbs) ? fbs : []).filter(
+              (fb: FeedbackDto) => fb.ranking && fb.ranking > 3
+            );
+            setFeedbacks(highRatingFeedbacks);
+          } catch (e) {
+            // Nếu lỗi getFeedbacks, vẫn tiếp tục hiển thị dishes và categories
+            setFeedbacks([]);
+          }
+        } else {
+          setFeedbacks([]);
+        }
       } catch (e) {
+        // Fallback error handling
+        if (__DEV__) {
+          console.error('[HOME] Unexpected error:', e);
+        }
         setDishes([]);
         setFeedbacks([]);
       } finally {
@@ -254,7 +281,7 @@ const HomeScreen = () => {
       }
     };
     fetchData();
-  }, []);
+  }, [user]);
 
   useEffect(() => {
     const interval = setInterval(() => {
@@ -285,8 +312,25 @@ const HomeScreen = () => {
     });
   }, [visible, query, categoryId]);
 
-  const featured = filtered.slice(0, 5);
-  const rest = filtered.slice(5);
+  // Sắp xếp món ăn: món có usedQuantity cao hơn (được order nhiều hơn) sẽ được ưu tiên
+  // Món nổi bật = top 5 món được order nhiều nhất
+  const sorted = useMemo(() => {
+    return [...filtered].sort((a, b) => {
+      // Ưu tiên món có usedQuantity cao hơn
+      const qtyA = a.usedQuantity || 0;
+      const qtyB = b.usedQuantity || 0;
+      if (qtyB !== qtyA) {
+        return qtyB - qtyA; // Giảm dần
+      }
+      // Nếu usedQuantity bằng nhau, ưu tiên món có giá cao hơn (thường là món premium)
+      return (b.price || 0) - (a.price || 0);
+    });
+  }, [filtered]);
+
+  // Món nổi bật: top 5 món được order nhiều nhất (hoặc tất cả nếu < 5 món)
+  const featured = sorted.slice(0, 5);
+  // Tất cả món ăn: phần còn lại (từ món thứ 6 trở đi)
+  const rest = sorted.slice(5);
 
   return (
     <Screen showsVerticalScrollIndicator={false}>
@@ -355,11 +399,6 @@ const HomeScreen = () => {
         </BannerPagination>
       </BannerContainer>
 
-      <OrderBuilderButton onPress={() => navigation.navigate('OrderBuilder')}>
-        <Text style={{ color: '#ffffff', fontSize: 20 }}>🍽️</Text>
-        <OrderBuilderText>Tạo món theo từng bước</OrderBuilderText>
-      </OrderBuilderButton>
-
       <Section>
         <SectionHeader>
           <SectionTitle>Danh mục</SectionTitle>
@@ -384,7 +423,9 @@ const HomeScreen = () => {
         <Section>
           <SectionHeader>
             <SectionTitle>Món ăn nổi bật</SectionTitle>
-            <TouchableOpacity onPress={() => setCategoryId(undefined)}>
+            <TouchableOpacity
+              onPress={() => navigation.navigate('FeaturedDishes', { dishes: featured })}
+            >
               <SectionMore>Xem tất cả &gt;</SectionMore>
             </TouchableOpacity>
           </SectionHeader>

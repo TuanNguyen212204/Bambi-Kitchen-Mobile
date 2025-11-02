@@ -17,6 +17,8 @@ export const loginThunk = createAsyncThunk(
         name: me?.name ?? me?.username ?? me?.mail ?? 'User',
         mail: me?.mail ?? me?.email,
         role: me?.role ?? me?.authorities?.[0]?.authority ?? me?.authority,
+        phone: me?.phone,
+        password: me?.password, // Lưu password để check Google login lần đầu
       };
       dispatch(setUser(mapped));
       return mapped;
@@ -37,6 +39,8 @@ export const loadSessionThunk = createAsyncThunk('auth/loadSession', async (_, {
         name: me?.name ?? me?.username ?? me?.mail ?? 'User',
         mail: me?.mail ?? me?.email,
         role: me?.role ?? me?.authorities?.[0]?.authority ?? me?.authority,
+        phone: me?.phone,
+        password: me?.password, // Lưu password để check Google login lần đầu
       };
       dispatch(setUser(mapped));
     } catch {

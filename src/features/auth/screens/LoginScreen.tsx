@@ -1,12 +1,14 @@
 import React, { useState } from 'react';
-import { Alert, KeyboardAvoidingView, Platform, Dimensions, StatusBar, ImageBackground, View, Text } from 'react-native';
+import { Alert, KeyboardAvoidingView, Platform, Dimensions, StatusBar, ImageBackground, View, Text, TouchableOpacity } from 'react-native';
 import { SafeAreaView, useSafeAreaInsets } from 'react-native-safe-area-context';
 import styled from 'styled-components/native';
 import Button from '@components/common/Button';
 import { COLORS } from '@constants';
 import { useAppDispatch, useAppSelector } from '@store/store';
 import { loginThunk } from '@store/thunks/authThunks';
-import { MaterialCommunityIcons } from '@expo/vector-icons';
+import { MaterialCommunityIcons, Ionicons } from '@expo/vector-icons';
+import { authService } from '@services/api/authService';
+import { Linking } from 'react-native';
 
 const Container = styled(View)`
   flex: 1;
@@ -61,9 +63,25 @@ const Subtitle = styled.Text`
 const Input = styled.TextInput`
   width: 100%;
   border-radius: 24px;
-  padding: 14px 16px;
+  padding: 14px 48px 14px 16px;
   margin-bottom: 12px;
   font-size: 16px;
+`;
+
+const InputContainer = styled.View`
+  position: relative;
+  width: 100%;
+  margin-bottom: 12px;
+`;
+
+const EyeIcon = styled(TouchableOpacity)`
+  position: absolute;
+  right: 16px;
+  top: 0;
+  bottom: 0;
+  justify-content: center;
+  align-items: center;
+  z-index: 1;
 `;
 
 const Row = styled(View)`
@@ -93,6 +111,7 @@ const GoogleBtn = styled.TouchableOpacity`
 const LoginScreen: React.FC<any> = ({ navigation }) => {
   const [username, setUsername] = useState('');
   const [password, setPassword] = useState('');
+  const [showPassword, setShowPassword] = useState(false);
   const dispatch = useAppDispatch();
   const loading = useAppSelector((s) => s.auth.loading);
   const insets = useSafeAreaInsets();
@@ -109,8 +128,21 @@ const LoginScreen: React.FC<any> = ({ navigation }) => {
     }
   };
 
-  const onGoogle = () => {
-    Alert.alert('Chức năng đăng nhập Google sẽ có sau!');
+  const onGoogle = async () => {
+    try {
+      const googleLoginUrl = await authService.googleLogin();
+      const canOpen = await Linking.canOpenURL(googleLoginUrl);
+      if (canOpen) {
+        await Linking.openURL(googleLoginUrl);
+        // Sau khi user xác thực Google, backend sẽ redirect về:
+        // bambi-kitchen-web.vercel.app/oauth2/callback?token=...
+        // Deep link handler sẽ bắt URL này và xử lý token
+      } else {
+        Alert.alert('Lỗi', 'Không thể mở trình duyệt để đăng nhập Google.');
+      }
+    } catch (e: any) {
+      Alert.alert('Lỗi', 'Không thể mở đăng nhập Google. Vui lòng thử lại.');
+    }
   };
 
   return (
@@ -136,14 +168,23 @@ const LoginScreen: React.FC<any> = ({ navigation }) => {
               keyboardType="phone-pad"
               style={{ borderWidth: 1, borderColor: COLORS.border }}
             />
-            <Input
-              placeholder="Mật khẩu"
-              secureTextEntry
-              value={password}
-              onChangeText={setPassword}
-              returnKeyType="done"
-              style={{ borderWidth: 1, borderColor: COLORS.border }}
-            />
+            <InputContainer>
+              <Input
+                placeholder="Mật khẩu"
+                secureTextEntry={!showPassword}
+                value={password}
+                onChangeText={setPassword}
+                returnKeyType="done"
+                style={{ borderWidth: 1, borderColor: COLORS.border }}
+              />
+              <EyeIcon onPress={() => setShowPassword(!showPassword)}>
+                <Ionicons 
+                  name={showPassword ? "eye-off-outline" : "eye-outline"} 
+                  size={24} 
+                  color={COLORS.textSecondary} 
+                />
+              </EyeIcon>
+            </InputContainer>
             <Button title="Đăng nhập" onPress={onLogin} loading={loading} fullWidth style={{ borderRadius: 24 }} />
             <Row>
               <LinkText onPress={() => navigation.navigate('ForgotPassword')}>Quên mật khẩu?</LinkText>

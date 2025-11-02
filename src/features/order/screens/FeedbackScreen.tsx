@@ -41,8 +41,19 @@ export default function FeedbackScreen() {
         comment: comment.trim() || undefined,
       });
 
-      toast.success('Cảm ơn bạn đã đánh giá!');
-      navigation.goBack();
+      Alert.alert('Thành công', 'Cảm ơn bạn đã đánh giá!', [
+        {
+          text: 'OK',
+          onPress: () => {
+            // Refresh order detail sau khi đánh giá
+            navigation.goBack();
+            // Trigger refresh bằng cách navigate lại
+            setTimeout(() => {
+              navigation.navigate('OrderDetail', { orderId });
+            }, 100);
+          },
+        },
+      ]);
     } catch (error: any) {
       console.error('Feedback error:', error);
       Alert.alert('Lỗi', error?.message || 'Gửi đánh giá thất bại. Vui lòng thử lại.');
@@ -77,12 +88,12 @@ export default function FeedbackScreen() {
             {rating === 1
               ? 'Rất không hài lòng'
               : rating === 2
-              ? 'Không hài lòng'
-              : rating === 3
-              ? 'Bình thường'
-              : rating === 4
-              ? 'Hài lòng'
-              : 'Rất hài lòng'}
+                ? 'Không hài lòng'
+                : rating === 3
+                  ? 'Bình thường'
+                  : rating === 4
+                    ? 'Hài lòng'
+                    : 'Rất hài lòng'}
           </Text>
         )}
       </View>
@@ -98,6 +109,9 @@ export default function FeedbackScreen() {
           onChangeText={setComment}
           editable={!loading}
           textAlignVertical="top"
+          autoCorrect={true}
+          autoCapitalize="sentences"
+          keyboardType="default"
         />
       </View>
 
@@ -190,4 +204,3 @@ const styles = StyleSheet.create({
     fontWeight: 'bold',
   },
 });
-

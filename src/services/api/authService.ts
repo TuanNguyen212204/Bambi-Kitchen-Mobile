@@ -58,6 +58,14 @@ export const authService = {
     });
     return res.data;
   },
+
+  googleLogin: async (): Promise<string> => {
+    // API trả về redirect URL, nhưng trên mobile chúng ta sẽ mở browser
+    // và nhận token từ deep link callback
+    // Format callback: bambi-kitchen-web.vercel.app/oauth2/callback?token=...
+    const baseURL = apiClient.defaults.baseURL || 'https://bambi.kdz.asia';
+    return `${baseURL}/api/user/login-with-google`;
+  },
 };
 
 

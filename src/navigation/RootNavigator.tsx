@@ -3,11 +3,19 @@ import { createNativeStackNavigator } from '@react-navigation/native-stack';
 import { useNavigation } from '@react-navigation/native';
 import MainTabNavigator from './MainTabNavigator';
 import { RootStackParamList } from '@/types/navigation';
-import { LoginScreen, RegisterScreen, ForgotPasswordScreen, OTPScreen, ResetPasswordScreen } from '@features/auth/screens';
+import {
+  LoginScreen,
+  RegisterScreen,
+  ForgotPasswordScreen,
+  OTPScreen,
+  ResetPasswordScreen,
+} from '@features/auth/screens';
 import DishDetailScreen from '@features/home/screens/DishDetailScreen';
 import EditProfileScreen from '@features/profile/screens/EditProfileScreen';
 import ChangePasswordScreen from '@features/profile/screens/ChangePasswordScreen';
 import FeedbackScreen from '@features/order/screens/FeedbackScreen';
+import OrderDetailScreen from '@features/order/screens/OrderDetailScreen';
+import FeaturedDishesScreen from '@features/home/screens/FeaturedDishesScreen';
 import PaymentSuccessScreen from '@features/payment/screens/PaymentSuccessScreen';
 import { useAppDispatch, useAppSelector } from '@store/store';
 import { loadSessionThunk } from '@store/thunks/authThunks';
@@ -64,7 +72,7 @@ const RootNavigator = () => {
           <Stack.Screen
             name="EditProfile"
             component={EditProfileScreen}
-            options={{ 
+            options={{
               headerShown: true,
               title: 'Chỉnh sửa thông tin',
               headerStyle: { backgroundColor: '#007bff' },
@@ -74,7 +82,7 @@ const RootNavigator = () => {
           <Stack.Screen
             name="ChangePassword"
             component={ChangePasswordScreen}
-            options={{ 
+            options={{
               headerShown: true,
               title: 'Đổi mật khẩu',
               headerStyle: { backgroundColor: '#007bff' },
@@ -84,7 +92,7 @@ const RootNavigator = () => {
           <Stack.Screen
             name="Feedback"
             component={FeedbackScreen}
-            options={{ 
+            options={{
               headerShown: true,
               title: 'Đánh giá đơn hàng',
               headerStyle: { backgroundColor: '#007bff' },
@@ -92,9 +100,23 @@ const RootNavigator = () => {
             }}
           />
           <Stack.Screen
+            name="OrderDetail"
+            component={OrderDetailScreen}
+            options={{
+              headerShown: false,
+            }}
+          />
+          <Stack.Screen
+            name="FeaturedDishes"
+            component={FeaturedDishesScreen}
+            options={{
+              headerShown: false,
+            }}
+          />
+          <Stack.Screen
             name="PaymentSuccess"
             component={PaymentSuccessScreen}
-            options={{ 
+            options={{
               headerShown: false,
               // Full screen để tương tự web success page
             }}

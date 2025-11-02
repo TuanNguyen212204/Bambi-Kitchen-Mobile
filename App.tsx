@@ -7,6 +7,7 @@ import RootNavigator from './src/navigation/RootNavigator';
 import { Provider } from 'react-redux';
 import { store } from './src/store/store';
 import { handlePaymentDeepLink } from './src/utils/paymentDeepLinkHandler';
+import { handleOAuthDeepLink } from './src/utils/oauthDeepLinkHandler';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 
 const PENDING_PAYMENT_KEY = 'pending_payment_url';
@@ -17,9 +18,18 @@ export default function App() {
 
   useEffect(() => {
     // Handle deep link khi app đã mở
-    const handleDeepLink = (url: string) => {
+    const handleDeepLink = async (url: string) => {
       console.log('[DEEP_LINK] Received URL:', url);
-      handlePaymentDeepLink(url, navigationRef.current);
+      
+      // Kiểm tra xem có phải OAuth callback không (ưu tiên OAuth trước)
+      // Hỗ trợ cả oauth2/callback và oauth-redirect.html
+      const isOAuth = url.includes('/oauth2/callback') || url.includes('oauth2/callback') || url.includes('oauth-redirect.html');
+      if (isOAuth) {
+        await handleOAuthDeepLink(url, navigationRef.current);
+      } else {
+        // Xử lý payment deep link
+        handlePaymentDeepLink(url, navigationRef.current);
+      }
     };
 
     // Lắng nghe deep link khi app đang chạy
@@ -46,7 +56,12 @@ export default function App() {
         AsyncStorage.getItem(PENDING_PAYMENT_KEY).then((storedUrl) => {
           if (storedUrl) {
             console.log('[APP] Found pending payment URL, processing...');
-            handlePaymentDeepLink(storedUrl, navigationRef.current);
+            const isOAuth = storedUrl.includes('/oauth2/callback') || storedUrl.includes('oauth2/callback') || storedUrl.includes('oauth-redirect.html');
+            if (isOAuth) {
+              handleOAuthDeepLink(storedUrl, navigationRef.current);
+            } else {
+              handlePaymentDeepLink(storedUrl, navigationRef.current);
+            }
             AsyncStorage.removeItem(PENDING_PAYMENT_KEY);
           }
         });

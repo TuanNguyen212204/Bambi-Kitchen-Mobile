@@ -56,9 +56,25 @@ const IngredientCategoryFormScreen = () => {
     <View style={styles.container}>
       <Text style={styles.title}>{mode === 'create' ? 'Thêm danh mục' : 'Sửa danh mục'}</Text>
       <Text style={styles.label}>Tên danh mục</Text>
-      <TextInput value={name} onChangeText={setName} placeholder="Nhập tên danh mục" style={styles.input} />
+      <TextInput 
+        value={name} 
+        onChangeText={setName} 
+        placeholder="Nhập tên danh mục" 
+        style={styles.input}
+        autoCorrect={true}
+        autoCapitalize="words"
+        keyboardType="default"
+      />
       <Text style={styles.label}>Mô tả (tuỳ chọn)</Text>
-      <TextInput value={description} onChangeText={setDescription} placeholder="Nhập mô tả" style={styles.input} />
+      <TextInput 
+        value={description} 
+        onChangeText={setDescription} 
+        placeholder="Nhập mô tả" 
+        style={styles.input}
+        autoCorrect={true}
+        autoCapitalize="sentences"
+        keyboardType="default"
+      />
       <TouchableOpacity onPress={onSubmit} style={styles.saveBtn} disabled={loading}>
         <Text style={{ color: 'white', fontWeight: '600' }}>{loading ? 'Đang lưu...' : 'Lưu'}</Text>
       </TouchableOpacity>

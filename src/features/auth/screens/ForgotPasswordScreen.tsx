@@ -88,7 +88,8 @@ const ForgotPasswordScreen: React.FC<any> = ({ navigation }) => {
     }
     setLoading(true);
     try {
-      await authService.sendOTP(email);
+      // Sử dụng /api/user/forgot-password (không cần JWT) thay vì /api/mail/send-otp
+      await authService.forgotPassword(email);
       Alert.alert('Thành công', 'Đã gửi mã OTP đến email của bạn');
       navigation.navigate('OTP', { email });
     } catch (e: any) {

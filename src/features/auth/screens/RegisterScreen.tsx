@@ -64,9 +64,25 @@ const Input = styled.TextInput`
   border-width: 1px;
   border-color: ${COLORS.border};
   border-radius: 24px;
-  padding: 14px 16px;
+  padding: 14px 48px 14px 16px;
   margin-bottom: 12px;
   font-size: 16px;
+`;
+
+const InputContainer = styled.View`
+  position: relative;
+  width: 100%;
+  margin-bottom: 12px;
+`;
+
+const EyeIcon = styled(TouchableOpacity)`
+  position: absolute;
+  right: 16px;
+  top: 0;
+  bottom: 0;
+  justify-content: center;
+  align-items: center;
+  z-index: 1;
 `;
 
 const BackButton = styled(TouchableOpacity)`
@@ -81,6 +97,8 @@ const RegisterScreen: React.FC<any> = ({ navigation }) => {
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [confirmPassword, setConfirmPassword] = useState('');
+  const [showPassword, setShowPassword] = useState(false);
+  const [showConfirmPassword, setShowConfirmPassword] = useState(false);
   const [loading, setLoading] = useState(false);
   const insets = useSafeAreaInsets();
 
@@ -128,10 +146,52 @@ const RegisterScreen: React.FC<any> = ({ navigation }) => {
               <Title>Đăng ký</Title>
             </TitleContainer>
             <Subtitle>Đăng ký để trải nghiệm Bambi Kitchen</Subtitle>
-            <Input placeholder="Tên" value={name} onChangeText={setName} />
-            <Input placeholder="Email" value={email} onChangeText={setEmail} keyboardType="email-address" autoCapitalize="none" />
-            <Input placeholder="Mật khẩu" value={password} onChangeText={setPassword} secureTextEntry />
-            <Input placeholder="Xác nhận mật khẩu" value={confirmPassword} onChangeText={setConfirmPassword} secureTextEntry />
+            <Input 
+              placeholder="Tên" 
+              value={name} 
+              onChangeText={setName}
+              autoCorrect={true}
+              autoCapitalize="words"
+              keyboardType="default"
+            />
+            <Input 
+              placeholder="Email" 
+              value={email} 
+              onChangeText={setEmail} 
+              keyboardType="email-address" 
+              autoCapitalize="none"
+              autoCorrect={false}
+            />
+            <InputContainer>
+              <Input 
+                placeholder="Mật khẩu" 
+                value={password} 
+                onChangeText={setPassword} 
+                secureTextEntry={!showPassword} 
+              />
+              <EyeIcon onPress={() => setShowPassword(!showPassword)}>
+                <Ionicons 
+                  name={showPassword ? "eye-off-outline" : "eye-outline"} 
+                  size={24} 
+                  color={COLORS.textSecondary} 
+                />
+              </EyeIcon>
+            </InputContainer>
+            <InputContainer>
+              <Input 
+                placeholder="Xác nhận mật khẩu" 
+                value={confirmPassword} 
+                onChangeText={setConfirmPassword} 
+                secureTextEntry={!showConfirmPassword} 
+              />
+              <EyeIcon onPress={() => setShowConfirmPassword(!showConfirmPassword)}>
+                <Ionicons 
+                  name={showConfirmPassword ? "eye-off-outline" : "eye-outline"} 
+                  size={24} 
+                  color={COLORS.textSecondary} 
+                />
+              </EyeIcon>
+            </InputContainer>
             <Button title="Đăng ký" onPress={onRegister} loading={loading} fullWidth style={{ borderRadius: 24, marginTop: 12 }} />
             <TouchableOpacity onPress={() => navigation.navigate('Login')} style={{ marginTop: 12, alignItems: 'center' }}>
               <Text style={{ color: COLORS.primary, fontWeight: '600' }}>Đã có tài khoản? Đăng nhập</Text>
