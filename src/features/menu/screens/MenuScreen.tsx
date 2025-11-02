@@ -87,15 +87,15 @@ const MenuScreen = () => {
     fetchData();
   }, []);
 
-  const visible = useMemo(() => dishes.filter((d) => (d as any).public !== false && ((d as any).active ?? true)), [dishes]);
+  // API /api/dish đã filter chỉ trả về dish public=true và active=true rồi
   const filtered = useMemo(() => {
     const q = query.trim().toLowerCase();
-    return visible.filter((d) => {
+    return dishes.filter((d) => {
       const byQ = !q || d.name?.toLowerCase().includes(q) || d.description?.toLowerCase().includes(q);
       const byCat = !categoryId || d.categoryId === categoryId;
       return byQ && byCat;
     });
-  }, [visible, query, categoryId]);
+  }, [dishes, query, categoryId]);
 
   return (
     <Screen>

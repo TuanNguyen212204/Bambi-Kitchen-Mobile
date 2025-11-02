@@ -57,18 +57,6 @@ const AdminHubScreen = () => {
     },
   ];
 
-  React.useLayoutEffect(() => {
-    navigation.setOptions({
-      headerRight: () => (
-        <TouchableOpacity
-          onPress={() => navigation.navigate('AdminDishList')}
-          style={{ marginRight: 16 }}
-        >
-          <Ionicons name="restaurant" size={24} color="#007AFF" />
-        </TouchableOpacity>
-      ),
-    });
-  }, [navigation]);
 
   const renderTile = (tile: TileData) => (
     <TouchableOpacity

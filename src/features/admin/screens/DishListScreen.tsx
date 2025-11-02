@@ -1,5 +1,6 @@
 import React, { useEffect, useState, useCallback, useMemo } from 'react';
-import { View, Text, FlatList, Image, TextInput, TouchableOpacity, StyleSheet, Switch, Alert, RefreshControl } from 'react-native';
+import { View, Text, FlatList, Image, TextInput, TouchableOpacity, StyleSheet, Switch, RefreshControl } from 'react-native';
+import { Ionicons } from '@expo/vector-icons';
 import { useNavigation, useFocusEffect } from '@react-navigation/native';
 import { dishService, DishDto } from '@services/api/dishService';
 import { toast } from '@utils/toast';
@@ -10,6 +11,7 @@ const DishListScreen = () => {
   const [loading, setLoading] = useState(false);
   const [refreshing, setRefreshing] = useState(false);
   const [keyword, setKeyword] = useState('');
+  const [showMenuOnly, setShowMenuOnly] = useState(false); // Filter chỉ hiển thị món có public=true và active=true
 
   const loadDishes = useCallback(async () => {
     try {
@@ -34,10 +36,18 @@ const DishListScreen = () => {
 
   const filtered = useMemo(() => {
     return dishes.filter((d) => {
-      if (keyword && !d.name.toLowerCase().includes(keyword.toLowerCase())) return false;
+      // Filter theo keyword
+      if (keyword && d.name && !d.name.toLowerCase().includes(keyword.toLowerCase())) return false;
+      if (keyword && !d.name) return false; // Nếu không có tên và có keyword thì filter ra
+      
+      // Filter theo showMenuOnly: chỉ hiển thị món public=true và active=true
+      if (showMenuOnly) {
+        if (!d.public || !d.active) return false;
+      }
+      
       return true;
     });
-  }, [dishes, keyword]);
+  }, [dishes, keyword, showMenuOnly]);
 
   const onTogglePublic = async (id: number) => {
     try {
@@ -59,28 +69,6 @@ const DishListScreen = () => {
     }
   };
 
-  const onDelete = (id: number, name: string) => {
-    Alert.alert(
-      'Xác nhận xóa',
-      `Bạn có chắc chắn muốn xóa món "${name}"?`,
-      [
-        { text: 'Hủy', style: 'cancel' },
-        {
-          text: 'Xóa',
-          style: 'destructive',
-          onPress: async () => {
-            try {
-              await dishService.delete(id);
-              toast.success('Đã xóa món');
-              await loadDishes();
-            } catch (error: any) {
-              toast.error(error?.message || 'Lỗi xóa món');
-            }
-          },
-        },
-      ]
-    );
-  };
 
   const renderItem = ({ item }: { item: DishDto }) => {
     return (
@@ -94,7 +82,7 @@ const DishListScreen = () => {
         />
         <View style={styles.info}>
           <View style={styles.headerRow}>
-            <Text style={styles.name}>{item.name}</Text>
+            <Text style={styles.name}>{item.name || 'N/A'}</Text>
             <View style={styles.badges}>
               {item.public && (
                 <View style={styles.badgePublic}>
@@ -110,15 +98,15 @@ const DishListScreen = () => {
           </View>
           {item.description && (
             <Text style={styles.description} numberOfLines={2}>
-              {item.description}
+              {item.description || ''}
             </Text>
           )}
           {item.price != null && (
             <Text style={styles.price}>{item.price.toLocaleString('vi-VN')} ₫</Text>
           )}
           <Text style={styles.meta}>
-            Loại: {item.dishType === 'PRESET' ? 'Món có sẵn' : 'Món tùy chỉnh'}
-            {item.account?.name && ` • Người tạo: ${item.account.name}`}
+            Loại: {item.dishType === 'PRESET' ? 'Món có sẵn' : item.dishType === 'CUSTOM' ? 'Món tùy chỉnh' : 'N/A'}
+            {item.account?.name && ` • Người tạo: ${item.account.name || ''}`}
           </Text>
           <View style={styles.actions}>
             <View style={styles.switchContainer}>
@@ -139,15 +127,6 @@ const DishListScreen = () => {
                 thumbColor="#fff"
               />
             </View>
-            <TouchableOpacity
-              style={styles.deleteBtn}
-              onPress={(e) => {
-                e.stopPropagation();
-                onDelete(item.id, item.name);
-              }}
-            >
-              <Text style={styles.deleteText}>Xóa</Text>
-            </TouchableOpacity>
           </View>
         </View>
       </TouchableOpacity>
@@ -163,6 +142,17 @@ const DishListScreen = () => {
           onChangeText={setKeyword}
           style={styles.search}
         />
+        <View style={{ flexDirection: 'row', gap: 8, marginBottom: 8 }}>
+          <TouchableOpacity
+            onPress={() => setShowMenuOnly(!showMenuOnly)}
+            style={[styles.filterBtn, showMenuOnly && styles.filterBtnActive]}
+          >
+            <Ionicons name={showMenuOnly ? 'checkmark-circle' : 'checkmark-circle-outline'} size={18} color={showMenuOnly ? '#fff' : '#007AFF'} />
+            <Text style={[styles.filterBtnText, showMenuOnly && styles.filterBtnTextActive]}>
+              Chỉ món trên menu
+            </Text>
+          </TouchableOpacity>
+        </View>
         <TouchableOpacity
           onPress={() => navigation.navigate('AdminDishForm', { mode: 'create' })}
           style={styles.createBtn}
@@ -207,6 +197,31 @@ const styles = StyleSheet.create({
     padding: 10,
     backgroundColor: '#fff',
     marginBottom: 12,
+  },
+  filterBtn: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 6,
+    paddingVertical: 8,
+    paddingHorizontal: 12,
+    borderRadius: 8,
+    borderWidth: 1,
+    borderColor: '#007AFF',
+    backgroundColor: '#fff',
+    flex: 1,
+    justifyContent: 'center',
+  },
+  filterBtnActive: {
+    backgroundColor: '#007AFF',
+    borderColor: '#007AFF',
+  },
+  filterBtnText: {
+    color: '#007AFF',
+    fontWeight: '600',
+    fontSize: 14,
+  },
+  filterBtnTextActive: {
+    color: '#fff',
   },
   createBtn: {
     backgroundColor: '#007AFF',
@@ -310,18 +325,6 @@ const styles = StyleSheet.create({
   switchLabel: {
     color: '#374151',
     fontSize: 14,
-  },
-  deleteBtn: {
-    backgroundColor: '#ef4444',
-    paddingVertical: 8,
-    paddingHorizontal: 12,
-    borderRadius: 8,
-    alignItems: 'center',
-    marginTop: 4,
-  },
-  deleteText: {
-    color: '#fff',
-    fontWeight: '600',
   },
   emptyContainer: {
     padding: 24,
