@@ -37,6 +37,8 @@ export type RootStackParamList = {
   EditProfile: undefined;
   ChangePassword: undefined;
   Feedback: { orderId: number };
+  OrderDetail: { orderId: number };
+  FeaturedDishes: { dishes: any[] };
   PaymentSuccess: {
     params?: Record<string, any>; // Query params từ deep link
   };

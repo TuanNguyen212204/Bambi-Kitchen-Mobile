@@ -71,9 +71,7 @@ export default function OrderHistoryScreen() {
   return (
     <ScrollView
       style={styles.container}
-      refreshControl={
-        <RefreshControl refreshing={refreshing} onRefresh={onRefresh} />
-      }
+      refreshControl={<RefreshControl refreshing={refreshing} onRefresh={onRefresh} />}
     >
       <Text style={styles.title}>Lịch sử đơn hàng</Text>
 
@@ -81,7 +79,12 @@ export default function OrderHistoryScreen() {
         <Text style={styles.empty}>Chưa có đơn hàng nào</Text>
       ) : (
         orders.map((order) => (
-          <View key={order.id} style={styles.orderCard}>
+          <TouchableOpacity
+            key={order.id}
+            style={styles.orderCard}
+            onPress={() => navigation.navigate('OrderDetail', { orderId: order.id })}
+            activeOpacity={0.7}
+          >
             <View style={styles.orderHeader}>
               <Text style={styles.orderId}>Đơn #{order.id}</Text>
               <Text style={styles.orderDate}>
@@ -89,9 +92,7 @@ export default function OrderHistoryScreen() {
               </Text>
             </View>
 
-            {order.note && (
-              <Text style={styles.note}>Ghi chú: {order.note}</Text>
-            )}
+            {order.note && <Text style={styles.note}>Ghi chú: {order.note}</Text>}
 
             <View style={styles.footer}>
               <Text style={styles.totalPrice}>{order.totalPrice.toLocaleString('vi-VN')}đ</Text>
@@ -119,19 +120,21 @@ export default function OrderHistoryScreen() {
               (order.status === 'PAID' || order.status === 'COMPLETED') && (
                 <TouchableOpacity
                   style={styles.feedbackButton}
-                  onPress={() => navigation.navigate('Feedback', { orderId: order.id })}
+                  onPress={(e) => {
+                    e.stopPropagation();
+                    navigation.navigate('Feedback', { orderId: order.id });
+                  }}
                 >
                   <Text style={styles.feedbackButtonText}>Đánh giá đơn hàng</Text>
                 </TouchableOpacity>
               )
             )}
-          </View>
+          </TouchableOpacity>
         ))
       )}
     </ScrollView>
   );
 }
-
 
 const styles = StyleSheet.create({
   container: { flex: 1, backgroundColor: '#f5f5f5', padding: 16 },

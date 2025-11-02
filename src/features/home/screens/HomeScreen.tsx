@@ -26,7 +26,7 @@ const Screen = styled.ScrollView`
 
 const Header = styled.View`
   background-color: #ef4444;
-  padding: 30px 16px 12px 16px;
+  padding: 15px 16px 12px 16px;
 `;
 
 const SearchContainer = styled.View`
@@ -379,7 +379,9 @@ const HomeScreen = () => {
         <Section>
           <SectionHeader>
             <SectionTitle>Món ăn nổi bật</SectionTitle>
-            <TouchableOpacity onPress={() => setCategoryId(undefined)}>
+            <TouchableOpacity
+              onPress={() => navigation.navigate('FeaturedDishes', { dishes: featured })}
+            >
               <SectionMore>Xem tất cả &gt;</SectionMore>
             </TouchableOpacity>
           </SectionHeader>

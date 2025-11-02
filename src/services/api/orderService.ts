@@ -46,8 +46,13 @@ export const orderService = {
     return (res.data?.data ?? res.data) as Orders;
   },
 
-  async submitFeedback(orderUpdate: { orderId: number; comment?: string; ranking?: number }): Promise<Orders> {
-    const res = await apiClient.put('/api/order/feedback', orderUpdate);
+  async submitFeedback(orderUpdate: {
+    orderId: number;
+    comment?: string;
+    ranking?: number;
+  }): Promise<Orders> {
+    // Dùng PUT /api/order với body { orderId, comment, ranking }
+    const res = await apiClient.put('/api/order', orderUpdate);
     return (res.data?.data ?? res.data) as Orders;
   },
 
@@ -70,23 +75,25 @@ export const orderService = {
           quantity: item.quantity,
           recipe: item.recipe || [], // Luôn gửi recipe (có thể là empty array)
         };
-        
+
         // dishId: chỉ có khi là preset dish
         if (item.dishId !== undefined && item.dishId !== null) {
           cleanItem.dishId = item.dishId;
         }
-        
+
         // basedOnId: ID của dish gốc (cho preset dish đã chỉnh sửa)
         if (item.basedOnId !== undefined && item.basedOnId !== null) {
           cleanItem.basedOnId = item.basedOnId;
         }
-        
+
         // dishTemplate: Backend YÊU CẦU cho MỌI item (kể cả preset dish)
         // Nếu có dishTemplate và size hợp lệ → dùng nó
         // Nếu không có → dùng default size "M"
-        if (item.dishTemplate && 
-            item.dishTemplate.size && 
-            ['S', 'M', 'L'].includes(item.dishTemplate.size)) {
+        if (
+          item.dishTemplate &&
+          item.dishTemplate.size &&
+          ['S', 'M', 'L'].includes(item.dishTemplate.size)
+        ) {
           cleanItem.dishTemplate = {
             size: item.dishTemplate.size,
           };
@@ -96,31 +103,35 @@ export const orderService = {
             size: 'M',
           };
         }
-        
+
         // note: Ghi chú của user (optional)
         if (item.note && item.note.trim()) {
           cleanItem.note = item.note.trim();
         }
-        
+
         return cleanItem;
       }),
     };
-    
+
     // note: Ghi chú cho toàn bộ order (optional)
     if (request.note && request.note.trim()) {
       cleanRequest.note = request.note.trim();
     }
-    
+
     // Log để debug (chỉ trong dev)
     if (__DEV__) {
       console.log('[ORDER] Creating order with payload:', JSON.stringify(cleanRequest, null, 2));
     }
-    
+
     const res = await apiClient.post('/api/order', cleanRequest);
     return res.data?.data ?? res.data ?? '';
   },
 
-  async updateOrder(orderUpdate: { orderId: number; comment?: string; ranking?: number }): Promise<Orders> {
+  async updateOrder(orderUpdate: {
+    orderId: number;
+    comment?: string;
+    ranking?: number;
+  }): Promise<Orders> {
     const res = await apiClient.put('/api/order', orderUpdate);
     return (res.data?.data ?? res.data) as Orders;
   },
