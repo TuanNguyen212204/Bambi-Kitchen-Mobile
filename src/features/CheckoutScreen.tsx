@@ -1,6 +1,6 @@
 import React, { useState, useEffect, useMemo } from 'react';
 import { useNavigation } from '@react-navigation/native';
-import { View, Text, TouchableOpacity, ScrollView, Alert, StyleSheet, ActivityIndicator } from 'react-native';
+import { View, Text, TouchableOpacity, ScrollView, Alert, StyleSheet, ActivityIndicator, TextInput } from 'react-native';
 import { useAppDispatch, useAppSelector } from '@/store/store';
 import { clearCart } from '@/store/slices/cartSlice';
 import { OrderItem, OrderItemDTO, MakeOrderRequest } from '@/types/api';
@@ -16,6 +16,7 @@ export default function CheckoutScreen() {
   const [loading, setLoading] = useState(false);
   const [dishes, setDishes] = useState<Record<number, DishDto>>({});
   const [fetchingDishes, setFetchingDishes] = useState(false);
+  const [orderNote, setOrderNote] = useState('');
 
   useEffect(() => {
     const fetchDishes = async () => {
@@ -116,8 +117,7 @@ export default function CheckoutScreen() {
         paymentMethod: paymentMethod === 'VNPAY' ? 'VNPAY' : 'MOMO',
         totalPrice,
         items: orderItems,
-        // Note có thể thêm sau nếu có input field cho user nhập note
-        // note: noteText || undefined,
+        note: orderNote.trim() || undefined,
       };
 
       const result = await orderService.createOrder(orderRequest);
@@ -203,6 +203,20 @@ export default function CheckoutScreen() {
           <Text style={styles.totalPrice}>{totalPrice.toLocaleString('vi-VN')}đ</Text>
         </View>
       </View>
+
+      <Text style={styles.sectionTitle}>Ghi chú đơn hàng</Text>
+      <TextInput
+        placeholder="Nhập ghi chú cho đơn hàng (tùy chọn)..."
+        value={orderNote}
+        onChangeText={setOrderNote}
+        style={styles.noteInput}
+        multiline
+        numberOfLines={3}
+        autoCorrect={false}
+        autoCapitalize="sentences"
+        textContentType="none"
+        enablesReturnKeyAutomatically={false}
+      />
 
       <Text style={styles.sectionTitle}>Phương thức thanh toán</Text>
       {(['VNPAY', 'MOMO'] as const).map((method) => (
@@ -323,5 +337,16 @@ const styles = StyleSheet.create({
     color: '#007bff',
     fontSize: 16,
     fontWeight: '600',
+  },
+  noteInput: {
+    borderWidth: 1,
+    borderColor: '#ddd',
+    borderRadius: 8,
+    padding: 12,
+    backgroundColor: '#fff',
+    fontSize: 14,
+    minHeight: 80,
+    textAlignVertical: 'top',
+    marginBottom: 8,
   },
 });
