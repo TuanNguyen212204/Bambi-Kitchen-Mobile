@@ -106,8 +106,8 @@ const IngredientCategoryListScreen = () => {
         value={search} 
         onChangeText={setSearch} 
         style={[styles.input, { marginBottom: 8 }]}
-        autoCorrect={true}
-        autoCapitalize="words"
+        autoCorrect={false}
+        autoCapitalize="none"
         keyboardType="default"
         textContentType="none"
         enablesReturnKeyAutomatically={false}

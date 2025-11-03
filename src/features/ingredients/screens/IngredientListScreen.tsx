@@ -9,12 +9,16 @@ const IngredientListScreen = () => {
   const dispatch = useAppDispatch();
   const navigation = useNavigation<any>();
   const { ingredients = [], categories = [], loading = false, filters = {} } = useAppSelector((s) => s.ingredient || {});
-  const [keyword, setKeyword] = useState(filters.keyword || '');
+  const keyword = filters.keyword || '';
 
   useEffect(() => {
     dispatch(fetchCategories());
     dispatch(fetchAllIngredients());
   }, [dispatch]);
+
+  const handleKeywordChange = (text: string) => {
+    dispatch(setFilters({ keyword: text }));
+  };
 
   const filtered = useMemo(() => {
     return ingredients.filter((i) => {
@@ -51,10 +55,10 @@ const IngredientListScreen = () => {
         <TextInput
           placeholder="Tìm theo tên..."
           value={keyword}
-          onChangeText={setKeyword}
+          onChangeText={handleKeywordChange}
           style={styles.search}
-          autoCorrect={true}
-          autoCapitalize="words"
+          autoCorrect={false}
+          autoCapitalize="none"
           keyboardType="default"
           textContentType="none"
           enablesReturnKeyAutomatically={false}
