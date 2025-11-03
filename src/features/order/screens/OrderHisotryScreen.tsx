@@ -1,4 +1,4 @@
-import React, { useEffect, useCallback, useState } from 'react';
+import React, { useEffect, useCallback, useState, useMemo } from 'react';
 import {
   View,
   Text,
@@ -46,6 +46,15 @@ export default function OrderHistoryScreen() {
     setTimeout(() => setRefreshing(false), 1000);
   }, [loadOrders]);
 
+  // Sắp xếp orders từ mới nhất đến cũ nhất theo createAt
+  const sortedOrders = useMemo(() => {
+    return [...orders].sort((a, b) => {
+      const dateA = a.createAt ? new Date(a.createAt).getTime() : 0;
+      const dateB = b.createAt ? new Date(b.createAt).getTime() : 0;
+      return dateB - dateA; // Mới nhất trước (giảm dần)
+    });
+  }, [orders]);
+
   // Note: API v3 không trả về items chi tiết trong Orders
   // Có thể cần gọi API getOrderById để lấy chi tiết
   // const handleReorder = (order: any) => {
@@ -75,10 +84,10 @@ export default function OrderHistoryScreen() {
     >
       <Text style={styles.title}>Lịch sử đơn hàng</Text>
 
-      {orders.length === 0 ? (
+      {sortedOrders.length === 0 ? (
         <Text style={styles.empty}>Chưa có đơn hàng nào</Text>
       ) : (
-        orders.map((order) => (
+        sortedOrders.map((order) => (
           <TouchableOpacity
             key={order.id}
             style={styles.orderCard}
