@@ -200,3 +200,26 @@ export interface FeedbackDto {
   accountName?: string;
   accountId?: number;
 }
+
+export interface Dish {
+  id: number;
+  name: string;
+  description?: string;
+  price?: number;
+  imageUrl?: string;
+  publicId?: string;
+  account?: { id: number; name: string; role?: string };
+  dishType?: 'PRESET' | 'CUSTOM';
+  usedQuantity?: number;
+  public?: boolean;
+  active?: boolean;
+}
+
+export interface OrderDetail {
+  id: number;
+  dish: Dish;
+  orders: Orders;
+  totalCalories?: number;
+  notes?: string;
+  size?: string;
+}

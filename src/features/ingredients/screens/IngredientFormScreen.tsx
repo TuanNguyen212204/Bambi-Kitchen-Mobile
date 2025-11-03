@@ -23,6 +23,8 @@ const IngredientFormScreen = () => {
   const [pricePerUnit, setPricePerUnit] = useState<string>(editing?.pricePerUnit != null ? String(editing.pricePerUnit) : '');
   const [active, setActive] = useState<boolean>(editing?.active ?? true);
   const [delta, setDelta] = useState<string>('0');
+  const [quantity, setQuantity] = useState<number>(editing?.quantity ?? editing?.stock ?? 0);
+  const [reserve, setReserve] = useState<number>(editing?.reserve ?? 0);
   const [image, setImage] = useState<{ uri: string; name: string; type: string } | null>(null);
 
   useEffect(() => {
@@ -52,18 +54,26 @@ const IngredientFormScreen = () => {
         ).unwrap();
         toast.success('Đã tạo nguyên liệu');
       } else if (editing) {
+        const d = Number(delta) || 0;
+        const nextQuantity = quantity + d;
+        
+        // Tính available = quantity - reserve
+        const calculatedAvailable = nextQuantity - reserve;
+        
         await dispatch(
           updateIngredientThunk({
             id: editing.id,
             name: trimmed,
             unit,
             active,
+            quantity: nextQuantity,
+            reserve: reserve,
+            available: calculatedAvailable,
             categoryId: categoryId!,
             pricePerUnit: pricePerUnit ? Number(pricePerUnit) : null,
             image, // if null, BE will receive empty file via helper
           })
         ).unwrap();
-        const d = Number(delta) || 0;
         if (d !== 0) {
           // handled by list quick adjust, but do it here per spec via navigate chain
           // adjust via dedicated thunk from list screen would require wiring here; keep behavior in list for now.

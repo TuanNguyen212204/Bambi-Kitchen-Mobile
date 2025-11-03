@@ -23,6 +23,7 @@ const IngredientDetailScreen = () => {
   const [imgUrl, setImgUrl] = useState<string | null>(null);
   const [image, setImage] = useState<{ uri: string; name: string; type: string } | null>(null);
   const [quantity, setQuantity] = useState<number>(0);
+  const [reserve, setReserve] = useState<number>(0);
   const [delta, setDelta] = useState<string>('0');
   const [categoryId, setCategoryId] = useState<number | undefined>(undefined);
 
@@ -38,6 +39,7 @@ const IngredientDetailScreen = () => {
       setImgUrl(ing.imgUrl || null);
       setPricePerUnit(ing.pricePerUnit != null ? String(ing.pricePerUnit) : '');
       setQuantity(ing.quantity ?? ing.stock ?? 0);
+      setReserve(ing.reserve ?? 0);
       setCategoryId(ing.category?.id);
     } catch (e: any) {
       toast.error(e?.toString?.() || 'Lỗi tải chi tiết');
@@ -64,6 +66,9 @@ const IngredientDetailScreen = () => {
       const nextQuantity = quantity + d;
       if (nextQuantity < 0) return toast.error('Tồn kho sau khi điều chỉnh không được âm');
 
+      // Tính available = quantity - reserve
+      const calculatedAvailable = nextQuantity - reserve;
+
       await dispatch(
         updateIngredientThunk({
           id: ingredientId,
@@ -71,6 +76,8 @@ const IngredientDetailScreen = () => {
           unit,
           active,
           quantity: nextQuantity,
+          reserve: reserve,
+          available: calculatedAvailable,
           pricePerUnit: pricePerUnit ? Number(pricePerUnit) : null,
           categoryId: categoryId!,
           image,
@@ -117,7 +124,17 @@ const IngredientDetailScreen = () => {
       </View>
       <Text style={styles.title}>Chỉnh sửa nguyên liệu</Text>
       <Text style={styles.label}>Tên nguyên liệu</Text>
-      <TextInput value={name} onChangeText={setName} placeholder="Nhập tên" style={styles.input} />
+      <TextInput 
+        value={name} 
+        onChangeText={setName} 
+        placeholder="Nhập tên" 
+        style={styles.input}
+        autoCorrect={true}
+        autoCapitalize="words"
+        keyboardType="default"
+        textContentType="none"
+        enablesReturnKeyAutomatically={false}
+      />
 
       <Text style={styles.label}>Danh mục</Text>
       <ScrollView horizontal showsHorizontalScrollIndicator={false} style={{ marginBottom: 8 }}>

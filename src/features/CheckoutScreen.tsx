@@ -153,7 +153,12 @@ export default function CheckoutScreen() {
       }
     } catch (error: any) {
       console.error('Checkout error:', error);
-      Alert.alert('Lỗi', error?.message || 'Đặt hàng thất bại. Vui lòng thử lại.');
+      // Lấy message từ error response data hoặc message
+      const errorMessage = error?.response?.data?.data || 
+                          error?.response?.data?.message || 
+                          error?.message || 
+                          'Đặt hàng thất bại. Vui lòng thử lại.';
+      Alert.alert('Lỗi', errorMessage);
     } finally {
       setLoading(false);
     }

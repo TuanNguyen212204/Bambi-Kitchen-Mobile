@@ -1,5 +1,5 @@
 import apiClient from './apiClient';
-import { MakeOrderRequest, Orders, FeedbackDto } from '@/types/api';
+import { MakeOrderRequest, Orders, FeedbackDto, OrderDetail } from '@/types/api';
 
 // Legacy types kept for backward compatibility (old API)
 export type OrderStatus = 'NEW' | 'ASSIGNED' | 'PREPARING' | 'DONE' | 'CANCELLED';
@@ -149,6 +149,21 @@ export const orderService = {
   async confirmCOD(orderId: number): Promise<OrderDto> {
     const res = await apiClient.post(`/api/order/${orderId}/cod/confirm`);
     return (res.data?.data ?? res.data) as OrderDto;
+  },
+
+  async getAllOrderDetails(): Promise<OrderDetail[]> {
+    const res = await apiClient.get('/api/order-detail');
+    return (res.data?.data ?? res.data ?? []) as OrderDetail[];
+  },
+
+  async getOrderDetailById(detailId: number): Promise<OrderDetail> {
+    const res = await apiClient.get(`/api/order-detail/${detailId}`);
+    return (res.data?.data ?? res.data) as OrderDetail;
+  },
+
+  async getOrderDetailsByOrderId(orderId: number): Promise<OrderDetail[]> {
+    const res = await apiClient.get(`/api/order-detail/by-order/${orderId}`);
+    return (res.data?.data ?? res.data ?? []) as OrderDetail[];
   },
 };
 

@@ -99,29 +99,6 @@ const SectionMore = styled.Text`
   font-weight: 600;
 `;
 
-const CategoryRow = styled.ScrollView.attrs({
-  horizontal: true,
-  showsHorizontalScrollIndicator: false,
-})`
-  padding-horizontal: 12px;
-`;
-
-const CategoryChip = styled.TouchableOpacity<{ active?: boolean }>`
-  background-color: ${(p) => (p.active ? '#ef4444' : '#f3f4f6')};
-  padding-vertical: 6px;
-  padding-horizontal: 12px;
-  border-radius: 20px;
-  margin-right: 8px;
-  min-width: 80px;
-  align-items: center;
-`;
-
-const CategoryText = styled.Text<{ active?: boolean }>`
-  color: ${(p) => (p.active ? '#ffffff' : '#111')};
-  font-weight: 600;
-  font-size: 12px;
-`;
-
 const DishRow = styled.ScrollView.attrs({
   horizontal: true,
   showsHorizontalScrollIndicator: false,
@@ -216,11 +193,9 @@ const HomeScreen = () => {
   const user = useAppSelector((s) => s.auth.user);
   const cartItems = useAppSelector((s) => s.cart.items);
   const [dishes, setDishes] = useState<DishDto[]>([]);
-  const [categories, setCategories] = useState<{ id: number; name: string }[]>([]);
   const [feedbacks, setFeedbacks] = useState<FeedbackDto[]>([]);
   const [loading, setLoading] = useState(false);
   const [query, setQuery] = useState('');
-  const [categoryId, setCategoryId] = useState<number | undefined>(undefined);
   const [currentBannerIndex, setCurrentBannerIndex] = useState(0);
   const bannerScrollRef = useRef<any>(null);
 
@@ -237,12 +212,8 @@ const HomeScreen = () => {
         // Public APIs - thử gọi, nếu lỗi 401 thì có thể backend yêu cầu auth
         // Nhưng vẫn cố gắng load để user có thể xem menu khi đã login
         try {
-          const [ds, cats] = await Promise.all([
-            dishService.getAll(),
-            dishService.getCategories(),
-          ]);
+          const ds = await dishService.getAll();
           setDishes(Array.isArray(ds) ? ds : []);
-          setCategories(Array.isArray(cats) ? cats : []);
         } catch (e: any) {
           // Nếu lỗi auth (401), có thể backend yêu cầu login
           // Chỉ log trong dev, không spam user
@@ -250,7 +221,6 @@ const HomeScreen = () => {
             console.log('[HOME] Dish/category APIs require auth, will retry after login');
           }
           setDishes([]);
-          setCategories([]);
         }
         
         // Chỉ gọi getFeedbacks nếu user đã đăng nhập
@@ -263,7 +233,7 @@ const HomeScreen = () => {
             );
             setFeedbacks(highRatingFeedbacks);
           } catch (e) {
-            // Nếu lỗi getFeedbacks, vẫn tiếp tục hiển thị dishes và categories
+            // Nếu lỗi getFeedbacks, vẫn tiếp tục hiển thị dishes
             setFeedbacks([]);
           }
         } else {
@@ -307,10 +277,9 @@ const HomeScreen = () => {
     return visible.filter((d) => {
       const byQ =
         !q || d.name?.toLowerCase().includes(q) || d.description?.toLowerCase().includes(q);
-      const byCat = !categoryId || d.categoryId === categoryId;
-      return byQ && byCat;
+      return byQ;
     });
-  }, [visible, query, categoryId]);
+  }, [visible, query]);
 
   // Sắp xếp món ăn: món có usedQuantity cao hơn (được order nhiều hơn) sẽ được ưu tiên
   // Món nổi bật = top 5 món được order nhiều nhất
@@ -346,6 +315,11 @@ const HomeScreen = () => {
               value={query}
               onChangeText={setQuery}
               placeholderTextColor="#999"
+              autoCorrect={true}
+              autoCapitalize="words"
+              keyboardType="default"
+              textContentType="none"
+              enablesReturnKeyAutomatically={false}
             />
           </SearchContainer>
           <TouchableOpacity
@@ -398,26 +372,6 @@ const HomeScreen = () => {
           ))}
         </BannerPagination>
       </BannerContainer>
-
-      <Section>
-        <SectionHeader>
-          <SectionTitle>Danh mục</SectionTitle>
-        </SectionHeader>
-        <CategoryRow>
-          <CategoryChip active={!categoryId} onPress={() => setCategoryId(undefined)}>
-            <CategoryText active={!categoryId}>Tất cả</CategoryText>
-          </CategoryChip>
-          {categories.map((c) => (
-            <CategoryChip
-              key={c.id}
-              active={categoryId === c.id}
-              onPress={() => setCategoryId(c.id)}
-            >
-              <CategoryText active={categoryId === c.id}>{c.name}</CategoryText>
-            </CategoryChip>
-          ))}
-        </CategoryRow>
-      </Section>
 
       {featured.length > 0 && (
         <Section>

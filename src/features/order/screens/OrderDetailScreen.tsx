@@ -57,7 +57,8 @@ const OrderDetailScreen: React.FC = () => {
     }
   };
 
-  const getStatusText = (status: string) => {
+  const getStatusText = (status: string | undefined) => {
+    if (!status) return 'Không xác định';
     switch (status) {
       case 'PENDING':
         return 'Đang chờ';
@@ -68,11 +69,12 @@ const OrderDetailScreen: React.FC = () => {
       case 'CANCELLED':
         return 'Đã hủy';
       default:
-        return status;
+        return String(status);
     }
   };
 
-  const getStatusColor = (status: string) => {
+  const getStatusColor = (status: string | undefined) => {
+    if (!status) return '#666';
     switch (status) {
       case 'PENDING':
         return '#FFA500';
@@ -90,13 +92,6 @@ const OrderDetailScreen: React.FC = () => {
   if (loading) {
     return (
       <SafeAreaView style={styles.container}>
-        <View style={styles.header}>
-          <TouchableOpacity onPress={() => navigation.goBack()}>
-            <Ionicons name="arrow-back" size={24} color="#111" />
-          </TouchableOpacity>
-          <Text style={styles.headerTitle}>Chi tiết đơn hàng</Text>
-          <View style={{ width: 24 }} />
-        </View>
         <View style={styles.center}>
           <ActivityIndicator size="large" color="#007AFF" />
           <Text style={styles.loadingText}>Đang tải chi tiết đơn hàng...</Text>
@@ -108,13 +103,6 @@ const OrderDetailScreen: React.FC = () => {
   if (error || !order) {
     return (
       <SafeAreaView style={styles.container}>
-        <View style={styles.header}>
-          <TouchableOpacity onPress={() => navigation.goBack()}>
-            <Ionicons name="arrow-back" size={24} color="#111" />
-          </TouchableOpacity>
-          <Text style={styles.headerTitle}>Chi tiết đơn hàng</Text>
-          <View style={{ width: 24 }} />
-        </View>
         <View style={styles.center}>
           <Ionicons name="alert-circle-outline" size={64} color="#FF3B30" />
           <Text style={styles.errorText}>{error || 'Không tìm thấy đơn hàng'}</Text>
@@ -128,43 +116,49 @@ const OrderDetailScreen: React.FC = () => {
 
   return (
     <SafeAreaView style={styles.container}>
-      <View style={styles.header}>
-        <TouchableOpacity onPress={() => navigation.goBack()}>
-          <Ionicons name="arrow-back" size={24} color="#111" />
-        </TouchableOpacity>
-        <Text style={styles.headerTitle}>Chi tiết đơn hàng</Text>
-        <View style={{ width: 24 }} />
-      </View>
-
       <ScrollView style={styles.content} showsVerticalScrollIndicator={false}>
         <View style={styles.card}>
           <View style={styles.cardHeader}>
             <Text style={styles.cardTitle}>Thông tin đơn hàng</Text>
             <View
-              style={[styles.statusBadge, { backgroundColor: getStatusColor(order.status) + '20' }]}
+              style={[styles.statusBadge, { backgroundColor: String(getStatusColor(order.status)) + '20' }]}
             >
-              <Text style={[styles.statusText, { color: getStatusColor(order.status) }]}>
-                {getStatusText(order.status)}
+              <Text style={[styles.statusText, { color: String(getStatusColor(order.status)) }]}>
+                {String(getStatusText(order.status))}
               </Text>
             </View>
           </View>
 
           <View style={styles.infoRow}>
             <Text style={styles.infoLabel}>Mã đơn:</Text>
-            <Text style={styles.infoValue}>#{order.id}</Text>
+            <Text style={styles.infoValue}>#{String(order.id || 'N/A')}</Text>
           </View>
 
           <View style={styles.infoRow}>
             <Text style={styles.infoLabel}>Ngày đặt:</Text>
-            <Text style={styles.infoValue}>{new Date(order.createAt).toLocaleString('vi-VN')}</Text>
+            <Text style={styles.infoValue}>
+              {(() => {
+                try {
+                  if (order.createAt && typeof order.createAt === 'string') {
+                    const date = new Date(order.createAt);
+                    if (!isNaN(date.getTime())) {
+                      return date.toLocaleString('vi-VN');
+                    }
+                  }
+                  return 'N/A';
+                } catch {
+                  return 'N/A';
+                }
+              })()}
+            </Text>
           </View>
 
-          {order.note && (
+          {order.note && String(order.note).trim() ? (
             <View style={styles.infoRow}>
               <Text style={styles.infoLabel}>Ghi chú:</Text>
               <Text style={styles.infoValue}>{String(order.note || '')}</Text>
             </View>
-          )}
+          ) : null}
         </View>
 
         <View style={styles.card}>
@@ -206,45 +200,47 @@ const OrderDetailScreen: React.FC = () => {
           <Text style={styles.cardTitle}>Tổng kết</Text>
           <View style={styles.summaryRow}>
             <Text style={styles.summaryLabel}>Tổng tiền:</Text>
-            <Text style={styles.summaryValue}>{order.totalPrice.toLocaleString('vi-VN')} ₫</Text>
+            <Text style={styles.summaryValue}>
+              {Number(order.totalPrice || 0).toLocaleString('vi-VN')} ₫
+            </Text>
           </View>
         </View>
 
         {/* Rating and Comment - chỉ hiển thị nếu đã đánh giá */}
-        {(order.ranking && order.ranking > 0) || (order.comment && order.comment !== '0') ? (
+        {(order.ranking && Number(order.ranking) > 0) || (order.comment && String(order.comment) !== '0' && String(order.comment).trim()) ? (
           <View style={styles.card}>
             <Text style={styles.cardTitle}>Đánh giá</Text>
-            {order.ranking && order.ranking > 0 && (
+            {order.ranking && Number(order.ranking) > 0 ? (
               <View style={styles.ratingSection}>
                 <Text style={styles.infoLabel}>Đánh giá:</Text>
                 <View style={styles.starContainer}>
                   {[1, 2, 3, 4, 5].map((star) => (
                     <Text key={star} style={styles.star}>
-                      {order.ranking && star <= order.ranking ? '⭐' : '☆'}
+                      {order.ranking && Number(order.ranking) >= star ? '⭐' : '☆'}
                     </Text>
                   ))}
-                  <Text style={styles.ratingText}>({order.ranking}/5)</Text>
+                  <Text style={styles.ratingText}>({String(order.ranking || 0)}/5)</Text>
                 </View>
               </View>
-            )}
-            {order.comment && order.comment !== '0' && (
+            ) : null}
+            {order.comment && String(order.comment) !== '0' && String(order.comment).trim() ? (
               <View style={styles.infoRow}>
                 <Text style={styles.infoLabel}>Bình luận:</Text>
                 <Text style={[styles.infoValue, styles.commentText]}>{String(order.comment || '')}</Text>
               </View>
-            )}
+            ) : null}
           </View>
         ) : null}
       </ScrollView>
 
       {/* Chỉ cho đánh giá khi status PAID hoặc COMPLETED và chưa đánh giá */}
-      {(order.status === 'PAID' || order.status === 'COMPLETED') &&
-      (!order.ranking || order.ranking === 0) &&
-      (!order.comment || order.comment === '0') ? (
+      {order.status && (String(order.status) === 'PAID' || String(order.status) === 'COMPLETED') &&
+      (!order.ranking || Number(order.ranking) === 0) &&
+      (!order.comment || String(order.comment) === '0') ? (
         <View style={styles.footer}>
           <TouchableOpacity
             style={styles.feedbackButton}
-            onPress={() => navigation.navigate('Feedback', { orderId: order.id })}
+            onPress={() => navigation.navigate('Feedback', { orderId: Number(order.id || 0) })}
           >
             <Ionicons name="star-outline" size={20} color="#fff" style={{ marginRight: 8 }} />
             <Text style={styles.feedbackButtonText}>Đánh giá đơn hàng</Text>

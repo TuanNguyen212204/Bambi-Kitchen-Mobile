@@ -1,5 +1,6 @@
 import React, { useEffect, useState } from 'react';
 import { View, Text, FlatList, TouchableOpacity, StyleSheet } from 'react-native';
+import { useNavigation } from '@react-navigation/native';
 import { orderService } from '@services/api/orderService';
 import { Orders, OrderStatusV3 } from '@/types/api';
 import { toast } from '@utils/toast';
@@ -12,6 +13,7 @@ const statusLabels: Record<OrderStatusV3, string> = {
 };
 
 const OrdersScreen = () => {
+  const navigation = useNavigation<any>();
   const [orders, setOrders] = useState<Orders[]>([]);
   const [loading, setLoading] = useState(false);
   const [refreshing, setRefreshing] = useState(false);
@@ -21,7 +23,13 @@ const OrdersScreen = () => {
       setLoading(true);
       // GET /api/order - lấy tất cả orders (API v3)
       const data = await orderService.getOrders();
-      setOrders(data as Orders[]);
+      // Sắp xếp từ mới đến cũ (theo createAt giảm dần)
+      const sortedData = (data as Orders[]).sort((a, b) => {
+        const dateA = a.createAt ? new Date(a.createAt).getTime() : 0;
+        const dateB = b.createAt ? new Date(b.createAt).getTime() : 0;
+        return dateB - dateA; // Mới nhất trước
+      });
+      setOrders(sortedData);
     } catch (e: any) {
       toast.error(e?.toString?.() || 'Lỗi tải danh sách đơn');
     } finally {
@@ -79,7 +87,11 @@ const OrdersScreen = () => {
             const rankingStars = ranking > 0 ? '⭐'.repeat(ranking) : '';
             
             return (
-              <View style={styles.card}>
+              <TouchableOpacity
+                style={styles.card}
+                onPress={() => navigation.navigate('AdminOrderDetail', { orderId: item.id })}
+                activeOpacity={0.7}
+              >
                 <Text style={styles.title}>Đơn #{orderId}</Text>
                 <Text style={styles.meta}>Ngày: {createDate}</Text>
                 <Text style={styles.meta}>Tổng tiền: {totalPrice}đ</Text>
@@ -93,7 +105,8 @@ const OrdersScreen = () => {
                     <Text style={styles.meta}>{String(item.comment)}</Text>
                   </View>
                 )}
-              </View>
+                <Text style={styles.viewDetail}>Nhấn để xem chi tiết →</Text>
+              </TouchableOpacity>
             );
           } catch (error) {
             // Fallback nếu có lỗi
@@ -123,6 +136,13 @@ const styles = StyleSheet.create({
   row: { flexDirection: 'row', gap: 8, marginTop: 8 },
   outline: { paddingVertical: 8, paddingHorizontal: 12, borderWidth: 1, borderColor: '#ddd', borderRadius: 8 },
   primary: { marginTop: 8, backgroundColor: '#16a34a', paddingVertical: 10, alignItems: 'center', borderRadius: 8 },
+  viewDetail: {
+    marginTop: 8,
+    color: '#007AFF',
+    fontSize: 14,
+    fontWeight: '600',
+    textAlign: 'right',
+  },
 });
 
 export default OrdersScreen;

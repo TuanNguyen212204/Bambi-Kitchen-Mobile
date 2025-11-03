@@ -53,6 +53,11 @@ const IngredientListScreen = () => {
           value={keyword}
           onChangeText={setKeyword}
           style={styles.search}
+          autoCorrect={true}
+          autoCapitalize="words"
+          keyboardType="default"
+          textContentType="none"
+          enablesReturnKeyAutomatically={false}
         />
         <Text style={styles.sectionLabel}>Danh mục</Text>
         <View style={styles.catRow}>
