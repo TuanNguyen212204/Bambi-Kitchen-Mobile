@@ -13,18 +13,23 @@ import { Ionicons } from '@expo/vector-icons';
 import { useRoute, useNavigation } from '@react-navigation/native';
 import { recipeService } from '@services/api/recipeService';
 import { IngredientsGetByDishResponse } from '@services/api/dishService';
+import { orderService } from '@services/api/orderService';
 import { toast } from '@utils/toast';
 
 const DishDetailScreen: React.FC = () => {
   const route = useRoute<any>();
-  const { dishId } = route.params as { dishId: number };
+  const { dishId, orderId } = route.params as { dishId: number; orderId?: number };
   const [dishData, setDishData] = useState<IngredientsGetByDishResponse | null>(null);
   const [loading, setLoading] = useState(true);
+  const [orderNote, setOrderNote] = useState<string | null>(null);
   const navigation = useNavigation<any>();
 
   useEffect(() => {
     fetchDishDetail();
-  }, [dishId]);
+    if (orderId) {
+      fetchOrderNote();
+    }
+  }, [dishId, orderId]);
 
   const fetchDishDetail = async () => {
     try {
@@ -46,6 +51,19 @@ const DishDetailScreen: React.FC = () => {
       navigation.goBack();
     } finally {
       setLoading(false);
+    }
+  };
+
+  const fetchOrderNote = async () => {
+    try {
+      if (!orderId) return;
+      const order = await orderService.getOrderById(orderId);
+      if (order?.note && String(order.note).trim()) {
+        setOrderNote(String(order.note).trim());
+      }
+    } catch (err) {
+      console.error('Error fetching order note:', err);
+      // Không hiển thị lỗi nếu không fetch được note
     }
   };
 
@@ -118,6 +136,13 @@ const DishDetailScreen: React.FC = () => {
               <View style={styles.infoRow}>
                 <Text style={styles.infoLabel}>Người tạo:</Text>
                 <Text style={styles.infoValue}>{String(dishData.account.name || 'N/A')}</Text>
+              </View>
+            ) : null}
+
+            {orderNote ? (
+              <View style={styles.infoRow}>
+                <Text style={styles.infoLabel}>Ghi chú đơn hàng:</Text>
+                <Text style={[styles.infoValue, styles.orderNoteText]}>{orderNote}</Text>
               </View>
             ) : null}
           </View>
@@ -284,6 +309,10 @@ const styles = StyleSheet.create({
     color: '#6b7280',
     fontSize: 14,
     paddingVertical: 20,
+  },
+  orderNoteText: {
+    fontStyle: 'italic',
+    color: '#e67e22',
   },
 });
 

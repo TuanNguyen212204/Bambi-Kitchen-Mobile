@@ -465,7 +465,9 @@ const DishFormScreen = () => {
                   <TextInput
                     value={quantity > 0 ? String(quantity) : ''}
                     onChangeText={(text) => {
-                      const num = Number(text) || 0;
+                      // Loại bỏ khoảng trắng và ký tự không phải số, chỉ lấy số nguyên dương
+                      const cleanedText = text.trim().replace(/[^\d]/g, '');
+                      const num = cleanedText ? Math.max(0, parseInt(cleanedText, 10)) : 0;
                       updateIngredientQuantity(ingredient.id, num);
                     }}
                     placeholder="SL"

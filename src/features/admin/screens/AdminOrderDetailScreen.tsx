@@ -189,7 +189,10 @@ const AdminOrderDetailScreen: React.FC = () => {
                 style={styles.detailItem}
                 onPress={() => {
                   if (detail?.dish?.id) {
-                    navigation.navigate('AdminDishDetail', { dishId: detail.dish.id });
+                    navigation.navigate('AdminDishDetail', { 
+                      dishId: detail.dish.id,
+                      orderId: orderId,
+                    });
                   }
                 }}
                 activeOpacity={0.7}
