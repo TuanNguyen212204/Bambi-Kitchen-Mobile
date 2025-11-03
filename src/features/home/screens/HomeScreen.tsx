@@ -38,7 +38,13 @@ const SearchContainer = styled.View`
   height: 36px;
 `;
 
-const SearchInput = styled.TextInput`
+const SearchInput = styled.TextInput.attrs({
+  autoCorrect: true,
+  autoCapitalize: 'words',
+  keyboardType: 'default',
+  textContentType: 'none',
+  enablesReturnKeyAutomatically: false,
+})`
   flex: 1;
   font-size: 14px;
   margin-left: 8px;
